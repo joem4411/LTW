@@ -203,7 +203,7 @@
                     <div>
                         <div class="flex items-center space-x-3">
                             <h1 class="text-3xl font-black text-white tracking-tight">System Admin</h1>
-                            <button onclick="logoutAdmin()" class="bg-red-900 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors shadow-sm">Log Out</button>
+                            <button onclick="logoutAdmin()" class="bg-red-900/80 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors border border-red-800">Log Out</button>
                         </div>
                         <p class="text-gray-400 font-medium text-sm mt-1">Manage passes, settings, and view logs.</p>
                     </div>
@@ -466,11 +466,12 @@
                             <div class="bg-red-950/20 p-6 rounded-2xl border border-red-900/50 mt-10">
                                 <h3 class="text-sm font-black text-red-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Danger Zone (Factory Resets)</h3>
                                 <p class="text-xs text-gray-400 mb-4">Warning: These actions cannot be undone. They will permanently delete data from the database.</p>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <button onclick="factoryReset('passes')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Delete All Passes</button>
                                     <button onclick="factoryReset('logs')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="file-minus" class="w-4 h-4 mr-2"></i> Clear Stats & Logs</button>
                                     <button onclick="factoryReset('settings')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Settings</button>
                                 </div>
+                                <button onclick="factoryReset('all')" class="w-full py-4 bg-black border-2 border-red-600 text-red-500 hover:bg-red-600 hover:text-white rounded-xl text-sm font-black transition-colors flex justify-center items-center"><i data-lucide="alert-octagon" class="w-5 h-5 mr-2"></i> COMPLETE FACTORY RESET (ALL DATA)</button>
                             </div>
 
                         </div>
@@ -900,28 +901,35 @@
         }
 
         async function factoryReset(type) {
-            if(!confirm(`WARNING: Are you absolutely sure you want to delete all ${type}? This CANNOT be undone.`)) return;
+            if(!confirm(`WARNING: Are you absolutely sure you want to reset/delete ${type.toUpperCase()}? This CANNOT be undone.`)) return;
             
+            const defaultSettings = {
+                firstTimePassword: "LTW@SGAA26", adminPasswords: [],
+                contacts: [{name: "Admin", phone: "+201234567890"}],
+                teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea", "N/A": "#FFFFFF"},
+                locations: ["St George Church", "St Anthony Church", "N/A"],
+                zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
+                events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
+                logos: { church: "", ltw: "", scout: "" }
+            };
+
             if(type === 'passes') {
                 await DB.clearCollection('passes');
                 alert("All passes have been deleted.");
-                loadManageTable();
+                loadManageTable(); loadStats();
             } else if(type === 'logs') {
                 await DB.clearCollection('logs');
                 alert("All activity logs and stats have been cleared.");
                 loadStats();
             } else if(type === 'settings') {
-                const defaultSettings = {
-                    firstTimePassword: "LTW@SGAA26", adminPasswords: [],
-                    contacts: [{name: "Admin", phone: "+201234567890"}],
-                    teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea", "N/A": "#FFFFFF"},
-                    locations: ["St George Church", "St Anthony Church", "N/A"],
-                    zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
-                    events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                    logos: { church: "", ltw: "", scout: "" }
-                };
                 await DB.updateSettings(defaultSettings);
                 alert("Settings have been factory reset.");
+            } else if(type === 'all') {
+                await DB.clearCollection('passes');
+                await DB.clearCollection('logs');
+                await DB.updateSettings(defaultSettings);
+                alert("Complete factory reset successful. All data cleared.");
+                loadManageTable(); loadStats();
             }
         }
 
