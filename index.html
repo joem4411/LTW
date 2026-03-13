@@ -38,7 +38,7 @@
         }
     </script>
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #050505; color: #f3f4f6; }
+        body { font-family: 'Cairo', sans-serif; background-color: #050505; color: #f3f4f6; overflow-x: hidden;}
         .view { display: none; }
         .view.active { display: block; animation: fadeIn 0.3s ease-in-out; }
         
@@ -61,6 +61,15 @@
         ::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #FACC15; }
 
+        /* Built-in Spreadsheet Styles */
+        #spreadsheet-container { max-height: calc(100vh - 180px); overflow: auto; background: #0a0a0a; border: 1px solid #333;}
+        #spreadsheet-table { border-collapse: collapse; width: 100%; font-family: sans-serif; font-size: 12px; }
+        #spreadsheet-table th { background: #1E1E1E; color: #aaa; border: 1px solid #333; padding: 6px 12px; font-weight: bold; position: sticky; top: 0; z-index: 10; text-align: center; user-select: none; }
+        #spreadsheet-table .row-header { position: sticky; left: 0; z-index: 10; background: #1E1E1E; width: 40px; text-align: center; }
+        #spreadsheet-table td { border: 1px solid #222; min-width: 120px; max-width: 300px; padding: 0; outline: none; background: #121212; color: #fff; vertical-align: top;}
+        #spreadsheet-table td div { padding: 6px; min-height: 28px; outline: none; white-space: pre-wrap; word-break: break-word; }
+        #spreadsheet-table td:focus-within { border: 2px solid #FACC15; background: #1a1a1a; z-index: 5; position: relative;}
+
         /* PDF Export Hidden Canvas */
         #export-canvas-container { position: absolute; top: -9999px; left: -9999px; z-index: -100; }
         .pdf-card { width: 408px; height: 650px; background: #050505; color: white; position: relative; overflow: hidden; border: 2px solid #111; box-sizing: border-box; }
@@ -77,12 +86,21 @@
                     <i id="nav-icon-fallback" data-lucide="sun" class="w-7 h-7 text-brand-yellow group-hover:rotate-45 transition-transform duration-300"></i>
                     <span class="font-black text-xl tracking-tight uppercase"><span class="text-brand-yellow">Light</span> The World</span>
                 </div>
-                <div class="flex items-center space-x-2 sm:space-x-4">
+                
+                <!-- Default Nav Links -->
+                <div id="main-nav-links" class="flex items-center space-x-2 sm:space-x-4">
                     <a href="#/scan" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400" id="nav-scan">
                         <i data-lucide="scan" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Scanner
                     </a>
                     <a href="#/admin" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400" id="nav-admin">
                         <i data-lucide="shield" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Admin
+                    </a>
+                </div>
+
+                <!-- Sheet Focused Nav Links (Hidden by default) -->
+                <div id="sheet-nav-links" class="flex items-center hidden">
+                    <a href="#/admin" class="px-4 py-2 rounded-lg text-sm font-bold bg-brand-border text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm">
+                        <i data-lucide="arrow-right" class="w-4 h-4 mr-2"></i> Back to Admin
                     </a>
                 </div>
             </div>
@@ -164,6 +182,38 @@
                     <button onclick="window.location.hash='#/scan'" class="mt-8 w-full py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-black text-lg shadow-lg transition-all flex items-center justify-center">
                         <i data-lucide="scan" class="w-5 h-5 mr-2"></i> Scan Next Pass
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: BUILT-IN SPREADSHEET ENGINE -->
+        <div id="view-sheet" class="view">
+            <div class="bg-brand-panel rounded-3xl shadow-2xl overflow-hidden border border-brand-border flex flex-col h-[calc(100vh-120px)]">
+                <!-- Sheet Toolbar -->
+                <div class="bg-brand-dark p-4 border-b border-brand-border flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-black text-white flex items-center"><i data-lucide="table" class="w-5 h-5 mr-2 text-brand-yellow"></i> Schedule Importer</h2>
+                        <p class="text-xs text-gray-500 mt-1">Copy data from Excel or Google Sheets and paste it directly into the grid below.</p>
+                    </div>
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <select id="sheet-team-select" class="px-4 py-2.5 rounded-lg text-sm font-bold bg-[#111] border border-brand-border text-white w-full sm:w-auto"></select>
+                        <button onclick="processBuiltInSheet()" id="btn-process-sheet" class="px-6 py-2.5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-black transition-colors shadow flex items-center whitespace-nowrap">
+                            <i data-lucide="cpu" class="w-4 h-4 mr-2"></i> Process & Sync
+                        </button>
+                    </div>
+                </div>
+
+                <!-- The Grid Container -->
+                <div id="spreadsheet-container" class="flex-grow">
+                    <table id="spreadsheet-table">
+                        <thead id="spreadsheet-header"></thead>
+                        <tbody id="spreadsheet-body"></tbody>
+                    </table>
+                </div>
+                
+                <div class="bg-brand-dark p-2 border-t border-brand-border flex justify-between items-center text-xs text-gray-500">
+                    <button onclick="clearSheet()" class="hover:text-red-400 transition-colors flex items-center"><i data-lucide="trash" class="w-3 h-3 mr-1"></i> Clear Grid</button>
+                    <span>Use Arrow Keys to navigate. Paste (Ctrl+V) anywhere.</span>
                 </div>
             </div>
         </div>
@@ -437,14 +487,9 @@
 
                             <!-- Integration -->
                             <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-2"></i> Google Sheets Sync Engine</h3>
-                                <p class="text-xs text-gray-400 mb-3">Paste your <b>CSV Links</b> here. The system will parse complex schedules, map locations, extract shift timings as Events, build assignments, and save all names into the Servants Directory.</p>
-                                <div class="space-y-3 mb-3">
-                                    <input type="text" id="set-sheet-live" placeholder="Live Team CSV Link..." class="w-full px-4 py-2 rounded-lg text-sm">
-                                    <input type="text" id="set-sheet-data" placeholder="Data Show Team CSV Link..." class="w-full px-4 py-2 rounded-lg text-sm">
-                                </div>
-                                <button onclick="saveAndSyncSheets()" class="w-full px-4 py-3 bg-brand-yellow hover:bg-yellow-500 rounded-lg text-sm font-bold text-black flex justify-center items-center shadow"><i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> <span>Parse Sheets & Auto-Sync System</span></button>
-                                <p id="sheet-status" class="text-xs font-bold text-brand-yellow mt-3 text-center"></p>
+                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="table" class="w-4 h-4 mr-2"></i> Built-in Schedule Engine</h3>
+                                <p class="text-xs text-gray-400 mb-4">Paste your complex schedules straight from Excel into our built-in spreadsheet view. The system will automatically construct events and passes for you.</p>
+                                <button onclick="window.location.hash='#/sheet'" class="w-full px-4 py-3 bg-brand-yellow hover:bg-yellow-500 rounded-lg text-sm font-bold text-black flex justify-center items-center shadow transition-colors"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> <span>Open Spreadsheet Editor</span></button>
                             </div>
 
                             <!-- Events & Masses -->
@@ -662,8 +707,7 @@
                             locations: ["St George Church", "St Anthony Church"],
                             zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                             events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                            logos: { church: "", ltw: "", scout: "" },
-                            sheetUrlLive: "", sheetUrlData: ""
+                            logos: { church: "", ltw: "", scout: "" }
                         };
                         await firestoreDB.collection('admin').doc('settings').set(GLOBAL_SETTINGS);
                     }
@@ -724,6 +768,247 @@
             }
         };
 
+        // --- SPREADSHEET EDITOR COMPONENT ---
+        let sheetGridData = [];
+        
+        function initSpreadsheet() {
+            const tbody = document.getElementById('spreadsheet-body');
+            const thead = document.getElementById('spreadsheet-header');
+            
+            // Render Headers (A to L)
+            let headerHtml = '<tr><th class="row-header"></th>';
+            for (let i = 0; i < 12; i++) {
+                headerHtml += `<th>${String.fromCharCode(65 + i)}</th>`;
+            }
+            headerHtml += '</tr>';
+            thead.innerHTML = headerHtml;
+
+            // Render 40 Rows
+            let bodyHtml = '';
+            for (let r = 0; r < 40; r++) {
+                bodyHtml += `<tr><td class="row-header font-bold text-gray-500">${r + 1}</td>`;
+                for (let c = 0; c < 12; c++) {
+                    bodyHtml += `<td><div contenteditable="true" data-r="${r}" data-c="${c}"></div></td>`;
+                }
+                bodyHtml += '</tr>';
+            }
+            tbody.innerHTML = bodyHtml;
+
+            // Arrow key navigation inside grid
+            tbody.addEventListener('keydown', (e) => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    const cell = e.target;
+                    if (!cell.hasAttribute('contenteditable')) return;
+                    
+                    let r = parseInt(cell.getAttribute('data-r'));
+                    let c = parseInt(cell.getAttribute('data-c'));
+                    
+                    if (e.key === 'ArrowUp') r = Math.max(0, r - 1);
+                    if (e.key === 'ArrowDown') r = Math.min(39, r + 1);
+                    if (e.key === 'ArrowLeft') c = Math.max(0, c - 1);
+                    if (e.key === 'ArrowRight') c = Math.min(11, c + 1);
+
+                    const nextCell = tbody.querySelector(`div[data-r="${r}"][data-c="${c}"]`);
+                    if (nextCell) {
+                        e.preventDefault();
+                        nextCell.focus();
+                        // Move cursor to end of text
+                        const range = document.createRange();
+                        const sel = window.getSelection();
+                        range.selectNodeContents(nextCell);
+                        range.collapse(false);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
+            });
+
+            // Advanced Paste handler to distribute Excel/Google Sheets data across cells
+            tbody.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                if (!text) return;
+
+                const activeCell = e.target;
+                if (!activeCell.hasAttribute('contenteditable')) return;
+
+                const startRow = parseInt(activeCell.getAttribute('data-r'));
+                const startCol = parseInt(activeCell.getAttribute('data-c'));
+
+                // Parse TSV (Tab-Separated Values)
+                const rows = [];
+                let currentRow = [];
+                let currentContent = '';
+                let inQuotes = false;
+
+                for (let i = 0; i < text.length; i++) {
+                    let char = text[i];
+                    if (char === '"' && text[i+1] === '"') { currentContent += '"'; i++; }
+                    else if (char === '"') { inQuotes = !inQuotes; }
+                    else if (char === '\t' && !inQuotes) { currentRow.push(currentContent); currentContent = ''; }
+                    else if (char === '\n' && !inQuotes) { currentRow.push(currentContent); rows.push(currentRow); currentRow = []; currentContent = ''; }
+                    else if (char !== '\r') { currentContent += char; }
+                }
+                if (currentContent || currentRow.length > 0) { currentRow.push(currentContent); rows.push(currentRow); }
+
+                // Distribute parsed data to DOM grid
+                for (let r = 0; r < rows.length; r++) {
+                    for (let c = 0; c < rows[r].length; c++) {
+                        const targetCell = tbody.querySelector(`div[data-r="${startRow + r}"][data-c="${startCol + c}"]`);
+                        if (targetCell) {
+                            targetCell.innerText = rows[r][c].trim();
+                        }
+                    }
+                }
+            });
+        }
+
+        function clearSheet() {
+            if(confirm("Clear all data in the grid?")) {
+                document.querySelectorAll('#spreadsheet-body div').forEach(div => div.innerText = '');
+            }
+        }
+
+        async function processBuiltInSheet() {
+            const teamSelect = document.getElementById('sheet-team-select');
+            const teamName = teamSelect.value;
+            if(!teamName) return alert("Please select a Team from the dropdown first.");
+
+            const btn = document.getElementById('btn-process-sheet');
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Processing...`;
+            lucide.createIcons();
+
+            // Extract 2D array from DOM grid
+            const rows = [];
+            const trs = document.querySelectorAll('#spreadsheet-body tr');
+            trs.forEach(tr => {
+                const rowData = [];
+                tr.querySelectorAll('td div').forEach(div => rowData.push(div.innerText.trim()));
+                // Only push if row has some data
+                if(rowData.some(cell => cell !== '')) {
+                    rows.push(rowData);
+                }
+            });
+
+            if(rows.length < 2) {
+                btn.innerHTML = `<i data-lucide="cpu" class="w-4 h-4 mr-2"></i> Process & Sync`;
+                lucide.createIcons();
+                return alert("No readable data found. Ensure you pasted a schedule with headers.");
+            }
+
+            await fetchServantsData();
+            const existingNames = new Set(localServants.map(srv => srv.Name.toLowerCase()));
+            const existingPasses = await DB.fetchAllPasses();
+            const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
+            
+            let newCount = 0; let passesCount = 0;
+            const s = GLOBAL_SETTINGS;
+
+            try {
+                let nameIndices = []; let timingIdx = -1; let phoneIdx = -1;
+                for(let r = 0; r < Math.min(6, rows.length); r++) {
+                    const hdrs = rows[r].map(h => h.toLowerCase());
+                    hdrs.forEach((h, idx) => {
+                        if(h.includes('اسم') && !h.includes('مواعيد')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
+                        if(h.includes('مواعيد') || h.includes('مكان') || h.includes('timing') || h.includes('المكان')) timingIdx = idx;
+                        if(phoneIdx === -1 && (h.includes('phone') || h.includes('mobile') || h.includes('رقم') || h.includes('تليفون') || h.includes('موبايل'))) phoneIdx = idx;
+                    });
+                }
+                if(nameIndices.length === 0) nameIndices = [1, 2, 3]; // fallback
+                
+                const invalidPhrases = ['الاسم', 'تسلسل', 'المكان', 'المواعيد', 'note', 'شريطة', 'قديم', 'جديد', 'no need', 'ملاحظات', 'فقط', 'only'];
+
+                for(let i=0; i<rows.length; i++) {
+                    const row = rows[i]; if(!row || row.length === 0) continue;
+                    
+                    let timingText = '';
+                    if(timingIdx !== -1 && row[timingIdx]) {
+                        timingText = row[timingIdx].replace(/"/g, '').trim();
+                    } else {
+                        let foundTiming = row.find(c => (c.includes('ص') && c.includes('الى')) || c.includes('جوارجيوس') || c.includes('انطونيوس'));
+                        if(foundTiming) timingText = foundTiming.replace(/"/g, '').trim();
+                    }
+                    
+                    if(!timingText || invalidPhrases.some(inv => timingText.toLowerCase() === inv)) continue;
+
+                    // Dynamic Location Extractor
+                    let loc = "St. George Church";
+                    if (timingText.includes("جوار")) loc = "St. George Church";
+                    else if (timingText.includes("نطونيوس")) loc = "St. Antonios Church";
+                    else if (timingText.includes("يوسف سلامة")) loc = "Youssef Salama Hall";
+
+                    // Clean Event Name
+                    let eventName = timingText
+                        .replace(/كنيسة جوارجيوس/g, '')
+                        .replace(/كنيسة جوارديوس/g, '')
+                        .replace(/كنيسة انبا أنطونيوس/g, '')
+                        .replace(/كنيسة الانبا انطونيوس/g, '')
+                        .replace(/قاعة يوسف سلامة/g, '')
+                        .replace(/\n/g, ' ')
+                        .replace(/ +/g, ' ')
+                        .trim();
+
+                    if(!eventName) continue;
+
+                    // Register Event Automatically
+                    let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === eventName);
+                    if(!existingEv) {
+                        existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: eventName, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
+                        GLOBAL_SETTINGS.events.push(existingEv);
+                        await DB.updateSettings(GLOBAL_SETTINGS); 
+                    }
+
+                    for(let idx of nameIndices) {
+                        if(idx < row.length && row[idx]) {
+                            let rawName = row[idx].replace(/"/g, '').trim();
+                            let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
+                            for(let name of subNames) {
+                                let isInv = invalidPhrases.some(inv => name.toLowerCase().includes(inv));
+                                if(isInv || name.length <= 2 || name.match(/^[\d\s\W]+$/)) continue;
+
+                                let phone = 'N/A';
+                                if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
+                                    let p = row[phoneIdx].replace(/"/g, '').trim();
+                                    if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
+                                }
+
+                                // Update Directory
+                                if(!existingNames.has(name.toLowerCase())) {
+                                    await DB.saveServant({ Name: name, Phone: phone, Team: teamName, PhotoURL: "" });
+                                    existingNames.add(name.toLowerCase());
+                                    newCount++;
+                                }
+
+                                // Auto Assign Pass
+                                const passKey = `${name.toLowerCase()}_${existingEv.id}`;
+                                if(!passCache.has(passKey)) {
+                                    const passId = `LWT-` + Math.random().toString(36).substring(2, 8).toUpperCase();
+                                    let zones = teamName === 'IT Team' ? 'ALL ZONES' : (existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES');
+                                    
+                                    await DB.savePass({
+                                        PassID: passId, Name: name, Phone: phone, Team: teamName,
+                                        Event: existingEv.id, Mass: 'N/A', Location: loc,
+                                        AllowedZones: zones, PhotoURL: "", Status: 'VALID', EntryTime: new Date().toISOString()
+                                    });
+                                    passCache.add(passKey);
+                                    passesCount++;
+                                }
+                            }
+                        }
+                    }
+                }
+                alert(`Sync Complete! Added ${newCount} servants & auto-assigned ${passesCount} shifts to Passes tab.`);
+            } catch (e) {
+                console.error("Error processing sheet data:", e);
+                alert("Error processing the grid data.");
+            } finally {
+                btn.innerHTML = `<i data-lucide="cpu" class="w-4 h-4 mr-2"></i> Process & Sync`;
+                lucide.createIcons();
+                await fetchServantsData();
+            }
+        }
+
+
         // --- UI STATE & LOGIC ---
         let currentSubmitAction = 'generate';
         function setSubmitAction(action) { currentSubmitAction = action; }
@@ -757,6 +1042,7 @@
             populateDropdown('g-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('s-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
+            populateDropdown('sheet-team-select', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             
             const activeEvents = settings.events;
             populateDropdown('g-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
@@ -896,16 +1182,30 @@
         let scanner = null;
         let isAdminLoggedIn = false;
         window.addEventListener('hashchange', handleRoute);
-        window.addEventListener('load', async () => { await applyGlobalSettings(); if(!window.location.hash) window.location.hash = '#/scan'; handleRoute(); });
+        window.addEventListener('load', async () => { 
+            await applyGlobalSettings(); 
+            initSpreadsheet(); // Init grid
+            if(!window.location.hash) window.location.hash = '#/scan'; 
+            handleRoute(); 
+        });
 
         function handleRoute() {
             const hash = window.location.hash;
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
+            
+            // Handle Navigation Bar Toggles
+            if (hash === '#/sheet') {
+                document.getElementById('main-nav-links').classList.add('hidden');
+                document.getElementById('sheet-nav-links').classList.remove('hidden');
+            } else {
+                document.getElementById('main-nav-links').classList.remove('hidden');
+                document.getElementById('sheet-nav-links').classList.add('hidden');
+                document.querySelectorAll('#main-nav-links .nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
+            }
+
             if(scanner) { scanner.clear(); scanner = null; }
 
-            // Clear admin session if navigating away
-            if (!hash.startsWith('#/admin')) {
+            if (!hash.startsWith('#/admin') && hash !== '#/sheet') {
                 isAdminLoggedIn = false;
             }
 
@@ -920,12 +1220,14 @@
                 if(isAdminLoggedIn) {
                     document.getElementById('admin-login').classList.add('hidden');
                     document.getElementById('admin-dashboard').classList.remove('hidden');
-                    // We handle default tab during successful login, so only re-render settings here if already active
                     if(!document.querySelector('.admin-tab.bg-brand-yellow')) switchAdminTab('generate');
                 } else {
                     document.getElementById('admin-login').classList.remove('hidden');
                     document.getElementById('admin-dashboard').classList.add('hidden');
                 }
+            } else if (hash === '#/sheet') {
+                if(!isAdminLoggedIn) { window.location.hash = '#/admin'; return; }
+                document.getElementById('view-sheet').classList.add('active');
             } else if (hash.startsWith('#/pass/')) {
                 document.getElementById('view-pass').classList.add('active');
                 verifyPass(hash.split('#/pass/')[1]);
@@ -1053,7 +1355,6 @@
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 
-                // Always default to generate tab upon login
                 switchAdminTab('generate');
                 renderSettingsUI();
             } else {
@@ -1071,7 +1372,7 @@
                 locations: ["St George Church", "St Anthony Church"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                logos: { church: "", ltw: "", scout: "" }, sheetUrlLive: "", sheetUrlData: ""
+                logos: { church: "", ltw: "", scout: "" }
             };
 
             if(type === 'passes') {
@@ -1095,191 +1396,14 @@
             }
         }
 
-        function switchAdminTab(tab) {
-            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
-            
-            const targetSec = document.getElementById(`admin-tab-${tab}`);
-            const targetTab = document.getElementById(`tab-${tab}`);
-            if (targetSec) targetSec.classList.remove('hidden');
-            if (targetTab) {
-                targetTab.classList.add('bg-brand-yellow', 'text-black');
-                targetTab.classList.remove('text-gray-400', 'bg-transparent');
-            }
-            
-            if(tab === 'manage') loadManageTable(); 
-            if(tab === 'servants') loadServantsTable();
-            if(tab === 'stats') loadStats();
-        }
-
-        // --- SERVANTS DIRECTORY & SHEET SYNC LOGIC ---
+        // --- SERVANTS DIRECTORY LOGIC ---
         let localServants = [];
 
         async function fetchServantsData() {
             localServants = await DB.fetchAllServants();
-            
             const dl = document.getElementById('servants-list');
             if(dl) {
                 dl.innerHTML = localServants.map(s => `<option value="${s.Name}">`).join('');
-            }
-        }
-
-        async function saveAndSyncSheets() {
-            const btn = document.querySelector('#admin-tab-settings button i.lucide-refresh-cw').parentNode;
-            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Syncing...`;
-            lucide.createIcons();
-
-            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
-            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
-            await DB.updateSettings(GLOBAL_SETTINGS);
-
-            await syncSheetsToDirectory();
-            
-            btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Save Links & Sync Servants`;
-            lucide.createIcons();
-        }
-
-        async function syncSheetsToDirectory() {
-            const statusEl = document.getElementById('sheet-status');
-            if(statusEl) statusEl.textContent = 'Fetching and parsing sheets...';
-            
-            let newCount = 0; let passesCount = 0;
-            const s = GLOBAL_SETTINGS;
-            
-            await fetchServantsData();
-            const existingNames = new Set(localServants.map(srv => srv.Name.toLowerCase()));
-            const existingPasses = await DB.fetchAllPasses();
-            const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
-
-            async function processSheet(url, teamName) {
-                if(!url) return;
-                try {
-                    let fetchUrl = url.trim();
-                    if (fetchUrl.includes('/edit')) fetchUrl = fetchUrl.split('/edit')[0] + '/export?format=csv';
-                    else if (fetchUrl.includes('/pubhtml')) fetchUrl = fetchUrl.replace('/pubhtml', '/pub') + '?output=csv';
-                    else if (fetchUrl.includes('/pub?') && !fetchUrl.includes('output=csv')) fetchUrl += '&output=csv';
-
-                    const res = await fetch(fetchUrl);
-                    const text = await res.text();
-                    if (text.toLowerCase().includes('<!doctype html>')) throw new Error('Not CSV Format');
-                    
-                    const rows = [];
-                    let currentRow = []; let currentCell = ''; let inQuotes = false;
-                    for (let i = 0; i < text.length; i++) {
-                        let char = text[i];
-                        if (char === '"') inQuotes = !inQuotes;
-                        else if (char === ',' && !inQuotes) { currentRow.push(currentCell.trim()); currentCell = ''; }
-                        else if (char === '\n' && !inQuotes) { currentRow.push(currentCell.trim()); rows.push(currentRow); currentRow = []; currentCell = ''; }
-                        else if (char !== '\r') currentCell += char;
-                    }
-                    if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
-
-                    if(rows.length >= 2) {
-                        let nameIndices = []; let timingIdx = -1; let phoneIdx = -1;
-                        for(let r = 0; r < Math.min(6, rows.length); r++) {
-                            const hdrs = rows[r].map(h => h.toLowerCase());
-                            hdrs.forEach((h, idx) => {
-                                if(h.includes('اسم') && !h.includes('مواعيد')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
-                                if(h.includes('مواعيد') || h.includes('مكان') || h.includes('timing') || h.includes('المكان')) timingIdx = idx;
-                                if(phoneIdx === -1 && (h.includes('phone') || h.includes('mobile') || h.includes('رقم') || h.includes('تليفون') || h.includes('موبايل'))) phoneIdx = idx;
-                            });
-                        }
-                        if(nameIndices.length === 0) nameIndices = [1, 2, 3]; // fallback
-                        
-                        const invalidPhrases = ['الاسم', 'تسلسل', 'المكان', 'المواعيد', 'note', 'شريطة', 'قديم', 'جديد', 'no need', 'ملاحظات', 'فقط', 'only'];
-
-                        for(let i=0; i<rows.length; i++) {
-                            const row = rows[i]; if(!row || row.length === 0) continue;
-                            
-                            let timingText = '';
-                            if(timingIdx !== -1 && row[timingIdx]) {
-                                timingText = row[timingIdx].replace(/"/g, '').trim();
-                            } else {
-                                let foundTiming = row.find(c => (c.includes('ص') && c.includes('الى')) || c.includes('جوارجيوس') || c.includes('انطونيوس'));
-                                if(foundTiming) timingText = foundTiming.replace(/"/g, '').trim();
-                            }
-                            
-                            if(!timingText || invalidPhrases.some(inv => timingText.toLowerCase() === inv)) continue;
-
-                            // Dynamic Location Extractor
-                            let loc = "St. George Church";
-                            if (timingText.includes("جوار")) loc = "St. George Church";
-                            else if (timingText.includes("نطونيوس")) loc = "St. Antonios Church";
-                            else if (timingText.includes("يوسف سلامة")) loc = "Youssef Salama Hall";
-
-                            // Clean Event Name
-                            let eventName = timingText
-                                .replace(/كنيسة جوارجيوس/g, '')
-                                .replace(/كنيسة جوارديوس/g, '')
-                                .replace(/كنيسة انبا أنطونيوس/g, '')
-                                .replace(/كنيسة الانبا انطونيوس/g, '')
-                                .replace(/قاعة يوسف سلامة/g, '')
-                                .replace(/\n/g, ' ')
-                                .replace(/ +/g, ' ')
-                                .trim();
-
-                            if(!eventName) continue;
-
-                            // Register Event Automatically
-                            let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === eventName);
-                            if(!existingEv) {
-                                existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: eventName, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
-                                GLOBAL_SETTINGS.events.push(existingEv);
-                                await DB.updateSettings(GLOBAL_SETTINGS); 
-                            }
-
-                            for(let idx of nameIndices) {
-                                if(idx < row.length && row[idx]) {
-                                    let rawName = row[idx].replace(/"/g, '').trim();
-                                    let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
-                                    for(let name of subNames) {
-                                        let isInv = invalidPhrases.some(inv => name.toLowerCase().includes(inv));
-                                        if(isInv || name.length <= 2 || name.match(/^[\d\s\W]+$/)) continue;
-
-                                        let phone = 'N/A';
-                                        if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
-                                            let p = row[phoneIdx].replace(/"/g, '').trim();
-                                            if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
-                                        }
-
-                                        // Update Directory
-                                        if(!existingNames.has(name.toLowerCase())) {
-                                            await DB.saveServant({ Name: name, Phone: phone, Team: teamName, PhotoURL: "" });
-                                            existingNames.add(name.toLowerCase());
-                                            newCount++;
-                                        }
-
-                                        // Auto Assign Pass
-                                        const passKey = `${name.toLowerCase()}_${existingEv.id}`;
-                                        if(!passCache.has(passKey)) {
-                                            const passId = `LWT-` + Math.random().toString(36).substring(2, 8).toUpperCase();
-                                            let zones = teamName === 'IT Team' ? 'ALL ZONES' : (existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES');
-                                            
-                                            await DB.savePass({
-                                                PassID: passId, Name: name, Phone: phone, Team: teamName,
-                                                Event: existingEv.id, Mass: 'N/A', Location: loc,
-                                                AllowedZones: zones, PhotoURL: "", Status: 'VALID', EntryTime: new Date().toISOString()
-                                            });
-                                            passCache.add(passKey);
-                                            passesCount++;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error("Error processing " + teamName + " sheet:", e);
-                }
-            }
-
-            await processSheet(s.sheetUrlLive, "Live Team");
-            await processSheet(s.sheetUrlData, "Data Show Team");
-
-            if(statusEl) statusEl.textContent = `Sync Complete! Added ${newCount} servants & auto-assigned ${passesCount} shifts to Passes tab.`;
-            await fetchServantsData();
-            if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) {
-                loadServantsTable();
             }
         }
 
@@ -1560,104 +1684,10 @@
             handleTeamLogic(); lucide.createIcons();
         }
 
-        // --- PERFECT ARABIC PDF GENERATOR (html2canvas) ---
-        async function generatePerfectPDF(pass) {
-            const s = GLOBAL_SETTINGS;
-            
-            if(pass.PhotoURL) {
-                document.getElementById('pdf-photo').src = pass.PhotoURL;
-                document.getElementById('pdf-photo').classList.remove('hidden');
-                document.getElementById('pdf-no-photo').classList.add('hidden');
-            } else {
-                document.getElementById('pdf-photo').classList.add('hidden');
-                document.getElementById('pdf-no-photo').classList.remove('hidden');
-            }
-
-            document.getElementById('pdf-name').textContent = pass.Name;
-            document.getElementById('pdf-team').textContent = pass.Team.toUpperCase();
-            document.getElementById('pdf-team').style.color = s.teamColors[pass.Team] || "#FFFFFF";
-            
-            let evName = pass.Event;
-            if(pass.Team !== 'IT Team') {
-                const ev = s.events.find(e => e.id === pass.Event); 
-                if(ev) {
-                    evName = ev.name;
-                    if (pass.Mass && pass.Mass !== 'N/A') {
-                        const m = ev.masses.find(x => x.id === pass.Mass);
-                        if (m) evName += ` - ${m.name}`;
-                    }
-                }
-            }
-            document.getElementById('pdf-event').textContent = `Event: ${evName}`;
-            document.getElementById('pdf-location').textContent = `Loc: ${pass.Location}`;
-            document.getElementById('pdf-id').textContent = pass.PassID;
-
-            const qrUrl = `${window.location.origin}${window.location.pathname}#/pass/${pass.PassID}`;
-            document.getElementById('qrcode-container').innerHTML = '';
-            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 256, height: 256 });
-            await new Promise(r => setTimeout(r, 100));
-            document.getElementById('pdf-qr').src = document.getElementById('qrcode-container').querySelector('canvas').toDataURL("image/png");
-
-            document.getElementById('pdf-footer-contacts').innerHTML = s.contacts.map(c => `${c.name}: ${c.phone}`).join(' | ');
-
-            const cardEl = document.getElementById('pdf-card');
-            const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
-            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
-            doc.save(`LWT-Pass-${pass.PassID}.pdf`);
-        }
-        
-        async function downloadPass(id) {
-            const pass = await DB.fetchPass(id);
-            if(pass) await generatePerfectPDF(pass);
-            else alert("Pass data not found.");
-        }
-
-        async function loadManageTable() {
-            const tbody = document.getElementById('manage-table-body');
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
-            lucide.createIcons();
-            
-            let passes = await DB.fetchAllPasses(); 
-            passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
-            passes.reverse();
-            
-            const s = GLOBAL_SETTINGS;
-            if(passes.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No valid passes generated.</td></tr>`;
-
-            tbody.innerHTML = passes.map(p => {
-                const tColor = s.teamColors[p.Team] || "#fff";
-                const ev = s.events.find(e => e.id === p.Event);
-                const evName = p.Team === 'IT Team' ? 'ALL ACCESS' : (ev ? ev.name : p.Event);
-                return `
-                <tr class="hover:bg-brand-dark transition border-b border-brand-border last:border-0">
-                    <td class="px-6 py-4 font-mono font-bold text-gray-400">${p.PassID}</td>
-                    <td class="px-6 py-4"><p class="font-black text-white text-base">${p.Name}</p><p class="text-xs mt-1" style="color:${tColor}">${p.Team}</p></td>
-                    <td class="px-6 py-4 text-gray-300 text-xs">${evName}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 rounded text-xs font-black ${p.Status==='VALID'?'bg-green-900 text-green-300':'bg-red-900 text-red-300'}">${p.Status}</span></td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <button onclick="editPass('${p.PassID}')" class="text-blue-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Edit</button>
-                        <button onclick="downloadPass('${p.PassID}')" class="text-brand-yellow hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="download" class="w-3 h-3"></i></button>
-                        <a href="#/pass/${p.PassID}" target="_blank" class="text-gray-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="eye" class="w-3 h-3"></i></a>
-                        ${p.Status==='VALID' ? `<button onclick="togglePassStatus('${p.PassID}', 'REVOKED')" class="text-red-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="x-circle" class="w-3 h-3"></i></button>` : `<button onclick="togglePassStatus('${p.PassID}', 'VALID')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="check-circle" class="w-3 h-3"></i></button>`}
-                        <button onclick="deletePass('${p.PassID}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
-                    </td>
-                </tr>`}).join('');
-            lucide.createIcons();
-        }
-
-        async function togglePassStatus(id, stat) { await DB.updatePassStatus(id, stat); loadManageTable(); loadStats(); }
-        async function deletePass(id) { if(confirm(`Completely Delete Pass ${id}?`)) { await DB.deletePass(id); loadManageTable(); loadStats(); } }
-
         // --- SETTINGS UI WITH INLINE EDITING ---
         function renderSettingsUI() {
             const s = GLOBAL_SETTINGS;
             document.getElementById('set-first-pwd').value = s.firstTimePassword;
-            if(document.getElementById('set-sheet-live')) document.getElementById('set-sheet-live').value = s.sheetUrlLive || '';
-            if(document.getElementById('set-sheet-data')) document.getElementById('set-sheet-data').value = s.sheetUrlData || '';
             
             document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `
                 <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
