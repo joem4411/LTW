@@ -201,7 +201,10 @@
             <div id="admin-dashboard" class="hidden">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <div>
-                        <h1 class="text-3xl font-black text-white tracking-tight">System Admin</h1>
+                        <div class="flex items-center space-x-3">
+                            <h1 class="text-3xl font-black text-white tracking-tight">System Admin</h1>
+                            <button onclick="logoutAdmin()" class="bg-red-900 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors shadow-sm">Log Out</button>
+                        </div>
                         <p class="text-gray-400 font-medium text-sm mt-1">Manage passes, settings, and view logs.</p>
                     </div>
                     <div class="flex flex-wrap gap-2 bg-brand-panel p-1.5 rounded-xl border border-brand-border">
@@ -458,6 +461,18 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Danger Zone -->
+                            <div class="bg-red-950/20 p-6 rounded-2xl border border-red-900/50 mt-10">
+                                <h3 class="text-sm font-black text-red-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Danger Zone (Factory Resets)</h3>
+                                <p class="text-xs text-gray-400 mb-4">Warning: These actions cannot be undone. They will permanently delete data from the database.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <button onclick="factoryReset('passes')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Delete All Passes</button>
+                                    <button onclick="factoryReset('logs')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="file-minus" class="w-4 h-4 mr-2"></i> Clear Stats & Logs</button>
+                                    <button onclick="factoryReset('settings')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Settings</button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -535,7 +550,7 @@
         const firestoreDB = firebase.firestore();
 
         // --- IMAGE COMPRESSOR ---
-        function resizeImage(file, maxSize = 300) {
+        function resizeImage(file, maxSize = 300, preserveTransparency = false) {
             return new Promise((resolve) => {
                 if(!file) return resolve("");
                 const reader = new FileReader();
@@ -548,7 +563,13 @@
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.5)); // High compression
+                        
+                        // Preserve transparency for logos by using PNG format, compress photos as JPEG
+                        if (preserveTransparency) {
+                            resolve(canvas.toDataURL('image/png'));
+                        } else {
+                            resolve(canvas.toDataURL('image/jpeg', 0.6));
+                        }
                     };
                     img.src = e.target.result;
                 };
@@ -609,6 +630,15 @@
             async logEntry(passId, result) {
                 let log = { LogID: 'LOG-' + Date.now(), PassID: passId, Time: new Date().toISOString(), Result: result };
                 await firestoreDB.collection('logs').doc(log.LogID).set(log); return log;
+            },
+            async clearCollection(collectionName) {
+                try {
+                    const snapshot = await firestoreDB.collection(collectionName).get();
+                    const batch = firestoreDB.batch();
+                    snapshot.docs.forEach((doc) => { batch.delete(doc.ref); });
+                    await batch.commit();
+                    return true;
+                } catch(e) { console.error(e); return false; }
             }
         };
 
@@ -729,6 +759,7 @@
 
         // --- ROUTING ---
         let scanner = null;
+        let isAdminLoggedIn = false;
         window.addEventListener('hashchange', handleRoute);
         window.addEventListener('load', async () => { await applyGlobalSettings(); if(!window.location.hash) window.location.hash = '#/scan'; handleRoute(); });
 
@@ -738,6 +769,11 @@
             document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
             if(scanner) { scanner.clear(); scanner = null; }
 
+            // Clear admin session if navigating away
+            if (!hash.startsWith('#/admin')) {
+                isAdminLoggedIn = false;
+            }
+
             if (hash.startsWith('#/scan')) {
                 document.getElementById('view-scan').classList.add('active');
                 document.getElementById('nav-scan').classList.add('text-brand-yellow', 'bg-brand-panel');
@@ -746,10 +782,13 @@
             } else if (hash.startsWith('#/admin')) {
                 document.getElementById('view-admin').classList.add('active');
                 document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
-                if(sessionStorage.getItem('lwt_admin') === 'true') {
+                if(isAdminLoggedIn) {
                     document.getElementById('admin-login').classList.add('hidden');
                     document.getElementById('admin-dashboard').classList.remove('hidden');
                     loadStats(); renderSettingsUI();
+                } else {
+                    document.getElementById('admin-login').classList.remove('hidden');
+                    document.getElementById('admin-dashboard').classList.add('hidden');
                 }
             } else if (hash.startsWith('#/pass/')) {
                 document.getElementById('view-pass').classList.add('active');
@@ -843,7 +882,10 @@
             const pwd = document.getElementById('admin-password').value;
             const s = GLOBAL_SETTINGS;
             if(s.adminPasswords.includes(pwd) || (s.adminPasswords.length === 0 && pwd === s.firstTimePassword)) {
-                sessionStorage.setItem('lwt_admin', 'true');
+                isAdminLoggedIn = true;
+                document.getElementById('admin-password').value = '';
+                document.getElementById('login-msg').textContent = "Enter system password to continue.";
+                document.getElementById('login-msg').classList.remove('text-red-500');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 loadStats(); renderSettingsUI();
@@ -851,6 +893,38 @@
                 document.getElementById('login-msg').textContent = "Incorrect password."; document.getElementById('login-msg').classList.add('text-red-500');
             }
         }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            handleRoute();
+        }
+
+        async function factoryReset(type) {
+            if(!confirm(`WARNING: Are you absolutely sure you want to delete all ${type}? This CANNOT be undone.`)) return;
+            
+            if(type === 'passes') {
+                await DB.clearCollection('passes');
+                alert("All passes have been deleted.");
+                loadManageTable();
+            } else if(type === 'logs') {
+                await DB.clearCollection('logs');
+                alert("All activity logs and stats have been cleared.");
+                loadStats();
+            } else if(type === 'settings') {
+                const defaultSettings = {
+                    firstTimePassword: "LTW@SGAA26", adminPasswords: [],
+                    contacts: [{name: "Admin", phone: "+201234567890"}],
+                    teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea", "N/A": "#FFFFFF"},
+                    locations: ["St George Church", "St Anthony Church", "N/A"],
+                    zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
+                    events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
+                    logos: { church: "", ltw: "", scout: "" }
+                };
+                await DB.updateSettings(defaultSettings);
+                alert("Settings have been factory reset.");
+            }
+        }
+
         function toggleFirstTimeSetup() { document.getElementById('first-time-panel').classList.toggle('hidden'); }
         async function saveFirstTimePassword() {
             const pwd = document.getElementById('admin-password').value, newPwd = document.getElementById('new-admin-password').value;
@@ -897,7 +971,7 @@
 
                 const photoFile = document.getElementById('g-photo').files[0];
                 let photoB64 = existingPass ? existingPass.PhotoURL : "";
-                if(photoFile) photoB64 = await resizeImage(photoFile, 300);
+                if(photoFile) photoB64 = await resizeImage(photoFile, 300, false); // False = Compress as JPEG
 
                 const passData = {
                     PassID: passId,
@@ -1142,7 +1216,7 @@
         }
         async function addMass(eIdx) { const n = document.getElementById(`m-name-${eIdx}`).value.trim(), s = document.getElementById(`m-start-${eIdx}`).value, e = document.getElementById(`m-end-${eIdx}`).value; if(n && s && e) { GLOBAL_SETTINGS.events[eIdx].masses.push({ id: 'm_'+Date.now(), name: n, start: s, end: e }); await DB.updateSettings(GLOBAL_SETTINGS); } else alert('Fill all mass fields'); }
         async function removeMass(eIdx, mIdx) { GLOBAL_SETTINGS.events[eIdx].masses.splice(mIdx, 1); await DB.updateSettings(GLOBAL_SETTINGS); }
-        async function uploadLogo(type) { const file = document.getElementById(`set-logo-${type}`).files[0]; if(file) { GLOBAL_SETTINGS.logos[type] = await resizeImage(file, 300); await DB.updateSettings(GLOBAL_SETTINGS); alert('Logo saved globally.'); } }
+        async function uploadLogo(type) { const file = document.getElementById(`set-logo-${type}`).files[0]; if(file) { GLOBAL_SETTINGS.logos[type] = await resizeImage(file, 300, true); await DB.updateSettings(GLOBAL_SETTINGS); alert('Logo saved globally.'); } }
     </script>
 </body>
 </html>
