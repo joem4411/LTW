@@ -94,11 +94,12 @@
         
         <!-- View: SCANNER -->
         <div id="view-scan" class="view">
+            <!-- Prominent Header Logos -->
+            <div class="flex justify-center space-x-6 mb-6 items-center h-20">
+                <img id="logo-scout-scan" src="" alt="Scout Logo" class="h-full w-auto object-contain hidden drop-shadow-lg">
+                <img id="logo-church-scan" src="" alt="Church Logo" class="h-full w-auto object-contain hidden drop-shadow-lg">
+            </div>
             <div class="text-center mb-8 flex flex-col items-center">
-                <div class="flex space-x-6 mb-4 items-center h-16">
-                    <img id="logo-scout-scan" src="" alt="Scout Logo" class="h-full w-auto object-contain hidden drop-shadow-lg">
-                    <img id="logo-church-scan" src="" alt="Church Logo" class="h-full w-auto object-contain hidden drop-shadow-lg">
-                </div>
                 <h1 class="text-3xl sm:text-4xl font-black text-white uppercase tracking-widest mt-2">Pass Scanner</h1>
                 <p class="text-sm sm:text-base text-gray-400 mt-2 font-medium">Verify servant access permissions automatically.</p>
             </div>
@@ -175,8 +176,8 @@
                 <div class="absolute top-0 left-0 w-full h-2 bg-brand-yellow"></div>
                 
                 <div class="flex justify-center space-x-4 mb-6 h-12">
-                    <img id="logo-church-admin" src="" class="h-full w-auto object-contain hidden">
-                    <img id="logo-ltw-admin" src="" class="h-full w-auto object-contain hidden">
+                    <img id="logo-church-admin-login" src="" class="h-full w-auto object-contain hidden">
+                    <img id="logo-ltw-admin-login" src="" class="h-full w-auto object-contain hidden">
                 </div>
 
                 <div class="w-20 h-20 bg-brand-dark rounded-full flex items-center justify-center mx-auto mb-6 border border-brand-border">
@@ -191,14 +192,21 @@
                 <button onclick="toggleFirstTimeSetup()" class="mt-6 text-xs text-gray-600 hover:text-gray-400 transition-colors">Emergency Login / First Time Setup</button>
 
                 <div id="first-time-panel" class="hidden mt-4 pt-4 border-t border-brand-border text-left">
-                    <p class="text-xs text-brand-yellow mb-2 font-bold">First-Time Setup Required</p>
-                    <input type="password" id="new-admin-password" placeholder="Create Personal Password" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-3">
+                    <p class="text-xs text-brand-yellow mb-2 font-bold">Emergency / First-Time Setup</p>
+                    <input type="password" id="emergency-password-input" placeholder="Enter Emergency Password (e.g. LTW@...)" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-2">
+                    <input type="password" id="new-admin-password" placeholder="Create New Personal Password" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-3">
                     <button onclick="saveFirstTimePassword()" class="w-full py-3 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors">Save & Login</button>
                 </div>
             </div>
 
             <!-- Admin Dashboard -->
             <div id="admin-dashboard" class="hidden">
+                <!-- Prominent Header Logos -->
+                <div class="flex justify-center space-x-6 mb-6 items-center h-20">
+                    <img id="logo-church-admin-dash" src="" class="h-full w-auto object-contain hidden drop-shadow-lg">
+                    <img id="logo-ltw-admin-dash" src="" class="h-full w-auto object-contain hidden drop-shadow-lg">
+                </div>
+                
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <div>
                         <div class="flex items-center space-x-3">
@@ -229,8 +237,9 @@
                                     <input type="text" id="g-name" required class="w-full px-4 py-3 rounded-xl placeholder-gray-600" placeholder="e.g. Mina Youssef">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-bold text-gray-300 mb-2">Phone Number *</label>
-                                    <input type="tel" id="g-phone" required class="w-full px-4 py-3 rounded-xl placeholder-gray-600" placeholder="+20...">
+                                    <label class="block text-sm font-bold text-gray-300 mb-2">Phone Number</label>
+                                    <!-- Removed required, explicitly tell users it defaults to N/A -->
+                                    <input type="text" id="g-phone" class="w-full px-4 py-3 rounded-xl placeholder-gray-600" placeholder="e.g. +20... or leave blank for N/A">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Team *</label>
@@ -387,14 +396,14 @@
                             <!-- Events & Masses -->
                             <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Events & Dates</h3>
-                                <p class="text-xs text-gray-400 mb-4">Add events with specific dates. Assign masses to handle auto-expiration. Choose active zones for each event.</p>
+                                <p class="text-xs text-gray-400 mb-4">Add events with specific dates. Assign masses to handle auto-expiration. Choose active zones for each event. You can edit existing entries inline and click save.</p>
                                 <div id="set-events-list" class="space-y-6 mb-6"></div>
                                 
-                                <div class="p-4 bg-brand-panel border border-brand-border rounded-xl">
+                                <div class="p-4 bg-brand-panel border border-brand-border rounded-xl mt-4">
                                     <p class="text-xs font-bold text-white mb-2">Create New Event</p>
                                     <div class="flex flex-col sm:flex-row gap-3">
                                         <input type="text" id="new-event-name" placeholder="Event Name (e.g. Palm Sunday)" class="flex-1 px-4 py-2 rounded-lg text-sm">
-                                        <input type="date" id="new-event-date" class="px-4 py-2 rounded-lg text-sm w-full sm:w-auto">
+                                        <input type="date" id="new-event-date" class="px-4 py-2 rounded-lg text-sm w-full sm:w-auto text-gray-300">
                                         <button onclick="addEvent()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold w-full sm:w-auto">Add Event</button>
                                     </div>
                                 </div>
@@ -403,9 +412,9 @@
                             <!-- Support Contacts -->
                             <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="phone" class="w-4 h-4 mr-2"></i> Footer Contacts</h3>
-                                <p class="text-xs text-gray-400 mb-3">These numbers appear on the app footer and exported passes.</p>
+                                <p class="text-xs text-gray-400 mb-3">These numbers appear on the app footer and exported passes. Edit directly and save.</p>
                                 <div id="set-contacts-list" class="space-y-3 mb-4"></div>
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
                                     <input type="text" id="new-contact-name" placeholder="Name (e.g. Admin)" class="w-1/3 px-4 py-2 rounded-lg text-sm">
                                     <input type="text" id="new-contact-phone" placeholder="Phone (+20...)" class="flex-1 px-4 py-2 rounded-lg text-sm">
                                     <button onclick="addContact()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
@@ -415,9 +424,10 @@
                             <!-- Teams & Colors -->
                             <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="palette" class="w-4 h-4 mr-2"></i> Teams & Colors</h3>
+                                <p class="text-xs text-gray-400 mb-3">Team field is always required when generating a pass. You can edit existing team names or colors directly.</p>
                                 <div id="set-teams-list" class="space-y-3 mb-4"></div>
-                                <div class="flex gap-2">
-                                    <input type="text" id="new-team-name" placeholder="Team Name" class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
+                                    <input type="text" id="new-team-name" placeholder="New Team Name" class="flex-1 px-4 py-2 rounded-lg text-sm">
                                     <input type="color" id="new-team-color" class="h-10 w-14 rounded cursor-pointer border-0 p-0 bg-transparent">
                                     <button onclick="addTeam()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                 </div>
@@ -427,16 +437,16 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                                     <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Church Locations</h3>
-                                    <div id="set-loc-list" class="space-y-2 mb-3"></div>
-                                    <div class="flex gap-2">
+                                    <div id="set-loc-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
+                                    <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
                                         <input type="text" id="new-loc" placeholder="Add location..." class="flex-1 px-4 py-2 rounded-lg text-sm">
                                         <button onclick="addItemToSettingArray('locations', 'new-loc')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                     </div>
                                 </div>
                                 <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                                     <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Global Zones Catalog</h3>
-                                    <div id="set-zone-list" class="space-y-2 mb-3 max-h-40 overflow-y-auto pr-2"></div>
-                                    <div class="flex gap-2">
+                                    <div id="set-zone-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
+                                    <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
                                         <input type="text" id="new-zone" placeholder="Add global zone..." class="flex-1 px-4 py-2 rounded-lg text-sm">
                                         <button onclick="addItemToSettingArray('zones', 'new-zone')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                     </div>
@@ -565,12 +575,8 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Preserve transparency for logos by using PNG format, compress photos as JPEG
-                        if (preserveTransparency) {
-                            resolve(canvas.toDataURL('image/png'));
-                        } else {
-                            resolve(canvas.toDataURL('image/jpeg', 0.6));
-                        }
+                        if (preserveTransparency) { resolve(canvas.toDataURL('image/png')); } 
+                        else { resolve(canvas.toDataURL('image/jpeg', 0.6)); }
                     };
                     img.src = e.target.result;
                 };
@@ -588,15 +594,20 @@
                     const doc = await firestoreDB.collection('admin').doc('settings').get();
                     if(doc.exists) {
                         GLOBAL_SETTINGS = doc.data();
-                        // Migration checks
                         if(!GLOBAL_SETTINGS.events) GLOBAL_SETTINGS.events = [];
                         GLOBAL_SETTINGS.events.forEach(e => { if(!e.date) e.date = ""; if(!e.allowedZones) e.allowedZones = GLOBAL_SETTINGS.zones || []; });
+                        
+                        // Clean up "N/A" if it exists in DB from older versions to enforce requirements
+                        if(GLOBAL_SETTINGS.teamColors && GLOBAL_SETTINGS.teamColors["N/A"]) {
+                            delete GLOBAL_SETTINGS.teamColors["N/A"];
+                            await this.updateSettings(GLOBAL_SETTINGS);
+                        }
                     } else {
                         GLOBAL_SETTINGS = {
                             firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                             contacts: [{name: "Admin", phone: "+201234567890"}],
-                            teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea", "N/A": "#FFFFFF"},
-                            locations: ["St George Church", "St Anthony Church", "N/A"],
+                            teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea"},
+                            locations: ["St George Church", "St Anthony Church"],
                             zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                             events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
                             logos: { church: "", ltw: "", scout: "" }
@@ -658,25 +669,26 @@
             if(settings.logos.ltw) { 
                 document.getElementById('nav-logo-ltw').src = settings.logos.ltw; document.getElementById('nav-logo-ltw').classList.remove('hidden'); 
                 document.getElementById('nav-icon-fallback').classList.add('hidden');
-                document.getElementById('logo-ltw-admin').src = settings.logos.ltw; document.getElementById('logo-ltw-admin').classList.remove('hidden'); 
+                const llad = document.getElementById('logo-ltw-admin-login'); if(llad){ llad.src = settings.logos.ltw; llad.classList.remove('hidden'); }
+                const lladDash = document.getElementById('logo-ltw-admin-dash'); if(lladDash){ lladDash.src = settings.logos.ltw; lladDash.classList.remove('hidden'); }
                 document.getElementById('pdf-ltw-logo').src = settings.logos.ltw;
             }
             if(settings.logos.church) { 
                 document.getElementById('logo-church-scan').src = settings.logos.church; document.getElementById('logo-church-scan').classList.remove('hidden'); 
-                document.getElementById('logo-church-admin').src = settings.logos.church; document.getElementById('logo-church-admin').classList.remove('hidden'); 
+                const lcad = document.getElementById('logo-church-admin-login'); if(lcad){ lcad.src = settings.logos.church; lcad.classList.remove('hidden'); }
+                const lcadDash = document.getElementById('logo-church-admin-dash'); if(lcadDash){ lcadDash.src = settings.logos.church; lcadDash.classList.remove('hidden'); }
                 document.getElementById('pdf-church-logo').src = settings.logos.church;
             }
             if(settings.logos.scout) { 
                 document.getElementById('logo-scout-scan').src = settings.logos.scout; document.getElementById('logo-scout-scan').classList.remove('hidden'); 
             }
             
-            // Dropdowns
+            // Dropdowns (Excluding N/A for strictly required fields)
             populateDropdown('g-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
             
-            // Filter out past events
             const activeEvents = settings.events;
-            populateDropdown('g-event', [{val: 'N/A', lbl: 'N/A'}, ...activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`}))]);
+            populateDropdown('g-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
             
             handleTeamLogic();
             populateStatsDropdown();
@@ -735,7 +747,7 @@
                 if(activeMasses.length > 0) {
                     mCont.classList.remove('hidden');
                     mSel.innerHTML = `<option value="N/A">-- Select Mass --</option>` + activeMasses.map(m => `<option value="${m.id}">${m.name} (${m.start} - ${m.end})</option>`).join('');
-                    if(activeMasses.length === 1) mSel.value = activeMasses[0].id;
+                    if(activeMasses.length === 1) mSel.value = activeMasses[0].id; // Auto select if only 1 mass
                 } else {
                     mCont.classList.add('hidden');
                     mSel.innerHTML = `<option value="N/A">N/A</option>`;
@@ -842,7 +854,7 @@
             }
             lucide.createIcons();
 
-            if (!pass) { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await DB.logEntry(id, "INVALID"); return; }
+            if (!pass || !pass.PassID || pass.PassID === 'undefined') { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await DB.logEntry(id, "INVALID"); return; }
             if (pass.Status === 'REVOKED') { statusHeader.textContent = "PASS REVOKED"; statusHeader.classList.add('bg-gray-800'); await DB.logEntry(id, "REVOKED"); return; }
 
             // Expiration Logic
@@ -906,8 +918,8 @@
             const defaultSettings = {
                 firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                 contacts: [{name: "Admin", phone: "+201234567890"}],
-                teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea", "N/A": "#FFFFFF"},
-                locations: ["St George Church", "St Anthony Church", "N/A"],
+                teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea"},
+                locations: ["St George Church", "St Anthony Church"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
                 logos: { church: "", ltw: "", scout: "" }
@@ -935,11 +947,28 @@
 
         function toggleFirstTimeSetup() { document.getElementById('first-time-panel').classList.toggle('hidden'); }
         async function saveFirstTimePassword() {
-            const pwd = document.getElementById('admin-password').value, newPwd = document.getElementById('new-admin-password').value;
-            if(pwd !== GLOBAL_SETTINGS.firstTimePassword) return alert("Incorrect Emergency password.");
-            if(!newPwd || newPwd.length < 4) return alert("Password too short.");
-            GLOBAL_SETTINGS.adminPasswords.push(newPwd); await DB.updateSettings(GLOBAL_SETTINGS);
-            document.getElementById('admin-password').value = newPwd; loginAdmin();
+            const emergencyPwd = document.getElementById('emergency-password-input').value;
+            const newPwd = document.getElementById('new-admin-password').value;
+            
+            if(emergencyPwd !== GLOBAL_SETTINGS.firstTimePassword) return alert("Incorrect Emergency password.");
+            if(!newPwd || newPwd.length < 4) return alert("New password too short (minimum 4 characters).");
+            
+            GLOBAL_SETTINGS.adminPasswords.push(newPwd); 
+            await DB.updateSettings(GLOBAL_SETTINGS);
+            
+            // Clear inputs and log in
+            document.getElementById('admin-password').value = '';
+            document.getElementById('emergency-password-input').value = '';
+            document.getElementById('new-admin-password').value = '';
+            document.getElementById('first-time-panel').classList.add('hidden');
+            
+            isAdminLoggedIn = true;
+            document.getElementById('login-msg').textContent = "Enter system password to continue.";
+            document.getElementById('login-msg').classList.remove('text-red-500');
+            document.getElementById('admin-login').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            loadStats(); 
+            renderSettingsUI();
         }
 
         function switchAdminTab(tab) {
@@ -984,7 +1013,7 @@
                 const passData = {
                     PassID: passId,
                     Name: document.getElementById('g-name').value,
-                    Phone: document.getElementById('g-phone').value,
+                    Phone: document.getElementById('g-phone').value || 'N/A', // defaults to N/A if empty string
                     Team: document.getElementById('g-team').value,
                     Event: isIT ? 'ALL ACCESS' : document.getElementById('g-event').value,
                     Mass: isIT ? 'N/A' : (document.getElementById('g-mass').value || 'N/A'),
@@ -1016,7 +1045,7 @@
 
             document.getElementById('g-edit-id').value = pass.PassID;
             document.getElementById('g-name').value = pass.Name;
-            document.getElementById('g-phone').value = pass.Phone;
+            document.getElementById('g-phone').value = pass.Phone !== 'N/A' ? pass.Phone : ''; // clear input if N/A
             document.getElementById('g-team').value = pass.Team;
             handleTeamLogic();
 
@@ -1067,7 +1096,13 @@
             let evName = pass.Event;
             if(pass.Team !== 'IT Team') {
                 const ev = s.events.find(e => e.id === pass.Event); 
-                if(ev) evName = ev.name;
+                if(ev) {
+                    evName = ev.name;
+                    if (pass.Mass && pass.Mass !== 'N/A') {
+                        const m = ev.masses.find(x => x.id === pass.Mass);
+                        if (m) evName += ` - ${m.name}`; // APPEND MASS NAME
+                    }
+                }
             }
             document.getElementById('pdf-event').textContent = `Event: ${evName}`;
             document.getElementById('pdf-location').textContent = `Loc: ${pass.Location}`;
@@ -1099,10 +1134,13 @@
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
             lucide.createIcons();
             
-            const passes = await DB.fetchAllPasses(); passes.reverse();
-            const s = GLOBAL_SETTINGS;
+            let passes = await DB.fetchAllPasses(); 
+            // Filter out undefined and empty passes immediately
+            passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
+            passes.reverse();
             
-            if(passes.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No passes generated.</td></tr>`;
+            const s = GLOBAL_SETTINGS;
+            if(passes.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No valid passes generated.</td></tr>`;
 
             tbody.innerHTML = passes.map(p => {
                 const tColor = s.teamColors[p.Team] || "#fff";
@@ -1136,7 +1174,9 @@
 
         async function loadStats() {
             const filter = document.getElementById('stats-filter').value;
-            const allPasses = await DB.fetchAllPasses();
+            let allPasses = await DB.fetchAllPasses();
+            allPasses = allPasses.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
+            
             let logs = await DB.fetchLogs();
             
             let passes = allPasses;
@@ -1170,22 +1210,64 @@
             }).join('');
         }
 
-        // --- SETTINGS UI ---
+        // --- SETTINGS UI WITH INLINE EDITING ---
         function renderSettingsUI() {
             const s = GLOBAL_SETTINGS;
             document.getElementById('set-first-pwd').value = s.firstTimePassword;
-            document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `<div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300"><span>${'*'.repeat(p.length)}</span><button onclick="removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button></div>`).join('');
-            document.getElementById('set-contacts-list').innerHTML = s.contacts.map((c, i) => `<div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300"><span><span class="text-brand-yellow">${c.name}:</span> ${c.phone}</span><button onclick="removeSettingItem('contacts', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button></div>`).join('');
-            document.getElementById('set-teams-list').innerHTML = Object.entries(s.teamColors).map(([name, color]) => `<div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300"><div class="flex items-center"><div class="w-4 h-4 rounded-full mr-3" style="background:${color}"></div> ${name}</div><button onclick="removeTeam('${name}')" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button></div>`).join('');
+            
+            document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `
+                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
+                    <span>${'*'.repeat(p.length)}</span>
+                    <button onclick="removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
 
-            const renderArr = (arr, id, field) => document.getElementById(id).innerHTML = arr.map((item, i) => `<div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300"><span>${item}</span><button onclick="removeSettingItem('${field}', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button></div>`).join('');
-            renderArr(s.locations, 'set-loc-list', 'locations'); renderArr(s.zones, 'set-zone-list', 'zones');
+            // Editable Contacts
+            document.getElementById('set-contacts-list').innerHTML = s.contacts.map((c, i) => `
+                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
+                    <input type="text" id="edit-contact-name-${i}" value="${c.name}" class="w-1/3 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                    <input type="text" id="edit-contact-phone-${i}" value="${c.phone}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                    <button onclick="updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                    <button onclick="removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
 
+            // Editable Teams
+            document.getElementById('set-teams-list').innerHTML = Object.entries(s.teamColors).map(([name, color]) => {
+                const idBase = name.replace(/[^a-zA-Z0-9]/g, '');
+                return `
+                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
+                    <input type="text" id="edit-team-name-${idBase}" value="${name}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                    <input type="color" id="edit-team-color-${idBase}" value="${color}" class="h-8 w-12 rounded cursor-pointer border-0 p-0 bg-transparent">
+                    <button onclick="updateTeam('${name}', '${idBase}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                    <button onclick="removeTeam('${name}')" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+                `
+            }).join('');
+
+            // Editable Arrays
+            const renderEditableArr = (arr, id, field) => document.getElementById(id).innerHTML = arr.map((item, i) => `
+                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
+                    <input type="text" id="edit-${field}-${i}" value="${item}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                    <button onclick="updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                    <button onclick="removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+            
+            renderEditableArr(s.locations, 'set-loc-list', 'locations'); 
+            renderEditableArr(s.zones, 'set-zone-list', 'zones');
+
+            // Editable Events
             document.getElementById('set-events-list').innerHTML = s.events.map((ev, eIdx) => `
                 <div class="bg-brand-panel p-4 rounded-xl border border-brand-border">
-                    <div class="flex justify-between items-center mb-2"><span class="font-bold text-brand-yellow">${ev.name} <span class="text-gray-500 font-normal">(${ev.date})</span></span><button onclick="removeSettingItem('events', ${eIdx})" class="text-red-500 text-xs flex"><i data-lucide="trash" class="w-3 h-3 mr-1"></i> Delete Event</button></div>
+                    <div class="flex justify-between items-center mb-2 gap-2">
+                        <input type="text" id="edit-ev-name-${eIdx}" value="${ev.name}" class="font-bold text-brand-yellow bg-transparent border-b border-brand-border px-1 w-1/2">
+                        <input type="date" id="edit-ev-date-${eIdx}" value="${ev.date}" class="text-gray-400 bg-transparent border-b border-brand-border px-1 w-1/3">
+                        <button onclick="updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Name/Date"><i data-lucide="save" class="w-4 h-4"></i></button>
+                        <button onclick="removeSettingItem('events', ${eIdx})" class="text-red-500 text-xs flex items-center bg-brand-dark px-2 py-1 rounded"><i data-lucide="trash" class="w-3 h-3 mr-1"></i> Delete</button>
+                    </div>
                     
-                    <div class="mb-3">
+                    <div class="mb-3 mt-3">
                         <p class="text-[10px] text-gray-500 mb-1">Active Zones for this event:</p>
                         <div class="flex flex-wrap gap-1">
                             ${s.zones.map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="toggleEventZone(${eIdx}, '${z}')" ${ev.allowedZones.includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${z}</label>`).join('')}
@@ -1196,9 +1278,9 @@
                         ${ev.masses.map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${m.name} (${m.start} - ${m.end})</span><button onclick="removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
                     </div>
                     <div class="flex gap-2 text-xs">
-                        <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border">
-                        <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border">
-                        <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border">
+                        <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border bg-brand-dark">
+                        <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
+                        <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
                         <button onclick="addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
                     </div>
                 </div>`).join('');
@@ -1208,6 +1290,33 @@
         async function updateSettingsField(field, value) { GLOBAL_SETTINGS[field] = value; await DB.updateSettings(GLOBAL_SETTINGS); }
         async function addItemToSettingArray(field, inputId) { const val = document.getElementById(inputId).value.trim(); if(val) { GLOBAL_SETTINGS[field].push(val); document.getElementById(inputId).value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
         async function removeSettingItem(field, idx) { if(confirm('Delete item?')) { GLOBAL_SETTINGS[field].splice(idx, 1); await DB.updateSettings(GLOBAL_SETTINGS); } }
+        
+        async function updateArrayItem(field, idx, inputId) {
+            GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim();
+            await DB.updateSettings(GLOBAL_SETTINGS);
+        }
+        
+        async function updateContact(idx) {
+            GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim();
+            GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim();
+            await DB.updateSettings(GLOBAL_SETTINGS);
+        }
+
+        async function updateTeam(oldName, idBase) {
+            const newName = document.getElementById(`edit-team-name-${idBase}`).value.trim();
+            const newColor = document.getElementById(`edit-team-color-${idBase}`).value;
+            if(!newName) return alert("Team name cannot be empty.");
+            if(oldName !== newName) { delete GLOBAL_SETTINGS.teamColors[oldName]; }
+            GLOBAL_SETTINGS.teamColors[newName] = newColor;
+            await DB.updateSettings(GLOBAL_SETTINGS);
+        }
+
+        async function updateEvent(idx) {
+            GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim();
+            GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value;
+            await DB.updateSettings(GLOBAL_SETTINGS);
+        }
+
         async function addContact() { const n = document.getElementById('new-contact-name').value.trim(); const p = document.getElementById('new-contact-phone').value.trim(); if(n && p) { GLOBAL_SETTINGS.contacts.push({name: n, phone: p}); document.getElementById('new-contact-name').value = ''; document.getElementById('new-contact-phone').value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
         async function addTeam() { const n = document.getElementById('new-team-name').value.trim(); const c = document.getElementById('new-team-color').value; if(n) { GLOBAL_SETTINGS.teamColors[n] = c; document.getElementById('new-team-name').value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
         async function removeTeam(name) { if(confirm('Delete team?')) { delete GLOBAL_SETTINGS.teamColors[name]; await DB.updateSettings(GLOBAL_SETTINGS); } }
