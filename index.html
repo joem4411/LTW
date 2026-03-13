@@ -94,7 +94,6 @@
         
         <!-- View: SCANNER -->
         <div id="view-scan" class="view">
-            <!-- Prominent Header Logos -->
             <div class="flex justify-center space-x-6 mb-6 items-center h-20">
                 <img id="logo-scout-scan" src="" alt="Scout Logo" class="h-full w-auto object-contain hidden drop-shadow-lg">
                 <img id="logo-church-scan" src="" alt="Church Logo" class="h-full w-auto object-contain hidden drop-shadow-lg">
@@ -200,7 +199,6 @@
 
             <!-- Admin Dashboard -->
             <div id="admin-dashboard" class="hidden">
-                <!-- Prominent Header Logos -->
                 <div class="flex justify-center space-x-6 mb-6 items-center h-20">
                     <img id="logo-church-admin-dash" src="" class="h-full w-auto object-contain hidden drop-shadow-lg">
                     <img id="logo-ltw-admin-dash" src="" class="h-full w-auto object-contain hidden drop-shadow-lg">
@@ -212,11 +210,12 @@
                             <h1 class="text-3xl font-black text-white tracking-tight">System Admin</h1>
                             <button onclick="logoutAdmin()" class="bg-red-900/80 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors border border-red-800">Log Out</button>
                         </div>
-                        <p class="text-gray-400 font-medium text-sm mt-1">Manage passes, settings, and view logs.</p>
+                        <p class="text-gray-400 font-medium text-sm mt-1">Manage passes, servants, and system logs.</p>
                     </div>
                     <div class="flex flex-wrap gap-2 bg-brand-panel p-1.5 rounded-xl border border-brand-border">
                         <button onclick="switchAdminTab('generate')" id="tab-generate" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-yellow text-black transition-colors flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Generate</button>
-                        <button onclick="switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Passes</button>
+                        <button onclick="switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="layout-grid" class="w-4 h-4 mr-1.5"></i> Passes</button>
+                        <button onclick="switchAdminTab('servants')" id="tab-servants" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Servants</button>
                         <button onclick="switchAdminTab('stats')" id="tab-stats" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5"></i> Stats</button>
                         <button onclick="switchAdminTab('settings')" id="tab-settings" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-1.5"></i> Settings</button>
                     </div>
@@ -230,14 +229,15 @@
                         
                         <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                             <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">1. Personal Details</h3>
+                            <p class="text-xs text-gray-400 mb-4">Typing a saved name will auto-fill their info.</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Servant Name *</label>
-                                    <input type="text" id="g-name" required class="w-full px-4 py-3 rounded-xl placeholder-gray-600" placeholder="e.g. Mina Youssef">
+                                    <input type="text" id="g-name" required class="w-full px-4 py-3 rounded-xl placeholder-gray-600" placeholder="e.g. Mina Youssef" list="servants-list">
+                                    <datalist id="servants-list"></datalist>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Phone Number</label>
-                                    <!-- Removed required, explicitly tell users it defaults to N/A -->
                                     <input type="text" id="g-phone" class="w-full px-4 py-3 rounded-xl placeholder-gray-600" placeholder="e.g. +20... or leave blank for N/A">
                                 </div>
                                 <div>
@@ -321,6 +321,39 @@
                     </div>
                 </div>
 
+                <!-- Tab: Servants -->
+                <div id="admin-tab-servants" class="admin-section hidden bg-brand-panel rounded-3xl border border-brand-border overflow-hidden">
+                    <div class="p-6 border-b border-brand-border flex justify-between items-center bg-brand-dark">
+                        <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="users" class="w-5 h-5 mr-2 text-brand-yellow"></i> Servants Directory</h2>
+                        <button onclick="loadServantsTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="p-6 border-b border-brand-border bg-brand-dark">
+                        <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Add / Manual Update</h3>
+                        <p class="text-xs text-gray-400 mb-3">Servants are auto-saved here when you generate a pass. You can also add them manually below.</p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="s-name" placeholder="Servant Name *" class="flex-1 px-4 py-2 rounded-lg text-sm">
+                            <input type="text" id="s-phone" placeholder="Phone" class="flex-1 px-4 py-2 rounded-lg text-sm">
+                            <select id="s-team" class="flex-1 px-4 py-2 rounded-lg text-sm"></select>
+                            <button onclick="manualSaveServant()" class="px-6 py-2 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm">Save</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-brand-dark text-gray-500 font-black uppercase tracking-wider text-xs border-b border-brand-border">
+                                <tr>
+                                    <th class="px-6 py-5">Servant Name</th>
+                                    <th class="px-6 py-5">Phone</th>
+                                    <th class="px-6 py-5">Default Team</th>
+                                    <th class="px-6 py-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="servants-table-body" class="divide-y divide-brand-border"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Tab: Stats -->
                 <div id="admin-tab-stats" class="admin-section hidden space-y-6">
                     <div class="flex justify-end mb-4">
@@ -330,7 +363,7 @@
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                         <div class="bg-brand-panel p-6 rounded-3xl border border-brand-border">
-                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider">Total Servants</p>
+                            <p class="text-[10px] font-black text-gray-500 uppercase tracking-wider">Total Passes</p>
                             <p id="stat-total" class="text-4xl font-black text-white mt-1">0</p>
                         </div>
                         <div class="bg-brand-panel p-6 rounded-3xl border border-brand-border">
@@ -389,6 +422,16 @@
                                         <input type="text" id="new-pwd" placeholder="Add new password..." class="flex-1 px-4 py-2 rounded-lg text-sm">
                                         <button onclick="addItemToSettingArray('adminPasswords', 'new-pwd')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Integration -->
+                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
+                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-2"></i> Google Sheets Integration</h3>
+                                <p class="text-xs text-gray-400 mb-3">Publish your Google Form Responses sheet to the web as a <b>CSV</b> and paste the link here. Names will merge with your internal directory for fast auto-complete.</p>
+                                <div class="flex gap-2">
+                                    <input type="text" id="set-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                    <button onclick="updateSettingsField('sheetUrl', document.getElementById('set-sheet-url').value); fetchSheetData();" class="px-4 py-2 bg-brand-border hover:bg-gray-700 rounded-lg text-sm font-bold text-white">Save</button>
                                 </div>
                             </div>
 
@@ -595,8 +638,6 @@
                         GLOBAL_SETTINGS = doc.data();
                         if(!GLOBAL_SETTINGS.events) GLOBAL_SETTINGS.events = [];
                         GLOBAL_SETTINGS.events.forEach(e => { if(!e.date) e.date = ""; if(!e.allowedZones) e.allowedZones = GLOBAL_SETTINGS.zones || []; });
-                        
-                        // Clean up "N/A" if it exists in DB from older versions to enforce requirements
                         if(GLOBAL_SETTINGS.teamColors && GLOBAL_SETTINGS.teamColors["N/A"]) {
                             delete GLOBAL_SETTINGS.teamColors["N/A"];
                             await this.updateSettings(GLOBAL_SETTINGS);
@@ -609,7 +650,8 @@
                             locations: ["St George Church", "St Anthony Church"],
                             zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                             events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                            logos: { church: "", ltw: "", scout: "" }
+                            logos: { church: "", ltw: "", scout: "" },
+                            sheetUrl: ""
                         };
                         await firestoreDB.collection('admin').doc('settings').set(GLOBAL_SETTINGS);
                     }
@@ -634,6 +676,23 @@
             },
             async updatePassStatus(id, newStatus) { await firestoreDB.collection('passes').doc(id).update({ Status: newStatus }); },
             async deletePass(id) { await firestoreDB.collection('passes').doc(id).delete(); },
+            
+            // SERVANTS API
+            async fetchAllServants() {
+                try { const snapshot = await firestoreDB.collection('servants').get(); return snapshot.docs.map(doc => doc.data()); } 
+                catch(e) { return []; }
+            },
+            async saveServant(servant) {
+                try {
+                    const id = servant.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
+                    await firestoreDB.collection('servants').doc(id).set(servant);
+                } catch(e) { console.error(e); }
+            },
+            async deleteServant(id) {
+                try { await firestoreDB.collection('servants').doc(id).delete(); } catch(e) { console.error(e); }
+            },
+
+            // LOGS
             async fetchLogs() {
                 try { const snapshot = await firestoreDB.collection('logs').get(); return snapshot.docs.map(doc => doc.data()); } 
                 catch(e) { return []; }
@@ -682,8 +741,9 @@
                 document.getElementById('logo-scout-scan').src = settings.logos.scout; document.getElementById('logo-scout-scan').classList.remove('hidden'); 
             }
             
-            // Dropdowns (Excluding N/A for strictly required fields)
+            // Dropdowns
             populateDropdown('g-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
+            populateDropdown('s-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
             
             const activeEvents = settings.events;
@@ -691,6 +751,7 @@
             
             handleTeamLogic();
             populateStatsDropdown();
+            fetchServantsData(); // Fetches Google sheet + Local DB
         }
 
         function populateDropdown(id, items) {
@@ -769,6 +830,56 @@
             });
         }
 
+        function populateStatsDropdown() {
+            const sel = document.getElementById('stats-filter');
+            if(!sel) return;
+            const events = GLOBAL_SETTINGS.events || [];
+            sel.innerHTML = `<option value="all">All Time / All Events</option>` + events.map(e => `<option value="${e.id}">${e.name} (${e.date})</option>`).join('');
+        }
+
+        async function loadStats() {
+            const filterEl = document.getElementById('stats-filter');
+            const filter = filterEl ? filterEl.value : 'all';
+            
+            let allPasses = await DB.fetchAllPasses();
+            allPasses = allPasses.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
+            
+            let logs = await DB.fetchLogs();
+            
+            let passes = allPasses;
+            if(filter !== 'all') {
+                const ev = GLOBAL_SETTINGS.events.find(e => e.id === filter);
+                if(ev) {
+                    passes = allPasses.filter(p => p.Event === filter || p.Team === 'IT Team');
+                    logs = logs.filter(l => l.Time.startsWith(ev.date));
+                }
+            }
+
+            const revoked = passes.filter(p => p.Status === 'REVOKED').length;
+            const enteredSet = new Set(logs.filter(l => l.Result.includes('GRANTED')).map(l => l.PassID));
+            const activePassesInSelection = passes.map(p => p.PassID);
+            const actuallyEnteredFromSelection = Array.from(enteredSet).filter(id => activePassesInSelection.includes(id));
+            
+            document.getElementById('stat-total').textContent = passes.length;
+            document.getElementById('stat-entered').textContent = actuallyEnteredFromSelection.length;
+            document.getElementById('stat-pending').textContent = passes.length - actuallyEnteredFromSelection.length;
+            document.getElementById('stat-revoked').textContent = revoked;
+
+            const tbody = document.getElementById('logs-table-body');
+            const recentLogs = [...logs].reverse().slice(0, 15);
+            
+            if(recentLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-500 font-bold">No activity found.</td></tr>`;
+            } else {
+                tbody.innerHTML = recentLogs.map(l => {
+                    const d = new Date(l.Time);
+                    const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                    const isGranted = l.Result.includes('GRANTED');
+                    return `<tr class="hover:bg-brand-panel transition border-b border-brand-border"><td class="px-6 py-4 text-xs font-bold text-gray-400">${d.toLocaleDateString()+' '+timeStr}</td><td class="px-6 py-4 font-mono font-bold text-white">${l.PassID}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-black ${isGranted ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${l.Result}</span></td></tr>`;
+                }).join('');
+            }
+        }
+
         // --- ROUTING ---
         let scanner = null;
         let isAdminLoggedIn = false;
@@ -797,7 +908,8 @@
                 if(isAdminLoggedIn) {
                     document.getElementById('admin-login').classList.add('hidden');
                     document.getElementById('admin-dashboard').classList.remove('hidden');
-                    loadStats(); renderSettingsUI();
+                    // We handle default tab during successful login, so only re-render settings here if already active
+                    if(!document.querySelector('.admin-tab.bg-brand-yellow')) switchAdminTab('generate');
                 } else {
                     document.getElementById('admin-login').classList.remove('hidden');
                     document.getElementById('admin-dashboard').classList.add('hidden');
@@ -900,7 +1012,10 @@
                 document.getElementById('login-msg').classList.remove('text-red-500');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
-                loadStats(); renderSettingsUI();
+                
+                // Always default to generate tab upon login
+                switchAdminTab('generate');
+                renderSettingsUI();
             } else {
                 document.getElementById('login-msg').textContent = "Incorrect password."; document.getElementById('login-msg').classList.add('text-red-500');
             }
@@ -915,9 +1030,7 @@
         
         function emergencyLogin() {
             const emergencyPwd = document.getElementById('emergency-password-input').value;
-            
             if(emergencyPwd === GLOBAL_SETTINGS.firstTimePassword) {
-                // Clear inputs and log in
                 document.getElementById('admin-password').value = '';
                 document.getElementById('emergency-password-input').value = '';
                 document.getElementById('emergency-panel').classList.add('hidden');
@@ -927,7 +1040,9 @@
                 document.getElementById('login-msg').classList.remove('text-red-500');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
-                loadStats(); 
+                
+                // Always default to generate tab upon login
+                switchAdminTab('generate');
                 renderSettingsUI();
             } else {
                 alert("Incorrect Emergency password.");
@@ -944,7 +1059,7 @@
                 locations: ["St George Church", "St Anthony Church"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                logos: { church: "", ltw: "", scout: "" }
+                logos: { church: "", ltw: "", scout: "" }, sheetUrl: ""
             };
 
             if(type === 'passes') {
@@ -961,45 +1076,170 @@
             } else if(type === 'all') {
                 await DB.clearCollection('passes');
                 await DB.clearCollection('logs');
+                await DB.clearCollection('servants');
                 await DB.updateSettings(defaultSettings);
                 alert("Complete factory reset successful. All data cleared.");
-                loadManageTable(); loadStats();
+                loadManageTable(); loadStats(); fetchServantsData();
             }
-        }
-
-        function toggleFirstTimeSetup() { document.getElementById('first-time-panel').classList.toggle('hidden'); }
-        async function saveFirstTimePassword() {
-            const emergencyPwd = document.getElementById('emergency-password-input').value;
-            const newPwd = document.getElementById('new-admin-password').value;
-            
-            if(emergencyPwd !== GLOBAL_SETTINGS.firstTimePassword) return alert("Incorrect Emergency password.");
-            if(!newPwd || newPwd.length < 4) return alert("New password too short (minimum 4 characters).");
-            
-            GLOBAL_SETTINGS.adminPasswords.push(newPwd); 
-            await DB.updateSettings(GLOBAL_SETTINGS);
-            
-            // Clear inputs and log in
-            document.getElementById('admin-password').value = '';
-            document.getElementById('emergency-password-input').value = '';
-            document.getElementById('new-admin-password').value = '';
-            document.getElementById('first-time-panel').classList.add('hidden');
-            
-            isAdminLoggedIn = true;
-            document.getElementById('login-msg').textContent = "Enter system password to continue.";
-            document.getElementById('login-msg').classList.remove('text-red-500');
-            document.getElementById('admin-login').classList.add('hidden');
-            document.getElementById('admin-dashboard').classList.remove('hidden');
-            loadStats(); 
-            renderSettingsUI();
         }
 
         function switchAdminTab(tab) {
             document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
-            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('bg-brand-yellow', 'text-black');
-            document.getElementById(`tab-${tab}`).classList.remove('text-gray-400', 'bg-transparent');
-            if(tab === 'manage') loadManageTable(); if(tab === 'stats') loadStats();
+            
+            const targetSec = document.getElementById(`admin-tab-${tab}`);
+            const targetTab = document.getElementById(`tab-${tab}`);
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetTab) {
+                targetTab.classList.add('bg-brand-yellow', 'text-black');
+                targetTab.classList.remove('text-gray-400', 'bg-transparent');
+            }
+            
+            if(tab === 'manage') loadManageTable(); 
+            if(tab === 'servants') loadServantsTable();
+            if(tab === 'stats') loadStats();
+        }
+
+        // --- SERVANTS DIRECTORY LOGIC ---
+        let sheetServants = [];
+        let localServants = [];
+
+        async function fetchServantsData() {
+            // Load Local Internal Directory
+            localServants = await DB.fetchAllServants();
+            
+            // Load External Google Sheet if exists
+            const settings = GLOBAL_SETTINGS;
+            sheetServants = [];
+            if(settings && settings.sheetUrl) {
+                try {
+                    const res = await fetch(settings.sheetUrl);
+                    const text = await res.text();
+                    
+                    const rows = [];
+                    let currentRow = []; let currentCell = ''; let inQuotes = false;
+                    for (let i = 0; i < text.length; i++) {
+                        let char = text[i];
+                        if (char === '"') inQuotes = !inQuotes;
+                        else if (char === ',' && !inQuotes) { currentRow.push(currentCell.trim()); currentCell = ''; }
+                        else if (char === '\n' && !inQuotes) { currentRow.push(currentCell.trim()); rows.push(currentRow); currentRow = []; currentCell = ''; }
+                        else if (char !== '\r') currentCell += char;
+                    }
+                    if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
+
+                    if(rows.length >= 2) {
+                        let nameIndices = []; let phoneIdx = -1;
+                        for(let r = 0; r < Math.min(3, rows.length); r++) {
+                            const hdrs = rows[r].map(h => h.toLowerCase());
+                            hdrs.forEach((h, idx) => {
+                                if(h.includes('name') || h.includes('اسم')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
+                                if(phoneIdx === -1 && (h.includes('phone') || h.includes('mobile') || h.includes('رقم') || h.includes('تليفون'))) phoneIdx = idx;
+                            });
+                        }
+                        if(nameIndices.length === 0) nameIndices = [0, 1];
+                        if(phoneIdx === -1) phoneIdx = 2;
+
+                        const uniqueNames = new Set();
+                        for(let i=1; i<rows.length; i++) {
+                            const row = rows[i]; if(!row || row.length === 0) continue;
+                            let phone = 'N/A';
+                            if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
+                                let p = row[phoneIdx].replace(/"/g, '').trim();
+                                if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
+                            }
+                            for(let idx of nameIndices) {
+                                if(idx < row.length && row[idx]) {
+                                    let rawName = row[idx].replace(/"/g, '').trim();
+                                    if(!rawName || rawName.toLowerCase() === 'no need' || rawName === '-') continue;
+                                    let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n && n.toLowerCase() !== 'no need');
+                                    for(let name of subNames) {
+                                        if(name.length > 2 && name.length < 50 && !name.match(/^[\d\s]+$/)) {
+                                            if(!uniqueNames.has(name)) { uniqueNames.add(name); sheetServants.push({name, phone}); }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch(e) { console.error("Error fetching google sheet data:", e); }
+            }
+
+            // Combine both sources for Autocomplete Datalist
+            const dl = document.getElementById('servants-list');
+            if(dl) {
+                const combined = new Map();
+                sheetServants.forEach(s => combined.set(s.name, s));
+                localServants.forEach(s => combined.set(s.Name, {name: s.Name, phone: s.Phone}));
+                dl.innerHTML = Array.from(combined.values()).map(s => `<option value="${s.name}">`).join('');
+            }
+        }
+
+        // Auto-fill phone/team when name is selected from list
+        document.getElementById('g-name').addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            
+            // First check internal directory for full details
+            const internal = localServants.find(s => s.Name === val);
+            if(internal) {
+                document.getElementById('g-phone').value = internal.Phone !== 'N/A' ? internal.Phone : '';
+                if(internal.Team) {
+                    document.getElementById('g-team').value = internal.Team;
+                    handleTeamLogic();
+                }
+            } else {
+                // Fallback to Google Sheet simple details
+                const sheet = sheetServants.find(s => s.name === val);
+                if(sheet && sheet.phone && sheet.phone !== 'N/A') {
+                    document.getElementById('g-phone').value = sheet.phone;
+                }
+            }
+        });
+
+        // Manual add in Servants Directory
+        async function manualSaveServant() {
+            const name = document.getElementById('s-name').value.trim();
+            const phone = document.getElementById('s-phone').value.trim() || 'N/A';
+            const team = document.getElementById('s-team').value;
+            if(!name) return alert("Servant name is required.");
+
+            await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: "" });
+            document.getElementById('s-name').value = '';
+            document.getElementById('s-phone').value = '';
+            
+            alert("Servant saved to directory!");
+            await fetchServantsData();
+            loadServantsTable();
+        }
+
+        async function loadServantsTable() {
+            const tbody = document.getElementById('servants-table-body');
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
+            lucide.createIcons();
+            
+            await fetchServantsData(); // refresh cache
+            
+            if(localServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass to auto-save them!</td></tr>`;
+
+            tbody.innerHTML = localServants.map(s => {
+                const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
+                return `
+                <tr class="hover:bg-brand-dark transition border-b border-brand-border last:border-0">
+                    <td class="px-6 py-4 font-black text-white text-base">${s.Name}</td>
+                    <td class="px-6 py-4 text-gray-300">${s.Phone}</td>
+                    <td class="px-6 py-4 text-gray-300 text-xs">${s.Team}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deleteServant('${id}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
+                    </td>
+                </tr>`
+            }).join('');
+            lucide.createIcons();
+        }
+
+        async function deleteServant(id) {
+            if(confirm("Remove this servant from the internal directory?")) {
+                await DB.deleteServant(id);
+                loadServantsTable();
+            }
         }
 
         // --- GENERATE / EDIT PASS ---
@@ -1015,7 +1255,6 @@
                 zones = Array.from(checkboxes).map(cb => cb.value).join(', ');
             }
 
-            // Disable buttons during process
             const btns = document.querySelectorAll('#generate-form button[type="submit"]');
             btns.forEach(b => b.disabled = true);
 
@@ -1028,14 +1267,22 @@
                     passId = `LWT-${rp}`;
                 }
 
+                const nameInput = document.getElementById('g-name').value.trim();
                 const photoFile = document.getElementById('g-photo').files[0];
                 let photoB64 = existingPass ? existingPass.PhotoURL : "";
-                if(photoFile) photoB64 = await resizeImage(photoFile, 300, false); // False = Compress as JPEG
+                
+                // If generating fresh and no photo uploaded, pull from internal directory if available
+                if (!photoFile && !existingPass) {
+                    const internal = localServants.find(s => s.Name === nameInput);
+                    if(internal && internal.PhotoURL) photoB64 = internal.PhotoURL;
+                }
+                
+                if(photoFile) photoB64 = await resizeImage(photoFile, 300, false);
 
                 const passData = {
                     PassID: passId,
-                    Name: document.getElementById('g-name').value,
-                    Phone: document.getElementById('g-phone').value || 'N/A', // defaults to N/A if empty string
+                    Name: nameInput,
+                    Phone: document.getElementById('g-phone').value || 'N/A',
                     Team: document.getElementById('g-team').value,
                     Event: isIT ? 'ALL ACCESS' : document.getElementById('g-event').value,
                     Mass: isIT ? 'N/A' : (document.getElementById('g-mass').value || 'N/A'),
@@ -1048,6 +1295,14 @@
 
                 const saved = await DB.savePass(passData);
                 if(saved) {
+                    // Auto-upsert into Servants Directory
+                    await DB.saveServant({
+                        Name: passData.Name,
+                        Phone: passData.Phone,
+                        Team: passData.Team,
+                        PhotoURL: passData.PhotoURL
+                    });
+                    
                     if(currentSubmitAction === 'generate' || currentSubmitAction === 'update-download') {
                         await generatePerfectPDF(passData);
                     }
@@ -1067,7 +1322,7 @@
 
             document.getElementById('g-edit-id').value = pass.PassID;
             document.getElementById('g-name').value = pass.Name;
-            document.getElementById('g-phone').value = pass.Phone !== 'N/A' ? pass.Phone : ''; // clear input if N/A
+            document.getElementById('g-phone').value = pass.Phone !== 'N/A' ? pass.Phone : ''; 
             document.getElementById('g-team').value = pass.Team;
             handleTeamLogic();
 
@@ -1101,7 +1356,6 @@
         async function generatePerfectPDF(pass) {
             const s = GLOBAL_SETTINGS;
             
-            // Populate HTML Template
             if(pass.PhotoURL) {
                 document.getElementById('pdf-photo').src = pass.PhotoURL;
                 document.getElementById('pdf-photo').classList.remove('hidden');
@@ -1122,7 +1376,7 @@
                     evName = ev.name;
                     if (pass.Mass && pass.Mass !== 'N/A') {
                         const m = ev.masses.find(x => x.id === pass.Mass);
-                        if (m) evName += ` - ${m.name}`; // APPEND MASS NAME
+                        if (m) evName += ` - ${m.name}`;
                     }
                 }
             }
@@ -1132,33 +1386,26 @@
 
             const qrUrl = `${window.location.origin}${window.location.pathname}#/pass/${pass.PassID}`;
             document.getElementById('qrcode-container').innerHTML = '';
-            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 256, height: 256 }); // Larger QR for sharp rendering
+            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 256, height: 256 });
             await new Promise(r => setTimeout(r, 100));
             document.getElementById('pdf-qr').src = document.getElementById('qrcode-container').querySelector('canvas').toDataURL("image/png");
 
-            // Combine all contacts
             document.getElementById('pdf-footer-contacts').innerHTML = s.contacts.map(c => `${c.name}: ${c.phone}`).join(' | ');
 
-            // Convert HTML to Canvas (High Resolution Scale)
             const cardEl = document.getElementById('pdf-card');
             const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
-            // Put Canvas into jsPDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
-            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST'); // High-quality embedding
+            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
             doc.save(`LWT-Pass-${pass.PassID}.pdf`);
         }
         
-        // Helper function for table download button
         async function downloadPass(id) {
             const pass = await DB.fetchPass(id);
-            if(pass) {
-                await generatePerfectPDF(pass);
-            } else {
-                alert("Pass data not found.");
-            }
+            if(pass) await generatePerfectPDF(pass);
+            else alert("Pass data not found.");
         }
 
         async function loadManageTable() {
@@ -1167,7 +1414,6 @@
             lucide.createIcons();
             
             let passes = await DB.fetchAllPasses(); 
-            // Filter out undefined and empty passes immediately
             passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
             passes.reverse();
             
@@ -1198,54 +1444,11 @@
         async function togglePassStatus(id, stat) { await DB.updatePassStatus(id, stat); loadManageTable(); loadStats(); }
         async function deletePass(id) { if(confirm(`Completely Delete Pass ${id}?`)) { await DB.deletePass(id); loadManageTable(); loadStats(); } }
 
-        function populateStatsDropdown() {
-            const sel = document.getElementById('stats-filter');
-            const events = GLOBAL_SETTINGS.events;
-            sel.innerHTML = `<option value="all">All Time / All Events</option>` + events.map(e => `<option value="${e.id}">${e.name} (${e.date})</option>`).join('');
-        }
-
-        async function loadStats() {
-            const filter = document.getElementById('stats-filter').value;
-            let allPasses = await DB.fetchAllPasses();
-            allPasses = allPasses.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
-            
-            let logs = await DB.fetchLogs();
-            
-            let passes = allPasses;
-            if(filter !== 'all') {
-                const ev = GLOBAL_SETTINGS.events.find(e => e.id === filter);
-                if(ev) {
-                    passes = allPasses.filter(p => p.Event === filter || p.Team === 'IT Team');
-                    logs = logs.filter(l => l.Time.startsWith(ev.date));
-                }
-            }
-
-            const revoked = passes.filter(p => p.Status === 'REVOKED').length;
-            const enteredSet = new Set(logs.filter(l => l.Result.includes('GRANTED')).map(l => l.PassID));
-            const activePassesInSelection = passes.map(p => p.PassID);
-            const actuallyEnteredFromSelection = Array.from(enteredSet).filter(id => activePassesInSelection.includes(id));
-            
-            document.getElementById('stat-total').textContent = passes.length;
-            document.getElementById('stat-entered').textContent = actuallyEnteredFromSelection.length;
-            document.getElementById('stat-pending').textContent = passes.length - actuallyEnteredFromSelection.length;
-            document.getElementById('stat-revoked').textContent = revoked;
-
-            const tbody = document.getElementById('logs-table-body');
-            const recentLogs = [...logs].reverse().slice(0, 15);
-            
-            if(recentLogs.length === 0) tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-500 font-bold">No activity found.</td></tr>`;
-            else tbody.innerHTML = recentLogs.map(l => {
-                const d = new Date(l.Time);
-                const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-                const isGranted = l.Result.includes('GRANTED');
-                return `<tr class="hover:bg-brand-panel transition border-b border-brand-border"><td class="px-6 py-4 text-xs font-bold text-gray-400">${d.toLocaleDateString()+' '+timeStr}</td><td class="px-6 py-4 font-mono font-bold text-white">${l.PassID}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-black ${isGranted ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${l.Result}</span></td></tr>`
-            }).join('');
-        }
-
         // --- SETTINGS UI WITH INLINE EDITING ---
         function renderSettingsUI() {
             const s = GLOBAL_SETTINGS;
             document.getElementById('set-first-pwd').value = s.firstTimePassword;
+            if(document.getElementById('set-sheet-url')) document.getElementById('set-sheet-url').value = s.sheetUrl || '';
             
             document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `
                 <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
@@ -1323,31 +1526,16 @@
         async function addItemToSettingArray(field, inputId) { const val = document.getElementById(inputId).value.trim(); if(val) { GLOBAL_SETTINGS[field].push(val); document.getElementById(inputId).value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
         async function removeSettingItem(field, idx) { if(confirm('Delete item?')) { GLOBAL_SETTINGS[field].splice(idx, 1); await DB.updateSettings(GLOBAL_SETTINGS); } }
         
-        async function updateArrayItem(field, idx, inputId) {
-            GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim();
-            await DB.updateSettings(GLOBAL_SETTINGS);
-        }
-        
-        async function updateContact(idx) {
-            GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim();
-            GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim();
-            await DB.updateSettings(GLOBAL_SETTINGS);
-        }
-
+        async function updateArrayItem(field, idx, inputId) { GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim(); await DB.updateSettings(GLOBAL_SETTINGS); }
+        async function updateContact(idx) { GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim(); GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim(); await DB.updateSettings(GLOBAL_SETTINGS); }
         async function updateTeam(oldName, idBase) {
             const newName = document.getElementById(`edit-team-name-${idBase}`).value.trim();
             const newColor = document.getElementById(`edit-team-color-${idBase}`).value;
             if(!newName) return alert("Team name cannot be empty.");
             if(oldName !== newName) { delete GLOBAL_SETTINGS.teamColors[oldName]; }
-            GLOBAL_SETTINGS.teamColors[newName] = newColor;
-            await DB.updateSettings(GLOBAL_SETTINGS);
+            GLOBAL_SETTINGS.teamColors[newName] = newColor; await DB.updateSettings(GLOBAL_SETTINGS);
         }
-
-        async function updateEvent(idx) {
-            GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim();
-            GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value;
-            await DB.updateSettings(GLOBAL_SETTINGS);
-        }
+        async function updateEvent(idx) { GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim(); GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value; await DB.updateSettings(GLOBAL_SETTINGS); }
 
         async function addContact() { const n = document.getElementById('new-contact-name').value.trim(); const p = document.getElementById('new-contact-phone').value.trim(); if(n && p) { GLOBAL_SETTINGS.contacts.push({name: n, phone: p}); document.getElementById('new-contact-name').value = ''; document.getElementById('new-contact-phone').value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
         async function addTeam() { const n = document.getElementById('new-team-name').value.trim(); const c = document.getElementById('new-team-color').value; if(n) { GLOBAL_SETTINGS.teamColors[n] = c; document.getElementById('new-team-name').value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
