@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Light The World Media Pass System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#0a0a0a',
+                            yellow: '#FACC15', // Tailwind yellow-400 equivalent for the logo glow
+                            gold: '#CA8A04'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-panel { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); }
+        
+        /* Checkbox styling */
+        .zone-checkbox:checked + div {
+            border-color: #FACC15;
+            background-color: #FEFCE8; /* yellow-50 */
+        }
+        .zone-checkbox:checked + div .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Scanner specific styles */
+        #reader { width: 100%; max-width: 500px; margin: 0 auto; border: 4px solid #FACC15 !important; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); background: #000;}
+        #reader video { object-fit: cover; }
+        #reader__dashboard_section_csr span { color: white !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-800 selection:bg-brand-yellow selection:text-black">
+
+    <!-- Navigation -->
+    <nav class="bg-brand-black text-white shadow-xl sticky top-0 z-50 border-b-2 border-brand-yellow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.location.hash='#/scan'">
+                    <i data-lucide="sun" class="w-7 h-7 text-brand-yellow group-hover:rotate-45 transition-transform duration-300"></i>
+                    <span class="font-black text-xl tracking-tight uppercase"><span class="text-brand-yellow">Light</span> The World</span>
+                </div>
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <a href="#/scan" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center" id="nav-scan">
+                        <i data-lucide="scan" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Scanner
+                    </a>
+                    <a href="#/admin" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition-colors flex items-center" id="nav-admin">
+                        <i data-lucide="shield" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
+        
+        <!-- View: SCANNER -->
+        <div id="view-scan" class="view">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-black text-brand-black uppercase tracking-widest">Pass Verification</h1>
+                <p class="text-sm sm:text-base text-gray-500 mt-2 font-medium">Point the camera at the servant's QR code to verify entry.</p>
+            </div>
+            <div id="reader" class="bg-black relative"></div>
+            <div class="mt-8 max-w-md mx-auto text-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                <p class="text-sm text-gray-500 mb-3">Camera not working?</p>
+                <button onclick="simulateScanPrompt()" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition-colors text-sm">
+                    Enter ID Manually
+                </button>
+            </div>
+        </div>
+
+        <!-- View: PASS VERIFICATION -->
+        <div id="view-pass" class="view max-w-2xl mx-auto">
+            <div id="pass-result-container" class="glass-panel rounded-3xl shadow-2xl overflow-hidden border-2 border-gray-100">
+                <!-- Header (Status) -->
+                <div id="pass-status-header" class="p-6 text-center text-white font-black text-3xl sm:text-4xl uppercase tracking-wider shadow-inner">
+                    <!-- Status injected here -->
+                </div>
+                
+                <!-- Body (Details) -->
+                <div class="p-6 sm:p-8 bg-white relative">
+                    <div class="absolute top-4 right-6 text-right">
+                        <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pass ID</h3>
+                        <p id="pass-id-display" class="text-sm font-mono font-bold text-gray-800 bg-gray-100 px-2 py-1 rounded"></p>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mt-4">
+                        <div class="w-32 h-32 rounded-2xl bg-gray-50 border-4 border-gray-100 flex items-center justify-center overflow-hidden shrink-0 shadow-sm" id="pass-photo-container">
+                            <i data-lucide="user" class="w-12 h-12 text-gray-300"></i>
+                        </div>
+                        <div class="flex-grow space-y-5 w-full">
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Servant Name</h3>
+                                <p id="pass-name" class="text-3xl font-black text-brand-black leading-tight"></p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <div>
+                                    <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Team</h3>
+                                    <p id="pass-team" class="text-base font-bold"></p>
+                                </div>
+                                <div>
+                                    <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Event</h3>
+                                    <p id="pass-event" class="text-base font-semibold text-gray-800"></p>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Church Location</h3>
+                                <p id="pass-location" class="text-base font-bold text-gray-800 flex items-center">
+                                    <i data-lucide="map-pin" class="w-4 h-4 mr-1 text-brand-yellow"></i> <span id="pass-location-text"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-5 bg-white rounded-2xl border-2 border-gray-100 shadow-sm">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center">
+                            <i data-lucide="shield-check" class="w-4 h-4 mr-1 text-green-500"></i> Allowed Zones
+                        </h3>
+                        <div id="pass-zones" class="flex flex-wrap gap-2">
+                            <!-- Badges injected here -->
+                        </div>
+                    </div>
+                    
+                    <div id="entry-status-alert" class="mt-6 p-4 rounded-xl text-center font-bold text-lg border-2">
+                        <!-- Entry status injected here -->
+                    </div>
+
+                    <button onclick="window.location.hash='#/scan'" class="mt-8 w-full py-4 bg-brand-black hover:bg-black text-brand-yellow rounded-xl font-black text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center group transform hover:-translate-y-1">
+                        <i data-lucide="scan" class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"></i> Scan Next Pass
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View: ADMIN -->
+        <div id="view-admin" class="view">
+            <!-- Login Overlay -->
+            <div id="admin-login" class="max-w-md mx-auto mt-10 bg-white p-8 rounded-3xl shadow-xl border border-gray-100 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-brand-yellow"></div>
+                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-100">
+                    <i data-lucide="lock" class="w-8 h-8 text-brand-black"></i>
+                </div>
+                <h2 class="text-2xl font-black mb-2 text-brand-black">Admin Access</h2>
+                <p class="text-sm text-gray-500 mb-6">Enter system password to continue.</p>
+                <input type="password" id="admin-password" placeholder="••••••••" class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 focus:ring-0 focus:border-brand-yellow text-center text-xl tracking-widest bg-gray-50 mb-4 outline-none transition font-bold">
+                <button onclick="loginAdmin()" class="w-full py-4 bg-brand-yellow text-brand-black rounded-xl font-black hover:bg-yellow-500 transition-colors shadow-md">Authenticate</button>
+            </div>
+
+            <!-- Admin Dashboard -->
+            <div id="admin-dashboard" class="hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                    <div>
+                        <h1 class="text-3xl font-black text-brand-black tracking-tight">System Admin</h1>
+                        <p class="text-gray-500 font-medium text-sm mt-1">Manage passes, settings, and view logs.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-gray-200">
+                        <button onclick="switchAdminTab('generate')" id="tab-generate" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-black text-brand-yellow transition-colors flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Generate</button>
+                        <button onclick="switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:text-brand-black hover:bg-gray-50 transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Manage</button>
+                        <button onclick="switchAdminTab('stats')" id="tab-stats" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:text-brand-black hover:bg-gray-50 transition-colors flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5"></i> Stats</button>
+                        <button onclick="switchAdminTab('settings')" id="tab-settings" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:text-brand-black hover:bg-gray-50 transition-colors flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-1.5"></i> Settings</button>
+                    </div>
+                </div>
+
+                <!-- Tab: Generate -->
+                <div id="admin-tab-generate" class="admin-section bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-black mb-6 flex items-center text-brand-black"><i data-lucide="badge-plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Create New Pass</h2>
+                    <form id="generate-form" onsubmit="handleGeneratePass(event)" class="space-y-8">
+                        
+                        <!-- Personal Info -->
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <h3 class="text-sm font-black text-gray-400 uppercase tracking-wider mb-4">1. Personal Details</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Servant Name *</label>
+                                    <input type="text" id="g-name" required class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number *</label>
+                                    <input type="tel" id="g-phone" required class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white font-medium">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Photo (Optional)</label>
+                                    <input type="file" id="g-photo" accept="image/*" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white text-sm cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Event Info -->
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <h3 class="text-sm font-black text-gray-400 uppercase tracking-wider mb-4">2. Assignment Details</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Team *</label>
+                                    <select id="g-team" required class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white font-medium appearance-none cursor-pointer">
+                                        <option value="Live Team">Live Team</option>
+                                        <option value="Data Show Team">Data Show Team</option>
+                                        <option value="IT Team">IT Team</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Event *</label>
+                                    <select id="g-event" required class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white font-medium appearance-none cursor-pointer">
+                                        <option value="Holy Week 2026">Holy Week 2026</option>
+                                        <option value="Easter Vigil">Easter Vigil</option>
+                                        <option value="Special Event">Special Event</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Church Location *</label>
+                                    <select id="g-location" required class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white font-medium appearance-none cursor-pointer">
+                                        <option value="St George Church">St George Church</option>
+                                        <option value="St Anthony Church">St Anthony Church</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Zones (Checkboxes instead of select) -->
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <h3 class="text-sm font-black text-gray-400 uppercase tracking-wider mb-4">3. Allowed Zones *</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="zones-container">
+                                <!-- Checkbox Cards -->
+                                <label class="relative cursor-pointer">
+                                    <input type="checkbox" name="zone" value="Live Area" class="peer sr-only zone-checkbox">
+                                    <div class="p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all flex items-center justify-between">
+                                        <span class="font-bold text-sm text-gray-700 peer-checked:text-brand-black">Live Area</span>
+                                        <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-yellow opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="checkbox" name="zone" value="Projector Area" class="peer sr-only zone-checkbox">
+                                    <div class="p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all flex items-center justify-between">
+                                        <span class="font-bold text-sm text-gray-700">Projector Area</span>
+                                        <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-yellow opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="checkbox" name="zone" value="Sound Room" class="peer sr-only zone-checkbox">
+                                    <div class="p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all flex items-center justify-between">
+                                        <span class="font-bold text-sm text-gray-700">Sound Room</span>
+                                        <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-yellow opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="checkbox" name="zone" value="Media Room" class="peer sr-only zone-checkbox">
+                                    <div class="p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all flex items-center justify-between">
+                                        <span class="font-bold text-sm text-gray-700">Media Room</span>
+                                        <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-yellow opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="checkbox" name="zone" value="Outside Cables" class="peer sr-only zone-checkbox">
+                                    <div class="p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all flex items-center justify-between">
+                                        <span class="font-bold text-sm text-gray-700">Outside Cables</span>
+                                        <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-yellow opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="checkbox" name="zone" value="St Mary Hall" class="peer sr-only zone-checkbox">
+                                    <div class="p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all flex items-center justify-between">
+                                        <span class="font-bold text-sm text-gray-700">St Mary Hall</span>
+                                        <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-yellow opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="checkbox" name="zone" value="Green Hall" class="peer sr-only zone-checkbox">
+                                    <div class="p-4 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 transition-all flex items-center justify-between">
+                                        <span class="font-bold text-sm text-gray-700">Green Hall</span>
+                                        <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-yellow opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Optional Logo Uploads -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 rounded-xl border-2 border-dashed border-gray-200">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Church Logo Override (Optional)</label>
+                                <input type="file" id="g-logo-church" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">LWT Logo Override (Optional)</label>
+                                <input type="file" id="g-logo-lwt" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-generate" class="w-full py-5 bg-brand-black hover:bg-black text-brand-yellow rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 flex justify-center items-center">
+                            <i data-lucide="printer" class="w-6 h-6 mr-2"></i> Generate & Download Pass PDF
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tab: Manage -->
+                <div id="admin-tab-manage" class="admin-section hidden bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h2 class="text-xl font-black flex items-center text-brand-black"><i data-lucide="folder-open" class="w-5 h-5 mr-2 text-brand-yellow"></i> Pass Directory</h2>
+                        <button onclick="loadManageTable()" class="px-4 py-2 bg-white rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors flex items-center shadow-sm">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-white text-gray-400 font-black uppercase tracking-wider text-xs border-b-2 border-gray-100">
+                                <tr>
+                                    <th class="px-6 py-5">ID</th>
+                                    <th class="px-6 py-5">Name</th>
+                                    <th class="px-6 py-5">Team</th>
+                                    <th class="px-6 py-5">Status</th>
+                                    <th class="px-6 py-5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manage-table-body" class="divide-y divide-gray-100">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab: Stats -->
+                <div id="admin-tab-stats" class="admin-section hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center space-x-5">
+                            <div class="p-4 bg-gray-50 border border-gray-100 rounded-2xl"><i data-lucide="users" class="w-8 h-8 text-brand-black"></i></div>
+                            <div>
+                                <p class="text-xs font-black text-gray-400 uppercase tracking-wider">Total Passes</p>
+                                <p id="stat-total" class="text-4xl font-black text-brand-black leading-none mt-1">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center space-x-5">
+                            <div class="p-4 bg-green-50 border border-green-100 rounded-2xl"><i data-lucide="check-circle" class="w-8 h-8 text-green-500"></i></div>
+                            <div>
+                                <p class="text-xs font-black text-gray-400 uppercase tracking-wider">Entries Today</p>
+                                <p id="stat-entries" class="text-4xl font-black text-brand-black leading-none mt-1">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex items-center space-x-5">
+                            <div class="p-4 bg-red-50 border border-red-100 rounded-2xl"><i data-lucide="x-octagon" class="w-8 h-8 text-red-500"></i></div>
+                            <div>
+                                <p class="text-xs font-black text-gray-400 uppercase tracking-wider">Revoked</p>
+                                <p id="stat-revoked" class="text-4xl font-black text-brand-black leading-none mt-1">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100 bg-gray-50">
+                            <h2 class="text-xl font-black flex items-center text-brand-black"><i data-lucide="activity" class="w-5 h-5 mr-2 text-brand-yellow"></i> Recent Entry Logs</h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm whitespace-nowrap">
+                                <thead class="bg-white text-gray-400 font-black uppercase tracking-wider text-xs border-b-2 border-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-5">Time</th>
+                                        <th class="px-6 py-5">Pass ID</th>
+                                        <th class="px-6 py-5">Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="logs-table-body" class="divide-y divide-gray-100">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Settings -->
+                <div id="admin-tab-settings" class="admin-section hidden bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-black mb-6 flex items-center text-brand-black"><i data-lucide="sliders" class="w-6 h-6 mr-2 text-brand-yellow"></i> System Settings</h2>
+                    
+                    <form id="settings-form" onsubmit="saveSettings(event)" class="space-y-8">
+                        <!-- Contact Info -->
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <h3 class="text-sm font-black text-gray-400 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="phone" class="w-4 h-4 mr-2"></i> Support Contacts</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Admin Phone Number</label>
+                                    <input type="text" id="set-admin-phone" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white font-medium" placeholder="+20...">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Developer Phone Number</label>
+                                    <input type="text" id="set-dev-phone" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-brand-yellow focus:ring-0 outline-none transition bg-white font-medium" placeholder="+20...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Team Colors -->
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                            <h3 class="text-sm font-black text-gray-400 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="palette" class="w-4 h-4 mr-2"></i> Team Colors (For PDF Export)</h3>
+                            <p class="text-xs text-gray-500 mb-4 font-medium">Select the accent color that will be used for each team's name on the exported PDF passes.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Live Team</label>
+                                    <div class="flex items-center space-x-3">
+                                        <input type="color" id="set-color-live" class="h-10 w-14 rounded cursor-pointer border-0 p-0 bg-transparent">
+                                        <span class="text-sm font-mono text-gray-500" id="hex-live"></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Data Show Team</label>
+                                    <div class="flex items-center space-x-3">
+                                        <input type="color" id="set-color-data" class="h-10 w-14 rounded cursor-pointer border-0 p-0 bg-transparent">
+                                        <span class="text-sm font-mono text-gray-500" id="hex-data"></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">IT Team</label>
+                                    <div class="flex items-center space-x-3">
+                                        <input type="color" id="set-color-it" class="h-10 w-14 rounded cursor-pointer border-0 p-0 bg-transparent">
+                                        <span class="text-sm font-mono text-gray-500" id="hex-it"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 bg-brand-black hover:bg-black text-brand-yellow rounded-xl font-black text-lg shadow-lg transition-all flex items-center justify-center">
+                            <i data-lucide="save" class="w-5 h-5 mr-2"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- Hidden div for generating QR Codes -->
+        <div id="qrcode-container" class="hidden"></div>
+    </main>
+
+    <!-- Support Footer -->
+    <footer class="bg-brand-black text-gray-400 py-8 text-center text-xs mt-auto border-t-4 border-brand-yellow">
+        <div class="max-w-4xl mx-auto px-4">
+            <p class="font-bold text-white mb-3 text-sm">If there is any issue please contact the team leader or system administrator.</p>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-8 font-medium">
+                <span class="flex items-center bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-800"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-brand-yellow"></i> Admin: <span id="footer-admin-phone" class="ml-1 text-white">+20XXXXXXXX</span></span>
+                <span class="flex items-center bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-800"><i data-lucide="code" class="w-3.5 h-3.5 mr-2 text-brand-yellow"></i> Dev: <span id="footer-dev-phone" class="ml-1 text-white">+20XXXXXXXX</span></span>
+            </div>
+            <p class="mt-6 font-bold tracking-wider text-[10px] text-gray-600 uppercase">&copy; 2026 SGAA Church - Light The World</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCkAvB-gdGq6IRHut1J77WfJvYUFTKW1lk",
+            authDomain: "ltw-pass-system.firebaseapp.com",
+            projectId: "ltw-pass-system",
+            storageBucket: "ltw-pass-system.firebasestorage.app",
+            messagingSenderId: "133608312380",
+            appId: "1:133608312380:web:830e094ce536dfc63cfd39"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const firestoreDB = firebase.firestore();
+
+        // --- DATABASE SERVICE (Firebase Firestore + Local Settings) ---
+        const DB = {
+            async fetchAllPasses() {
+                try {
+                    const snapshot = await firestoreDB.collection('passes').get();
+                    return snapshot.docs.map(doc => doc.data());
+                } catch(e) { console.error("Error fetching passes:", e); return []; }
+            },
+            async fetchPass(id) {
+                try {
+                    const doc = await firestoreDB.collection('passes').doc(id).get();
+                    return doc.exists ? doc.data() : undefined;
+                } catch(e) { console.error("Error fetching pass:", e); return undefined; }
+            },
+            async savePass(pass) {
+                try {
+                    await firestoreDB.collection('passes').doc(pass.PassID).set(pass);
+                } catch(e) { console.error("Error saving pass:", e); }
+            },
+            async updatePassStatus(id, newStatus) {
+                try {
+                    await firestoreDB.collection('passes').doc(id).update({ Status: newStatus });
+                } catch(e) { console.error("Error updating status:", e); }
+            },
+            async fetchLogs() {
+                try {
+                    const snapshot = await firestoreDB.collection('logs').get();
+                    return snapshot.docs.map(doc => doc.data());
+                } catch(e) { console.error("Error fetching logs:", e); return []; }
+            },
+            async logEntry(passId, result) {
+                let log = {
+                    LogID: 'LOG-' + Date.now(),
+                    PassID: passId,
+                    Time: new Date().toISOString(),
+                    Result: result
+                };
+                try {
+                    await firestoreDB.collection('logs').doc(log.LogID).set(log);
+                } catch(e) { console.error("Error saving log:", e); }
+                return log;
+            },
+            
+            // SETTINGS API (Settings remain local to the specific Admin device)
+            getSettings() {
+                const defaultSettings = {
+                    adminPhone: "+201234567890",
+                    devPhone: "+200987654321",
+                    teamColors: {
+                        "Live Team": "#dc2626", // Red
+                        "Data Show Team": "#2563eb", // Blue
+                        "IT Team": "#9333ea" // Purple
+                    }
+                };
+                return JSON.parse(localStorage.getItem('lwt_settings')) || defaultSettings;
+            },
+            saveSettings(settings) {
+                localStorage.setItem('lwt_settings', JSON.stringify(settings));
+                applyGlobalSettings();
+            }
+        };
+
+        // Apply settings globally on load
+        function applyGlobalSettings() {
+            const settings = DB.getSettings();
+            document.getElementById('footer-admin-phone').textContent = settings.adminPhone;
+            document.getElementById('footer-dev-phone').textContent = settings.devPhone;
+        }
+
+        // Add event listeners to color inputs to update hex span text
+        ['live', 'data', 'it'].forEach(team => {
+            const input = document.getElementById(`set-color-${team}`);
+            if(input) {
+                input.addEventListener('input', (e) => {
+                    document.getElementById(`hex-${team}`).textContent = e.target.value.toUpperCase();
+                });
+            }
+        });
+
+        // --- ROUTING LOGIC ---
+        let html5QrcodeScanner = null;
+
+        window.addEventListener('hashchange', handleRoute);
+        window.addEventListener('load', () => {
+            applyGlobalSettings();
+            if(!window.location.hash) window.location.hash = '#/scan';
+            handleRoute();
+        });
+
+        function handleRoute() {
+            const hash = window.location.hash;
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('bg-gray-800', 'text-brand-yellow');
+                el.classList.add('text-white');
+            });
+
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(e => console.log("Scanner clear error", e));
+                html5QrcodeScanner = null;
+            }
+
+            if (hash.startsWith('#/scan')) {
+                document.getElementById('view-scan').classList.add('active');
+                document.getElementById('nav-scan').classList.add('bg-gray-800', 'text-brand-yellow');
+                document.getElementById('nav-scan').classList.remove('text-white');
+                startScanner();
+            } else if (hash.startsWith('#/admin')) {
+                document.getElementById('view-admin').classList.add('active');
+                document.getElementById('nav-admin').classList.add('bg-gray-800', 'text-brand-yellow');
+                document.getElementById('nav-admin').classList.remove('text-white');
+                if(sessionStorage.getItem('lwt_admin') === 'true') {
+                    document.getElementById('admin-login').classList.add('hidden');
+                    document.getElementById('admin-dashboard').classList.remove('hidden');
+                    loadStats();
+                }
+            } else if (hash.startsWith('#/pass/')) {
+                document.getElementById('view-pass').classList.add('active');
+                const id = hash.split('#/pass/')[1];
+                verifyPass(id);
+            } else {
+                window.location.hash = '#/scan';
+            }
+        }
+
+        // --- SCANNER LOGIC ---
+        function startScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+            let passId = decodedText;
+            if(decodedText.includes('#/pass/')) {
+                passId = decodedText.split('#/pass/')[1];
+            }
+            window.location.hash = `#/pass/${passId}`;
+        }
+
+        function onScanFailure(error) {}
+
+        function simulateScanPrompt() {
+            const id = prompt("Enter Pass ID to simulate scan (e.g. LWT-XXXXXX):");
+            if(id) window.location.hash = `#/pass/${id}`;
+        }
+
+        // --- PASS VERIFICATION LOGIC ---
+        async function verifyPass(id) {
+            const pass = await DB.fetchPass(id);
+            const statusHeader = document.getElementById('pass-status-header');
+            const alertBox = document.getElementById('entry-status-alert');
+            const photoCont = document.getElementById('pass-photo-container');
+            const settings = DB.getSettings();
+
+            statusHeader.className = "p-6 text-center text-white font-black text-3xl sm:text-4xl uppercase tracking-wider shadow-inner";
+            alertBox.className = "mt-6 p-4 rounded-xl text-center font-bold text-lg border-2 hidden";
+            
+            document.getElementById('pass-id-display').textContent = id;
+            document.getElementById('pass-name').textContent = pass ? pass.Name : 'UNKNOWN';
+            document.getElementById('pass-team').textContent = pass ? pass.Team : '-';
+            document.getElementById('pass-event').textContent = pass ? pass.Event : '-';
+            document.getElementById('pass-location-text').textContent = pass ? pass.Location : '-';
+            
+            // Zones logic
+            const zonesContainer = document.getElementById('pass-zones');
+            zonesContainer.innerHTML = '';
+            if(pass && pass.AllowedZones) {
+                pass.AllowedZones.split(', ').forEach(z => {
+                    zonesContainer.innerHTML += `<span class="bg-gray-100 border border-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">${z}</span>`;
+                });
+            } else {
+                zonesContainer.innerHTML = '-';
+            }
+
+            // Photo & Team Colors
+            if(pass) {
+                const hexColor = settings.teamColors[pass.Team] || '#333333';
+                document.getElementById('pass-team').style.color = hexColor;
+
+                if(pass.PhotoURL) {
+                    photoCont.innerHTML = `<img src="${pass.PhotoURL}" class="w-full h-full object-cover">`;
+                } else {
+                    photoCont.innerHTML = `<i data-lucide="user" class="w-12 h-12 text-gray-300"></i>`;
+                    lucide.createIcons();
+                }
+            } else {
+                document.getElementById('pass-team').style.color = 'inherit';
+            }
+
+            if (!pass) {
+                statusHeader.textContent = "PASS INVALID";
+                statusHeader.classList.add('bg-red-600');
+                await DB.logEntry(id, "INVALID - NOT FOUND");
+                return;
+            }
+
+            if (pass.Status === 'REVOKED') {
+                statusHeader.textContent = "PASS REVOKED";
+                statusHeader.classList.add('bg-gray-800');
+                await DB.logEntry(id, "DENIED - REVOKED");
+                return;
+            }
+
+            // Valid Pass Logic
+            statusHeader.textContent = "ACCESS GRANTED";
+            statusHeader.classList.add('bg-green-500');
+
+            const allLogs = await DB.fetchLogs();
+            const passLogs = allLogs.filter(l => l.PassID === id && l.Result.includes('GRANTED'));
+
+            alertBox.classList.remove('hidden');
+            if (passLogs.length === 0) {
+                alertBox.textContent = "First Scan - Entry Registered";
+                alertBox.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
+                await DB.logEntry(id, "GRANTED - FIRST ENTRY");
+            } else {
+                alertBox.textContent = "Warning - Already Entered Today";
+                alertBox.classList.add('bg-yellow-50', 'text-yellow-700', 'border-yellow-200');
+                await DB.logEntry(id, "GRANTED - SUBSEQUENT ENTRY");
+            }
+        }
+
+        // --- ADMIN LOGIC ---
+        function loginAdmin() {
+            if(document.getElementById('admin-password').value === 'admin123') {
+                sessionStorage.setItem('lwt_admin', 'true');
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                loadStats();
+                loadSettingsToForm();
+            } else {
+                alert('Incorrect Password');
+            }
+        }
+
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(el => {
+                el.classList.remove('bg-brand-black', 'text-brand-yellow');
+                el.classList.add('text-gray-500', 'bg-white');
+            });
+            
+            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('bg-brand-black', 'text-brand-yellow');
+            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500', 'bg-white');
+
+            if(tab === 'manage') loadManageTable();
+            if(tab === 'stats') loadStats();
+            if(tab === 'settings') loadSettingsToForm();
+        }
+
+        // --- SETTINGS LOGIC ---
+        function loadSettingsToForm() {
+            const settings = DB.getSettings();
+            document.getElementById('set-admin-phone').value = settings.adminPhone;
+            document.getElementById('set-dev-phone').value = settings.devPhone;
+            
+            document.getElementById('set-color-live').value = settings.teamColors["Live Team"];
+            document.getElementById('hex-live').textContent = settings.teamColors["Live Team"].toUpperCase();
+
+            document.getElementById('set-color-data').value = settings.teamColors["Data Show Team"];
+            document.getElementById('hex-data').textContent = settings.teamColors["Data Show Team"].toUpperCase();
+
+            document.getElementById('set-color-it').value = settings.teamColors["IT Team"];
+            document.getElementById('hex-it').textContent = settings.teamColors["IT Team"].toUpperCase();
+        }
+
+        function saveSettings(e) {
+            e.preventDefault();
+            const newSettings = {
+                adminPhone: document.getElementById('set-admin-phone').value,
+                devPhone: document.getElementById('set-dev-phone').value,
+                teamColors: {
+                    "Live Team": document.getElementById('set-color-live').value,
+                    "Data Show Team": document.getElementById('set-color-data').value,
+                    "IT Team": document.getElementById('set-color-it').value
+                }
+            };
+            DB.saveSettings(newSettings);
+            alert("Settings saved successfully!");
+        }
+
+        // File to Base64 helper
+        const fileToBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        async function handleGeneratePass(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-generate');
+            
+            // Gather Checked Zones
+            const checkboxes = document.querySelectorAll('input[name="zone"]:checked');
+            if(checkboxes.length === 0) {
+                alert("Please select at least one Allowed Zone.");
+                return;
+            }
+            const zones = Array.from(checkboxes).map(cb => cb.value).join(', ');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Generating...`;
+            lucide.createIcons();
+
+            try {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let randomPart = '';
+                for(let i=0; i<6; i++) randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+                const passId = `LWT-${randomPart}`;
+
+                const photoFile = document.getElementById('g-photo').files[0];
+                let photoB64 = "";
+                if(photoFile) photoB64 = await fileToBase64(photoFile);
+
+                const churchLogoFile = document.getElementById('g-logo-church').files[0];
+                let cLogoB64 = "";
+                if(churchLogoFile) cLogoB64 = await fileToBase64(churchLogoFile);
+
+                const lwtLogoFile = document.getElementById('g-logo-lwt').files[0];
+                let lwtLogoB64 = "";
+                if(lwtLogoFile) lwtLogoB64 = await fileToBase64(lwtLogoFile);
+
+                const passData = {
+                    PassID: passId,
+                    Name: document.getElementById('g-name').value,
+                    Phone: document.getElementById('g-phone').value,
+                    Team: document.getElementById('g-team').value,
+                    Event: document.getElementById('g-event').value,
+                    Location: document.getElementById('g-location').value,
+                    AllowedZones: zones,
+                    PhotoURL: photoB64,
+                    Status: 'VALID',
+                    EntryTime: new Date().toISOString()
+                };
+
+                await DB.savePass(passData);
+                await generatePDF(passData, cLogoB64, lwtLogoB64);
+                
+                alert(`Pass ${passId} Generated and Downloaded Successfully!`);
+                e.target.reset();
+                // reset color of checkboxes by triggering uncheck technically handled by form reset
+
+            } catch (err) {
+                console.error(err);
+                alert("Error generating pass.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="printer" class="w-6 h-6 mr-2"></i> Generate & Download Pass PDF`;
+                lucide.createIcons();
+            }
+        }
+
+        // Hex to RGB Array for jsPDF
+        function hexToRgb(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+        }
+
+        async function generatePDF(pass, churchLogo, lwtLogo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
+            const settings = DB.getSettings();
+
+            // Unified Black & White Base Design
+            doc.setFillColor(10, 10, 10); // Brand Black
+            doc.rect(0, 0, 54, 15, 'F');
+
+            // Text Header
+            doc.setTextColor(250, 204, 21); // Brand Yellow
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "bold");
+            doc.text("SGAA CHURCH", 27, 6, {align: 'center'});
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(6);
+            doc.text("LIGHT THE WORLD MEDIA", 27, 10, {align: 'center'});
+            doc.text("EVENT PASS", 27, 13, {align: 'center'});
+
+            if(churchLogo) doc.addImage(churchLogo, 'PNG', 2, 2, 10, 10);
+            if(lwtLogo) doc.addImage(lwtLogo, 'PNG', 42, 2, 10, 10);
+
+            // Photo area (centered, sharp borders)
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.5);
+            if(pass.PhotoURL) {
+                doc.addImage(pass.PhotoURL, 'JPEG', 17, 18, 20, 20);
+                doc.rect(17, 18, 20, 20, 'S');
+            } else {
+                doc.setFillColor(245, 245, 245);
+                doc.rect(17, 18, 20, 20, 'F');
+                doc.rect(17, 18, 20, 20, 'S');
+                doc.setTextColor(150, 150, 150);
+                doc.text("NO PHOTO", 27, 29, {align: 'center'});
+            }
+
+            // Info
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "bold");
+            doc.text(pass.Name.toUpperCase(), 27, 43, {align: 'center'});
+            
+            // TEAM NAME COLORED FROM SETTINGS
+            const teamHexColor = settings.teamColors[pass.Team] || "#333333";
+            const rgbColor = hexToRgb(teamHexColor);
+            
+            doc.setFontSize(7);
+            doc.setTextColor(rgbColor[0], rgbColor[1], rgbColor[2]);
+            doc.text(pass.Team.toUpperCase(), 27, 47, {align: 'center'});
+
+            doc.setTextColor(50, 50, 50);
+            doc.setFontSize(5.5);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Event: ${pass.Event}`, 27, 51, {align: 'center'});
+            doc.text(`Loc: ${pass.Location}`, 27, 54, {align: 'center'});
+            
+            // Generate QR Code internally
+            const qrUrl = `${window.location.origin}${window.location.pathname}#/pass/${pass.PassID}`;
+            const qrContainer = document.getElementById('qrcode-container');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, { text: qrUrl, width: 128, height: 128, correctLevel : QRCode.CorrectLevel.M });
+            
+            await new Promise(r => setTimeout(r, 100));
+            const qrCanvas = qrContainer.querySelector('canvas');
+            if(qrCanvas) {
+                const qrData = qrCanvas.toDataURL("image/png");
+                doc.addImage(qrData, 'PNG', 19, 57, 16, 16);
+            }
+
+            doc.setFontSize(6);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(0,0,0);
+            doc.text(pass.PassID, 27, 76, {align: 'center'});
+
+            // Footer
+            doc.setFillColor(10, 10, 10);
+            doc.rect(0, 79, 54, 7, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(4);
+            doc.setFont("helvetica", "normal");
+            doc.text("Contact Leader or Admin for issues.", 27, 82, {align: 'center'});
+            doc.setTextColor(250, 204, 21); // Yellow
+            doc.text(`Admin: ${settings.adminPhone} | Dev: ${settings.devPhone}`, 27, 84, {align: 'center'});
+
+            doc.save(`LWT-Pass-${pass.PassID}.pdf`);
+        }
+
+        async function loadManageTable() {
+            const tbody = document.getElementById('manage-table-body');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400 font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
+            lucide.createIcons();
+            
+            const passes = await DB.fetchAllPasses();
+            passes.reverse();
+            const settings = DB.getSettings();
+            
+            if(passes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400 font-bold">No passes generated yet.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = passes.map(p => {
+                const teamColor = settings.teamColors[p.Team] || "#333333";
+                return `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-50 last:border-0">
+                    <td class="px-6 py-4 font-mono font-bold text-gray-600">${p.PassID}</td>
+                    <td class="px-6 py-4 font-black text-brand-black">${p.Name}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-black bg-opacity-10" style="color: ${teamColor}; background-color: ${teamColor}20;">${p.Team}</span></td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-lg text-xs font-black ${p.Status === 'VALID' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}">${p.Status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right space-x-3">
+                        <a href="#/pass/${p.PassID}" class="text-brand-black hover:text-brand-yellow font-bold text-xs bg-gray-100 hover:bg-black px-3 py-1.5 rounded-md transition-colors inline-flex items-center"><i data-lucide="eye" class="w-3 h-3 mr-1"></i> View</a>
+                        ${p.Status === 'VALID' 
+                            ? `<button onclick="revokePass('${p.PassID}')" class="text-red-600 hover:text-white hover:bg-red-600 font-bold text-xs bg-red-50 px-3 py-1.5 rounded-md transition-colors inline-flex items-center"><i data-lucide="x-circle" class="w-3 h-3 mr-1"></i> Revoke</button>`
+                            : `<button onclick="restorePass('${p.PassID}')" class="text-green-600 hover:text-white hover:bg-green-600 font-bold text-xs bg-green-50 px-3 py-1.5 rounded-md transition-colors inline-flex items-center"><i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> Restore</button>`
+                        }
+                    </td>
+                </tr>
+            `}).join('');
+            lucide.createIcons();
+        }
+
+        async function revokePass(id) {
+            if(confirm(`Are you sure you want to revoke pass ${id}?`)) {
+                await DB.updatePassStatus(id, 'REVOKED');
+                loadManageTable();
+                loadStats();
+            }
+        }
+
+        async function restorePass(id) {
+            if(confirm(`Restore pass ${id} to VALID status?`)) {
+                await DB.updatePassStatus(id, 'VALID');
+                loadManageTable();
+                loadStats();
+            }
+        }
+
+        async function loadStats() {
+            const passes = await DB.fetchAllPasses();
+            const logs = await DB.fetchLogs();
+            
+            document.getElementById('stat-total').textContent = passes.length;
+            document.getElementById('stat-revoked').textContent = passes.filter(p => p.Status === 'REVOKED').length;
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            const entriesToday = new Set(logs.filter(l => l.Result.includes('GRANTED') && l.Time.startsWith(todayStr)).map(l => l.PassID));
+            document.getElementById('stat-entries').textContent = entriesToday.size;
+
+            const tbody = document.getElementById('logs-table-body');
+            const recentLogs = [...logs].reverse().slice(0, 10);
+            
+            if(recentLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-400 font-bold">No recent activity.</td></tr>`;
+            } else {
+                tbody.innerHTML = recentLogs.map(l => {
+                    const d = new Date(l.Time);
+                    const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+                    const isGranted = l.Result.includes('GRANTED');
+                    return `
+                    <tr class="hover:bg-gray-50 transition border-b border-gray-50 last:border-0">
+                        <td class="px-6 py-4 text-xs font-bold text-gray-500">${d.toLocaleDateString()} ${timeStr}</td>
+                        <td class="px-6 py-4 font-mono font-bold text-brand-black">${l.PassID}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1.5 rounded-lg text-[10px] font-black ${isGranted ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}">${l.Result}</span>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+        }
+    </script>
+</body>
+</html>
