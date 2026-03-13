@@ -63,7 +63,7 @@
 
         /* PDF Export Hidden Canvas */
         #export-canvas-container { position: absolute; top: -9999px; left: -9999px; z-index: -100; }
-        .pdf-card { width: 204px; height: 325px; background: #050505; color: white; position: relative; overflow: hidden; border: 1px solid #111; box-sizing: border-box; }
+        .pdf-card { width: 408px; height: 650px; background: #050505; color: white; position: relative; overflow: hidden; border: 2px solid #111; box-sizing: border-box; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-brand-yellow selection:text-black">
@@ -189,13 +189,12 @@
                 <input type="password" id="admin-password" placeholder="••••••••" class="w-full px-5 py-4 rounded-xl border border-brand-border focus:border-brand-yellow text-center text-xl tracking-widest bg-brand-dark text-white mb-4 outline-none transition font-bold" onkeypress="handleEnter(event, loginAdmin)">
                 <button onclick="loginAdmin()" class="w-full py-4 bg-brand-yellow text-black rounded-xl font-black hover:bg-yellow-500 transition-colors shadow-md">Authenticate</button>
                 
-                <button onclick="toggleFirstTimeSetup()" class="mt-6 text-xs text-gray-600 hover:text-gray-400 transition-colors">Emergency Login / First Time Setup</button>
+                <button onclick="toggleEmergencyLogin()" class="mt-6 text-xs text-gray-600 hover:text-gray-400 transition-colors">Emergency Login</button>
 
-                <div id="first-time-panel" class="hidden mt-4 pt-4 border-t border-brand-border text-left">
-                    <p class="text-xs text-brand-yellow mb-2 font-bold">Emergency / First-Time Setup</p>
-                    <input type="password" id="emergency-password-input" placeholder="Enter Emergency Password (e.g. LTW@...)" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-2">
-                    <input type="password" id="new-admin-password" placeholder="Create New Personal Password" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-3">
-                    <button onclick="saveFirstTimePassword()" class="w-full py-3 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors">Save & Login</button>
+                <div id="emergency-panel" class="hidden mt-4 pt-4 border-t border-brand-border text-left">
+                    <p class="text-xs text-brand-yellow mb-2 font-bold">Emergency Override</p>
+                    <input type="password" id="emergency-password-input" placeholder="Enter Emergency Password" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-3">
+                    <button onclick="emergencyLogin()" class="w-full py-3 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors">Log In</button>
                 </div>
             </div>
 
@@ -493,41 +492,41 @@
         
         <div id="qrcode-container" class="hidden"></div>
 
-        <!-- Hidden Canvas Area for Perfect Arabic PDF Generation via html2canvas -->
+        <!-- Hidden Canvas Area for Perfect Arabic PDF Generation via html2canvas (High Resolution) -->
         <div id="export-canvas-container">
-            <div id="pdf-card" class="pdf-card flex flex-col pt-3 px-3 pb-2 font-['Cairo']">
+            <div id="pdf-card" class="pdf-card flex flex-col pt-6 px-6 pb-4 font-['Cairo']">
                 <!-- Header -->
-                <div class="flex justify-between items-start mb-2">
-                    <img id="pdf-church-logo" src="" class="w-8 h-8 object-contain">
-                    <div class="text-center flex-1">
-                        <p class="text-[#FACC15] font-black text-[9px] leading-tight">SGAA CHURCH</p>
-                        <p class="text-white font-bold text-[7px] leading-tight mt-0.5">LIGHT THE WORLD MEDIA</p>
-                        <p class="text-white font-bold text-[7px] leading-tight">EVENT PASS</p>
+                <div class="flex justify-between items-start mb-4">
+                    <img id="pdf-church-logo" src="" class="w-16 h-16 object-contain">
+                    <div class="text-center flex-1 mt-1">
+                        <p class="text-[#FACC15] font-black text-[18px] leading-tight">SGAA CHURCH</p>
+                        <p class="text-white font-bold text-[14px] leading-tight mt-1">LIGHT THE WORLD MEDIA</p>
+                        <p class="text-white font-bold text-[14px] leading-tight">EVENT PASS</p>
                     </div>
-                    <img id="pdf-ltw-logo" src="" class="w-8 h-8 object-contain">
+                    <img id="pdf-ltw-logo" src="" class="w-16 h-16 object-contain">
                 </div>
                 <!-- Photo -->
-                <div class="flex justify-center mb-2">
-                    <div id="pdf-photo-box" class="w-[70px] h-[70px] border border-[#222] bg-[#111] flex items-center justify-center overflow-hidden">
+                <div class="flex justify-center mb-4">
+                    <div id="pdf-photo-box" class="w-[140px] h-[140px] border-2 border-[#222] bg-[#111] flex items-center justify-center overflow-hidden rounded-xl">
                         <img id="pdf-photo" src="" class="w-full h-full object-cover hidden">
-                        <span id="pdf-no-photo" class="text-[#666] text-[8px] font-bold">NO PHOTO</span>
+                        <span id="pdf-no-photo" class="text-[#666] text-[16px] font-bold">NO PHOTO</span>
                     </div>
                 </div>
                 <!-- Info -->
                 <div class="text-center flex-1">
-                    <p id="pdf-name" class="font-black text-[13px] text-white leading-tight mb-1" dir="auto"></p>
-                    <p id="pdf-team" class="font-bold text-[9px] mb-1.5"></p>
-                    <p id="pdf-event" class="font-medium text-[7px] text-[#aaa] leading-tight" dir="auto"></p>
-                    <p id="pdf-location" class="font-medium text-[7px] text-[#aaa] leading-tight" dir="auto"></p>
-                    <div class="flex justify-center mt-2">
-                        <img id="pdf-qr" src="" class="w-[50px] h-[50px]">
+                    <p id="pdf-name" class="font-black text-[26px] text-white leading-tight mb-2" dir="auto"></p>
+                    <p id="pdf-team" class="font-bold text-[18px] mb-3"></p>
+                    <p id="pdf-event" class="font-medium text-[14px] text-[#aaa] leading-tight mb-1" dir="auto"></p>
+                    <p id="pdf-location" class="font-medium text-[14px] text-[#aaa] leading-tight" dir="auto"></p>
+                    <div class="flex justify-center mt-4">
+                        <img id="pdf-qr" src="" class="w-[100px] h-[100px] bg-white p-1 rounded-lg">
                     </div>
-                    <p id="pdf-id" class="font-black text-[7px] mt-1 tracking-widest text-[#ddd]"></p>
+                    <p id="pdf-id" class="font-black text-[14px] mt-2 tracking-widest text-[#ddd]"></p>
                 </div>
                 <!-- Footer -->
-                <div class="mt-auto border-t border-[#222] pt-1.5 text-center">
-                    <p class="text-white text-[5px] mb-0.5">Contact Leader or Admin for issues.</p>
-                    <p id="pdf-footer-contacts" class="text-[#FACC15] text-[5px] font-bold leading-tight" dir="auto"></p>
+                <div class="mt-auto border-t-2 border-[#222] pt-3 text-center">
+                    <p class="text-white text-[10px] mb-1">Contact Leader or Admin for issues.</p>
+                    <p id="pdf-footer-contacts" class="text-[#FACC15] text-[10px] font-bold leading-tight" dir="auto"></p>
                 </div>
             </div>
         </div>
@@ -912,6 +911,29 @@
             handleRoute();
         }
 
+        function toggleEmergencyLogin() { document.getElementById('emergency-panel').classList.toggle('hidden'); }
+        
+        function emergencyLogin() {
+            const emergencyPwd = document.getElementById('emergency-password-input').value;
+            
+            if(emergencyPwd === GLOBAL_SETTINGS.firstTimePassword) {
+                // Clear inputs and log in
+                document.getElementById('admin-password').value = '';
+                document.getElementById('emergency-password-input').value = '';
+                document.getElementById('emergency-panel').classList.add('hidden');
+                
+                isAdminLoggedIn = true;
+                document.getElementById('login-msg').textContent = "Enter system password to continue.";
+                document.getElementById('login-msg').classList.remove('text-red-500');
+                document.getElementById('admin-login').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                loadStats(); 
+                renderSettingsUI();
+            } else {
+                alert("Incorrect Emergency password.");
+            }
+        }
+
         async function factoryReset(type) {
             if(!confirm(`WARNING: Are you absolutely sure you want to reset/delete ${type.toUpperCase()}? This CANNOT be undone.`)) return;
             
@@ -1110,23 +1132,33 @@
 
             const qrUrl = `${window.location.origin}${window.location.pathname}#/pass/${pass.PassID}`;
             document.getElementById('qrcode-container').innerHTML = '';
-            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 128, height: 128 });
+            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 256, height: 256 }); // Larger QR for sharp rendering
             await new Promise(r => setTimeout(r, 100));
             document.getElementById('pdf-qr').src = document.getElementById('qrcode-container').querySelector('canvas').toDataURL("image/png");
 
             // Combine all contacts
             document.getElementById('pdf-footer-contacts').innerHTML = s.contacts.map(c => `${c.name}: ${c.phone}`).join(' | ');
 
-            // Convert HTML to Canvas
+            // Convert HTML to Canvas (High Resolution Scale)
             const cardEl = document.getElementById('pdf-card');
-            const canvas = await html2canvas(cardEl, { scale: 3, useCORS: true, backgroundColor: '#050505' });
+            const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
 
             // Put Canvas into jsPDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
-            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86);
+            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST'); // High-quality embedding
             doc.save(`LWT-Pass-${pass.PassID}.pdf`);
+        }
+        
+        // Helper function for table download button
+        async function downloadPass(id) {
+            const pass = await DB.fetchPass(id);
+            if(pass) {
+                await generatePerfectPDF(pass);
+            } else {
+                alert("Pass data not found.");
+            }
         }
 
         async function loadManageTable() {
@@ -1154,7 +1186,7 @@
                     <td class="px-6 py-4"><span class="px-3 py-1 rounded text-xs font-black ${p.Status==='VALID'?'bg-green-900 text-green-300':'bg-red-900 text-red-300'}">${p.Status}</span></td>
                     <td class="px-6 py-4 text-right space-x-2">
                         <button onclick="editPass('${p.PassID}')" class="text-blue-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Edit</button>
-                        <button onclick="generatePerfectPDF(await DB.fetchPass('${p.PassID}'))" class="text-brand-yellow hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="download" class="w-3 h-3"></i></button>
+                        <button onclick="downloadPass('${p.PassID}')" class="text-brand-yellow hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="download" class="w-3 h-3"></i></button>
                         <a href="#/pass/${p.PassID}" target="_blank" class="text-gray-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="eye" class="w-3 h-3"></i></a>
                         ${p.Status==='VALID' ? `<button onclick="togglePassStatus('${p.PassID}', 'REVOKED')" class="text-red-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="x-circle" class="w-3 h-3"></i></button>` : `<button onclick="togglePassStatus('${p.PassID}', 'VALID')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="check-circle" class="w-3 h-3"></i></button>`}
                         <button onclick="deletePass('${p.PassID}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
