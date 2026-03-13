@@ -230,9 +230,9 @@
                         <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">1. Personal Details</h3>
-                                <button type="button" onclick="batchGenerateFromSheet()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm"><i data-lucide="users" class="w-3.5 h-3.5 mr-1.5 text-brand-yellow"></i> Auto-Generate from Sheet</button>
+                                <button type="button" onclick="batchGenerateForTeam()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm"><i data-lucide="users" class="w-3.5 h-3.5 mr-1.5 text-brand-yellow"></i> Auto-Generate for Team</button>
                             </div>
-                            <p class="text-xs text-gray-400 mb-4">Typing a saved name will auto-fill their info. Or use the Auto-Generate button to create passes for the whole sheet.</p>
+                            <p class="text-xs text-gray-400 mb-4">Typing an imported name will auto-fill their info. Or select a team and click Auto-Generate to mass-create passes for that team.</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Servant Name *</label>
@@ -333,13 +333,20 @@
                         </button>
                     </div>
                     <div class="p-6 border-b border-brand-border bg-brand-dark">
-                        <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Add / Manual Update</h3>
-                        <p class="text-xs text-gray-400 mb-3">Servants are auto-saved here when you generate a pass. You can also add them manually below.</p>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <input type="text" id="s-name" placeholder="Servant Name *" class="flex-1 px-4 py-2 rounded-lg text-sm">
-                            <input type="text" id="s-phone" placeholder="Phone" class="flex-1 px-4 py-2 rounded-lg text-sm">
-                            <select id="s-team" class="flex-1 px-4 py-2 rounded-lg text-sm"></select>
-                            <button onclick="manualSaveServant()" class="px-6 py-2 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm">Save</button>
+                        <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Add / Edit Servant</h3>
+                        <p class="text-xs text-gray-400 mb-3">Updating a servant's Photo or Phone number here will <b>automatically update all of their existing passes</b>!</p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                            <input type="text" id="s-name" placeholder="Servant Name *" class="flex-1 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow">
+                            <input type="text" id="s-phone" placeholder="Phone" class="w-full sm:w-1/4 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow">
+                            <select id="s-team" class="w-full sm:w-1/4 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow"></select>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 mt-3 items-center">
+                            <div class="flex-1 text-xs text-gray-400">
+                                Upload Photo to attach to all their generated passes:
+                                <input type="file" id="s-photo" accept="image/*" class="mt-1 w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer p-1">
+                            </div>
+                            <button onclick="manualSaveServant()" class="px-6 py-3 h-full bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm whitespace-nowrap"><i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Save & Update Passes</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -430,13 +437,14 @@
 
                             <!-- Integration -->
                             <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-2"></i> Google Sheets Integration</h3>
-                                <p class="text-xs text-gray-400 mb-3">Ensure your Google Sheet is set to <b>"Anyone with the link can view"</b>, then paste the link here.</p>
-                                <div class="flex gap-2">
-                                    <input type="text" id="set-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." class="flex-1 px-4 py-2 rounded-lg text-sm">
-                                    <button onclick="updateSettingsField('sheetUrl', document.getElementById('set-sheet-url').value); fetchServantsData();" class="px-4 py-2 bg-brand-border hover:bg-gray-700 rounded-lg text-sm font-bold text-white">Save</button>
+                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-2"></i> Google Sheets Sync Engine</h3>
+                                <p class="text-xs text-gray-400 mb-3">Paste your <b>CSV Links</b> here. The system will parse complex schedules, map locations, extract shift timings as Events, build assignments, and save all names into the Servants Directory.</p>
+                                <div class="space-y-3 mb-3">
+                                    <input type="text" id="set-sheet-live" placeholder="Live Team CSV Link..." class="w-full px-4 py-2 rounded-lg text-sm">
+                                    <input type="text" id="set-sheet-data" placeholder="Data Show Team CSV Link..." class="w-full px-4 py-2 rounded-lg text-sm">
                                 </div>
-                                <p id="sheet-status" class="text-xs font-bold text-brand-yellow mt-3"></p>
+                                <button onclick="saveAndSyncSheets()" class="w-full px-4 py-3 bg-brand-yellow hover:bg-yellow-500 rounded-lg text-sm font-bold text-black flex justify-center items-center shadow"><i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> <span>Parse Sheets & Auto-Sync System</span></button>
+                                <p id="sheet-status" class="text-xs font-bold text-brand-yellow mt-3 text-center"></p>
                             </div>
 
                             <!-- Events & Masses -->
@@ -655,7 +663,7 @@
                             zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                             events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
                             logos: { church: "", ltw: "", scout: "" },
-                            sheetUrl: ""
+                            sheetUrlLive: "", sheetUrlData: ""
                         };
                         await firestoreDB.collection('admin').doc('settings').set(GLOBAL_SETTINGS);
                     }
@@ -755,7 +763,7 @@
             
             handleTeamLogic();
             populateStatsDropdown();
-            fetchServantsData(); // Fetches Google sheet + Local DB
+            await fetchServantsData();
         }
 
         function populateDropdown(id, items) {
@@ -1063,7 +1071,7 @@
                 locations: ["St George Church", "St Anthony Church"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                logos: { church: "", ltw: "", scout: "" }, sheetUrl: ""
+                logos: { church: "", ltw: "", scout: "" }, sheetUrlLive: "", sheetUrlData: ""
             };
 
             if(type === 'passes') {
@@ -1104,39 +1112,56 @@
             if(tab === 'stats') loadStats();
         }
 
-        // --- SERVANTS DIRECTORY LOGIC ---
-        let sheetServants = [];
+        // --- SERVANTS DIRECTORY & SHEET SYNC LOGIC ---
         let localServants = [];
 
         async function fetchServantsData() {
-            // Load Local Internal Directory
             localServants = await DB.fetchAllServants();
             
-            // Load External Google Sheet if exists
-            const settings = GLOBAL_SETTINGS;
-            sheetServants = [];
+            const dl = document.getElementById('servants-list');
+            if(dl) {
+                dl.innerHTML = localServants.map(s => `<option value="${s.Name}">`).join('');
+            }
+        }
+
+        async function saveAndSyncSheets() {
+            const btn = document.querySelector('#admin-tab-settings button i.lucide-refresh-cw').parentNode;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Syncing...`;
+            lucide.createIcons();
+
+            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
+            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
+            await DB.updateSettings(GLOBAL_SETTINGS);
+
+            await syncSheetsToDirectory();
+            
+            btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Save Links & Sync Servants`;
+            lucide.createIcons();
+        }
+
+        async function syncSheetsToDirectory() {
             const statusEl = document.getElementById('sheet-status');
-            if(statusEl) statusEl.textContent = 'Loading sheet...';
+            if(statusEl) statusEl.textContent = 'Fetching and parsing sheets...';
+            
+            let newCount = 0; let passesCount = 0;
+            const s = GLOBAL_SETTINGS;
+            
+            await fetchServantsData();
+            const existingNames = new Set(localServants.map(srv => srv.Name.toLowerCase()));
+            const existingPasses = await DB.fetchAllPasses();
+            const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
 
-            if(settings && settings.sheetUrl) {
+            async function processSheet(url, teamName) {
+                if(!url) return;
                 try {
-                    let url = settings.sheetUrl.trim();
-                    // Auto-correct standard sheet URLs to CSV export URLs
-                    if (url.includes('/edit')) {
-                        url = url.split('/edit')[0] + '/export?format=csv';
-                    } else if (url.includes('/pubhtml')) {
-                        url = url.replace('/pubhtml', '/pub') + '?output=csv';
-                    } else if (url.includes('/pub?') && !url.includes('output=csv')) {
-                        url += '&output=csv';
-                    }
+                    let fetchUrl = url.trim();
+                    if (fetchUrl.includes('/edit')) fetchUrl = fetchUrl.split('/edit')[0] + '/export?format=csv';
+                    else if (fetchUrl.includes('/pubhtml')) fetchUrl = fetchUrl.replace('/pubhtml', '/pub') + '?output=csv';
+                    else if (fetchUrl.includes('/pub?') && !fetchUrl.includes('output=csv')) fetchUrl += '&output=csv';
 
-                    const res = await fetch(url);
+                    const res = await fetch(fetchUrl);
                     const text = await res.text();
-                    
-                    if (text.toLowerCase().includes('<!doctype html>')) {
-                        if(statusEl) statusEl.textContent = 'Error: Sheet must be set to "Anyone with link can view".';
-                        return;
-                    }
+                    if (text.toLowerCase().includes('<!doctype html>')) throw new Error('Not CSV Format');
                     
                     const rows = [];
                     let currentRow = []; let currentCell = ''; let inQuotes = false;
@@ -1150,75 +1175,123 @@
                     if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
 
                     if(rows.length >= 2) {
-                        let nameIndices = []; let phoneIdx = -1;
-                        for(let r = 0; r < Math.min(4, rows.length); r++) {
+                        let nameIndices = []; let timingIdx = -1; let phoneIdx = -1;
+                        for(let r = 0; r < Math.min(6, rows.length); r++) {
                             const hdrs = rows[r].map(h => h.toLowerCase());
                             hdrs.forEach((h, idx) => {
-                                if(h.includes('name') || h.includes('اسم') || h.includes('الاسم')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
+                                if(h.includes('اسم') && !h.includes('مواعيد')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
+                                if(h.includes('مواعيد') || h.includes('مكان') || h.includes('timing') || h.includes('المكان')) timingIdx = idx;
                                 if(phoneIdx === -1 && (h.includes('phone') || h.includes('mobile') || h.includes('رقم') || h.includes('تليفون') || h.includes('موبايل'))) phoneIdx = idx;
                             });
                         }
-                        if(nameIndices.length === 0) nameIndices = [0, 1];
-                        if(phoneIdx === -1) phoneIdx = 2;
+                        if(nameIndices.length === 0) nameIndices = [1, 2, 3]; // fallback
+                        
+                        const invalidPhrases = ['الاسم', 'تسلسل', 'المكان', 'المواعيد', 'note', 'شريطة', 'قديم', 'جديد', 'no need', 'ملاحظات', 'فقط', 'only'];
 
-                        const uniqueNames = new Set();
-                        for(let i=1; i<rows.length; i++) {
+                        for(let i=0; i<rows.length; i++) {
                             const row = rows[i]; if(!row || row.length === 0) continue;
-                            let phone = 'N/A';
-                            if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
-                                let p = row[phoneIdx].replace(/"/g, '').trim();
-                                if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
+                            
+                            let timingText = '';
+                            if(timingIdx !== -1 && row[timingIdx]) {
+                                timingText = row[timingIdx].replace(/"/g, '').trim();
+                            } else {
+                                let foundTiming = row.find(c => (c.includes('ص') && c.includes('الى')) || c.includes('جوارجيوس') || c.includes('انطونيوس'));
+                                if(foundTiming) timingText = foundTiming.replace(/"/g, '').trim();
                             }
+                            
+                            if(!timingText || invalidPhrases.some(inv => timingText.toLowerCase() === inv)) continue;
+
+                            // Dynamic Location Extractor
+                            let loc = "St. George Church";
+                            if (timingText.includes("جوار")) loc = "St. George Church";
+                            else if (timingText.includes("نطونيوس")) loc = "St. Antonios Church";
+                            else if (timingText.includes("يوسف سلامة")) loc = "Youssef Salama Hall";
+
+                            // Clean Event Name
+                            let eventName = timingText
+                                .replace(/كنيسة جوارجيوس/g, '')
+                                .replace(/كنيسة جوارديوس/g, '')
+                                .replace(/كنيسة انبا أنطونيوس/g, '')
+                                .replace(/كنيسة الانبا انطونيوس/g, '')
+                                .replace(/قاعة يوسف سلامة/g, '')
+                                .replace(/\n/g, ' ')
+                                .replace(/ +/g, ' ')
+                                .trim();
+
+                            if(!eventName) continue;
+
+                            // Register Event Automatically
+                            let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === eventName);
+                            if(!existingEv) {
+                                existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: eventName, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
+                                GLOBAL_SETTINGS.events.push(existingEv);
+                                await DB.updateSettings(GLOBAL_SETTINGS); 
+                            }
+
                             for(let idx of nameIndices) {
                                 if(idx < row.length && row[idx]) {
                                     let rawName = row[idx].replace(/"/g, '').trim();
-                                    if(!rawName || rawName.toLowerCase() === 'no need' || rawName === '-') continue;
-                                    let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n && n.toLowerCase() !== 'no need');
+                                    let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
                                     for(let name of subNames) {
-                                        if(name.length > 2 && name.length < 50 && !name.match(/^[\d\s]+$/)) {
-                                            if(!uniqueNames.has(name)) { uniqueNames.add(name); sheetServants.push({name, phone}); }
+                                        let isInv = invalidPhrases.some(inv => name.toLowerCase().includes(inv));
+                                        if(isInv || name.length <= 2 || name.match(/^[\d\s\W]+$/)) continue;
+
+                                        let phone = 'N/A';
+                                        if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
+                                            let p = row[phoneIdx].replace(/"/g, '').trim();
+                                            if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
+                                        }
+
+                                        // Update Directory
+                                        if(!existingNames.has(name.toLowerCase())) {
+                                            await DB.saveServant({ Name: name, Phone: phone, Team: teamName, PhotoURL: "" });
+                                            existingNames.add(name.toLowerCase());
+                                            newCount++;
+                                        }
+
+                                        // Auto Assign Pass
+                                        const passKey = `${name.toLowerCase()}_${existingEv.id}`;
+                                        if(!passCache.has(passKey)) {
+                                            const passId = `LWT-` + Math.random().toString(36).substring(2, 8).toUpperCase();
+                                            let zones = teamName === 'IT Team' ? 'ALL ZONES' : (existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES');
+                                            
+                                            await DB.savePass({
+                                                PassID: passId, Name: name, Phone: phone, Team: teamName,
+                                                Event: existingEv.id, Mass: 'N/A', Location: loc,
+                                                AllowedZones: zones, PhotoURL: "", Status: 'VALID', EntryTime: new Date().toISOString()
+                                            });
+                                            passCache.add(passKey);
+                                            passesCount++;
                                         }
                                     }
                                 }
                             }
                         }
-                        if(statusEl) statusEl.textContent = `Connected! Found ${sheetServants.length} servants in sheet.`;
                     }
-                } catch(e) { 
-                    console.error("Error fetching google sheet data:", e); 
-                    if(statusEl) statusEl.textContent = 'Error connecting to sheet. Check URL format.';
+                } catch (e) {
+                    console.error("Error processing " + teamName + " sheet:", e);
                 }
-            } else {
-                if(statusEl) statusEl.textContent = 'No sheet linked.';
             }
 
-            // Combine both sources for Autocomplete Datalist
-            const dl = document.getElementById('servants-list');
-            if(dl) {
-                const combined = new Map();
-                sheetServants.forEach(s => combined.set(s.name, s));
-                localServants.forEach(s => combined.set(s.Name, {name: s.Name, phone: s.Phone}));
-                dl.innerHTML = Array.from(combined.values()).map(s => `<option value="${s.name}">`).join('');
+            await processSheet(s.sheetUrlLive, "Live Team");
+            await processSheet(s.sheetUrlData, "Data Show Team");
+
+            if(statusEl) statusEl.textContent = `Sync Complete! Added ${newCount} servants & auto-assigned ${passesCount} shifts to Passes tab.`;
+            await fetchServantsData();
+            if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) {
+                loadServantsTable();
             }
         }
 
         // Auto-fill phone/team when name is selected from list
         document.getElementById('g-name').addEventListener('input', (e) => {
             const val = e.target.value.trim();
-            
-            // First check internal directory for full details
             const internal = localServants.find(s => s.Name === val);
             if(internal) {
                 document.getElementById('g-phone').value = internal.Phone !== 'N/A' ? internal.Phone : '';
                 if(internal.Team) {
                     document.getElementById('g-team').value = internal.Team;
                     handleTeamLogic();
-                }
-            } else {
-                // Fallback to Google Sheet simple details
-                const sheet = sheetServants.find(s => s.name === val);
-                if(sheet && sheet.phone && sheet.phone !== 'N/A') {
-                    document.getElementById('g-phone').value = sheet.phone;
                 }
             }
         });
@@ -1228,15 +1301,36 @@
             const name = document.getElementById('s-name').value.trim();
             const phone = document.getElementById('s-phone').value.trim() || 'N/A';
             const team = document.getElementById('s-team').value;
+            const photoFile = document.getElementById('s-photo').files[0];
             if(!name) return alert("Servant name is required.");
 
-            await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: "" });
+            let photoB64 = "";
+            const internal = localServants.find(s => s.Name === name);
+            if (internal && internal.PhotoURL) photoB64 = internal.PhotoURL;
+            
+            if(photoFile) photoB64 = await resizeImage(photoFile, 300, false);
+
+            // 1. Update Profile in Directory
+            await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photoB64 });
+            
+            // 2. Cascade changes to all pre-generated shift passes
+            const allPasses = await DB.fetchAllPasses();
+            const servantPasses = allPasses.filter(p => p.Name.toLowerCase() === name.toLowerCase());
+            for(let p of servantPasses) {
+                p.Phone = phone;
+                p.Team = team;
+                if(photoB64) p.PhotoURL = photoB64;
+                await DB.savePass(p);
+            }
+
             document.getElementById('s-name').value = '';
             document.getElementById('s-phone').value = '';
+            document.getElementById('s-photo').value = '';
             
-            alert("Servant saved to directory!");
+            alert(`Servant saved! ${servantPasses.length} of their existing passes were automatically updated.`);
             await fetchServantsData();
             loadServantsTable();
+            loadManageTable();
         }
 
         async function loadServantsTable() {
@@ -1244,18 +1338,22 @@
             tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
             lucide.createIcons();
             
-            await fetchServantsData(); // refresh cache
+            await fetchServantsData(); 
             
-            if(localServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass to auto-save them!</td></tr>`;
+            if(localServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass or Sync to auto-save them!</td></tr>`;
 
             tbody.innerHTML = localServants.map(s => {
                 const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
                 return `
                 <tr class="hover:bg-brand-dark transition border-b border-brand-border last:border-0">
-                    <td class="px-6 py-4 font-black text-white text-base">${s.Name}</td>
+                    <td class="px-6 py-4 font-black text-white text-base flex items-center">
+                        ${s.PhotoURL ? `<img src="${s.PhotoURL}" class="w-6 h-6 rounded mr-2 object-cover">` : `<i data-lucide="user" class="w-4 h-4 mr-2 text-gray-600"></i>`}
+                        ${s.Name}
+                    </td>
                     <td class="px-6 py-4 text-gray-300">${s.Phone}</td>
                     <td class="px-6 py-4 text-gray-300 text-xs">${s.Team}</td>
                     <td class="px-6 py-4 text-right">
+                        <button onclick="editServant('${id}')" class="text-blue-400 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
                         <button onclick="deleteServant('${id}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
                     </td>
                 </tr>`
@@ -1263,20 +1361,32 @@
             lucide.createIcons();
         }
 
+        function editServant(id) {
+            const s = localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === id);
+            if(s) {
+                document.getElementById('s-name').value = s.Name;
+                document.getElementById('s-phone').value = s.Phone !== 'N/A' ? s.Phone : '';
+                document.getElementById('s-team').value = s.Team;
+                window.scrollTo({top:0, behavior:'smooth'});
+            }
+        }
+
         async function deleteServant(id) {
-            if(confirm("Remove this servant from the internal directory?")) {
+            if(confirm("Remove this servant from the internal directory? (This will NOT delete their passes)")) {
                 await DB.deleteServant(id);
                 loadServantsTable();
             }
         }
 
         // --- GENERATE / EDIT PASS ---
-        async function batchGenerateFromSheet() {
-            if (!sheetServants || sheetServants.length === 0) {
-                return alert("No servants found in Google Sheet. Please check the URL in Settings and ensure the sheet is accessible.");
+        async function batchGenerateForTeam() {
+            const team = document.getElementById('g-team').value;
+            const targetServants = localServants.filter(s => s.Team === team);
+            
+            if (targetServants.length === 0) {
+                return alert(`No servants found in directory assigned to ${team}.`);
             }
             
-            const team = document.getElementById('g-team').value;
             const isIT = team === 'IT Team';
             const eventId = isIT ? 'ALL ACCESS' : document.getElementById('g-event').value;
             const massId = isIT ? 'N/A' : (document.getElementById('g-mass').value || 'N/A');
@@ -1289,21 +1399,21 @@
                 zones = Array.from(checkboxes).map(cb => cb.value).join(', ');
             }
 
-            if(!confirm(`Are you sure you want to automatically generate passes for ${sheetServants.length} servants from the Sheet?\n\nTeam: ${team}\nEvent: ${document.getElementById('g-event').options[document.getElementById('g-event').selectedIndex].text}\n\nNote: This saves them to the database instantly. You can print their PDFs later from the 'Passes' tab.`)) return;
+            if(!confirm(`Are you sure you want to automatically generate passes for ${targetServants.length} servants assigned to ${team}?\n\nEvent: ${isIT ? 'ALL ACCESS' : document.getElementById('g-event').options[document.getElementById('g-event').selectedIndex].text}\n\nNote: This saves them to the database instantly. You can print their PDFs later from the 'Passes' tab.`)) return;
 
-            const btn = document.getElementById('btn-generate');
+            const btn = document.querySelector('#create-buttons button');
             const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Generating ${sheetServants.length} Passes...`;
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Generating ${targetServants.length} Passes...`;
             lucide.createIcons();
 
             let count = 0;
             const existingPasses = await DB.fetchAllPasses();
 
             try {
-                for (const servant of sheetServants) {
+                for (const servant of targetServants) {
                     // Check if pass already exists for this exact name and event to avoid duplicates
-                    const exists = existingPasses.find(p => p.Name.toLowerCase() === servant.name.toLowerCase() && p.Event === eventId);
+                    const exists = existingPasses.find(p => p.Name.toLowerCase() === servant.Name.toLowerCase() && p.Event === eventId);
                     if(exists) continue;
 
                     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -1312,26 +1422,24 @@
 
                     const passData = {
                         PassID: passId,
-                        Name: servant.name,
-                        Phone: servant.phone || 'N/A',
+                        Name: servant.Name,
+                        Phone: servant.Phone || 'N/A',
                         Team: team,
                         Event: eventId,
                         Mass: massId,
                         Location: loc,
                         AllowedZones: zones,
-                        PhotoURL: "", // Blank for batch generated
+                        PhotoURL: servant.PhotoURL || "", // Pull existing photo if available
                         Status: 'VALID',
                         EntryTime: new Date().toISOString()
                     };
 
                     await DB.savePass(passData);
-                    await DB.saveServant({ Name: passData.Name, Phone: passData.Phone, Team: passData.Team, PhotoURL: "" });
                     count++;
                 }
                 alert(`Successfully generated ${count} new passes in the database!`);
                 loadManageTable();
                 loadStats();
-                loadServantsTable();
             } catch (err) {
                 console.error(err);
                 alert("An error occurred during batch generation. Check your network.");
@@ -1407,6 +1515,7 @@
                     }
                     alert(`Pass ${passId} Saved successfully!`);
                     cancelEdit();
+                    fetchServantsData();
                 }
             } catch (err) {
                 console.error(err); alert("Critical Error saving pass.");
@@ -1547,7 +1656,8 @@
         function renderSettingsUI() {
             const s = GLOBAL_SETTINGS;
             document.getElementById('set-first-pwd').value = s.firstTimePassword;
-            if(document.getElementById('set-sheet-url')) document.getElementById('set-sheet-url').value = s.sheetUrl || '';
+            if(document.getElementById('set-sheet-live')) document.getElementById('set-sheet-live').value = s.sheetUrlLive || '';
+            if(document.getElementById('set-sheet-data')) document.getElementById('set-sheet-data').value = s.sheetUrlData || '';
             
             document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `
                 <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
