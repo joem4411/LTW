@@ -61,15 +61,6 @@
         ::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #FACC15; }
 
-        /* Built-in Spreadsheet Styles */
-        #spreadsheet-container { max-height: calc(100vh - 180px); overflow: auto; background: #0a0a0a; border: 1px solid #333;}
-        #spreadsheet-table { border-collapse: collapse; width: 100%; font-family: sans-serif; font-size: 12px; }
-        #spreadsheet-table th { background: #1E1E1E; color: #aaa; border: 1px solid #333; padding: 6px 12px; font-weight: bold; position: sticky; top: 0; z-index: 10; text-align: center; user-select: none; }
-        #spreadsheet-table .row-header { position: sticky; left: 0; z-index: 10; background: #1E1E1E; width: 40px; text-align: center; }
-        #spreadsheet-table td { border: 1px solid #222; min-width: 120px; max-width: 300px; padding: 0; outline: none; background: #121212; color: #fff; vertical-align: top;}
-        #spreadsheet-table td div { padding: 6px; min-height: 28px; outline: none; white-space: pre-wrap; word-break: break-word; }
-        #spreadsheet-table td:focus-within { border: 2px solid #FACC15; background: #1a1a1a; z-index: 5; position: relative;}
-
         /* PDF Export Hidden Canvas */
         #export-canvas-container { position: absolute; top: -9999px; left: -9999px; z-index: -100; }
         .pdf-card { width: 408px; height: 650px; background: #050505; color: white; position: relative; overflow: hidden; border: 2px solid #111; box-sizing: border-box; }
@@ -87,7 +78,6 @@
                     <span class="font-black text-xl tracking-tight uppercase"><span class="text-brand-yellow">Light</span> The World</span>
                 </div>
                 
-                <!-- Default Nav Links -->
                 <div id="main-nav-links" class="flex items-center space-x-2 sm:space-x-4">
                     <a href="#/scan" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400" id="nav-scan">
                         <i data-lucide="scan" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Scanner
@@ -97,7 +87,6 @@
                     </a>
                 </div>
 
-                <!-- Sheet Focused Nav Links (Hidden by default) -->
                 <div id="sheet-nav-links" class="flex items-center hidden">
                     <a href="#/admin" class="px-4 py-2 rounded-lg text-sm font-bold bg-brand-border text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm">
                         <i data-lucide="arrow-right" class="w-4 h-4 mr-2"></i> Back to Admin
@@ -108,7 +97,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
+    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative flex flex-col">
         
         <!-- View: SCANNER -->
         <div id="view-scan" class="view">
@@ -186,35 +175,23 @@
             </div>
         </div>
 
-        <!-- View: BUILT-IN SPREADSHEET ENGINE -->
-        <div id="view-sheet" class="view">
-            <div class="bg-brand-panel rounded-3xl shadow-2xl overflow-hidden border border-brand-border flex flex-col h-[calc(100vh-120px)]">
-                <!-- Sheet Toolbar -->
-                <div class="bg-brand-dark p-4 border-b border-brand-border flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h2 class="text-lg font-black text-white flex items-center"><i data-lucide="table" class="w-5 h-5 mr-2 text-brand-yellow"></i> Schedule Importer</h2>
-                        <p class="text-xs text-gray-500 mt-1">Copy data from Excel or Google Sheets and paste it directly into the grid below.</p>
-                    </div>
-                    <div class="flex items-center space-x-3 w-full sm:w-auto">
-                        <select id="sheet-team-select" class="px-4 py-2.5 rounded-lg text-sm font-bold bg-[#111] border border-brand-border text-white w-full sm:w-auto"></select>
-                        <button onclick="processBuiltInSheet()" id="btn-process-sheet" class="px-6 py-2.5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-black transition-colors shadow flex items-center whitespace-nowrap">
-                            <i data-lucide="cpu" class="w-4 h-4 mr-2"></i> Process & Sync
-                        </button>
-                    </div>
+        <!-- View: EMBEDDED SPREADSHEET VIEWER -->
+        <div id="view-sheet" class="view w-full h-full flex-grow flex flex-col min-h-[70vh]">
+            <div class="bg-brand-panel p-4 rounded-t-3xl shadow-2xl border-x border-t border-brand-border flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-black text-white flex items-center"><i data-lucide="table" class="w-5 h-5 mr-2 text-brand-yellow"></i> Live Google Sheet</h2>
+                    <p class="text-xs text-gray-400 mt-1">Servants write their names directly in this live document.</p>
                 </div>
-
-                <!-- The Grid Container -->
-                <div id="spreadsheet-container" class="flex-grow">
-                    <table id="spreadsheet-table">
-                        <thead id="spreadsheet-header"></thead>
-                        <tbody id="spreadsheet-body"></tbody>
-                    </table>
+                <div class="flex items-center space-x-3 w-full sm:w-auto">
+                    <select id="iframe-team-select" onchange="loadIframe()" class="px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-dark border border-brand-border text-white w-full sm:w-auto">
+                        <option value="live">Live Team Schedule</option>
+                        <option value="data">Data Show Team Schedule</option>
+                    </select>
                 </div>
-                
-                <div class="bg-brand-dark p-2 border-t border-brand-border flex justify-between items-center text-xs text-gray-500">
-                    <button onclick="clearSheet()" class="hover:text-red-400 transition-colors flex items-center"><i data-lucide="trash" class="w-3 h-3 mr-1"></i> Clear Grid</button>
-                    <span>Use Arrow Keys to navigate. Paste (Ctrl+V) anywhere.</span>
-                </div>
+            </div>
+            <!-- The Iframe Container -->
+            <div class="flex-grow w-full bg-white rounded-b-3xl overflow-hidden border-x border-b border-brand-border shadow-2xl relative">
+                <iframe id="live-google-sheet-iframe" src="" class="absolute top-0 left-0 w-full h-full border-none"></iframe>
             </div>
         </div>
 
@@ -263,6 +240,7 @@
                         <p class="text-gray-400 font-medium text-sm mt-1">Manage passes, servants, and system logs.</p>
                     </div>
                     <div class="flex flex-wrap gap-2 bg-brand-panel p-1.5 rounded-xl border border-brand-border">
+                        <button onclick="switchAdminTab('sync')" id="tab-sync" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i> Sync Hub</button>
                         <button onclick="switchAdminTab('generate')" id="tab-generate" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-yellow text-black transition-colors flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Generate</button>
                         <button onclick="switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="layout-grid" class="w-4 h-4 mr-1.5"></i> Passes</button>
                         <button onclick="switchAdminTab('servants')" id="tab-servants" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Servants</button>
@@ -271,8 +249,52 @@
                     </div>
                 </div>
 
+                <!-- Tab: Sync Hub -->
+                <div id="admin-tab-sync" class="admin-section hidden space-y-6">
+                    <div class="bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border">
+                        <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+                            <div>
+                                <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="refresh-cw" class="w-6 h-6 mr-2 text-brand-yellow"></i> Auto-Generate from Google Sheets</h2>
+                                <p class="text-sm text-gray-400 mt-1">Servants write their names in the "Live Sheets" tab. Click Sync below to instantly extract their names, map the events, and build their passes.</p>
+                            </div>
+                            <a href="#/sheet" class="px-6 py-3 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-xl font-bold text-sm transition-colors shadow flex items-center whitespace-nowrap"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> View Live Sheets</a>
+                        </div>
+                        
+                        <div class="p-6 bg-brand-dark rounded-2xl border border-brand-border mb-6">
+                            <h3 class="text-xs font-bold text-brand-yellow mb-4 uppercase tracking-wider"><i data-lucide="settings-2" class="w-4 h-4 inline mr-1"></i> Column Mapping Config (Optional)</h3>
+                            <p class="text-xs text-gray-400 mb-4">The AI auto-detects names and timings, but you can force it to read specific columns (e.g. A, B, C) if the sheet layout is very unusual.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Name Columns (Comma separated)</label>
+                                    <input type="text" id="map-names" placeholder="e.g. B, C, D" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Event / Timing Column</label>
+                                    <input type="text" id="map-event" placeholder="e.g. E" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Phone Column</label>
+                                    <input type="text" id="map-phone" placeholder="e.g. F" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                </div>
+                            </div>
+                            <button onclick="saveMappingSettings()" class="mt-3 px-4 py-2 bg-brand-border hover:bg-gray-600 text-white rounded text-xs font-bold transition-colors">Save Column Mapping</button>
+                        </div>
+
+                        <button onclick="startBuiltInSync()" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
+                            <i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Scan Live Sheets & Generate Passes</span>
+                        </button>
+                        
+                        <div id="sync-console-wrapper" class="hidden mt-6">
+                            <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase">Sync Console Log</h3>
+                            <div id="sync-console" class="bg-black border border-brand-border p-4 rounded-xl text-xs font-mono text-gray-300 h-48 overflow-y-auto space-y-1">
+                                <!-- Logs injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Tab: Generate -->
-                <div id="admin-tab-generate" class="admin-section bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border">
+                <div id="admin-tab-generate" class="admin-section bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border hidden">
                     <h2 class="text-xl font-black mb-6 flex items-center text-white" id="generate-title"><i data-lucide="badge-plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Create New Pass</h2>
                     <form id="generate-form" onsubmit="handleGeneratePass(event)" class="space-y-8">
                         <input type="hidden" id="g-edit-id" value="">
@@ -332,9 +354,12 @@
                         </div>
 
                         <!-- Form Buttons -->
-                        <div id="create-buttons" class="flex">
-                            <button type="submit" id="btn-generate" onclick="setSubmitAction('generate')" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center">
+                        <div id="create-buttons" class="flex flex-col sm:flex-row gap-4">
+                            <button type="submit" id="btn-generate" onclick="setSubmitAction('generate')" class="flex-1 py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center">
                                 <i data-lucide="printer" class="w-6 h-6 mr-2"></i> Generate & Download Pass
+                            </button>
+                            <button type="button" onclick="batchGenerateForTeam()" class="px-6 py-5 bg-brand-dark border-2 border-brand-border hover:border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center">
+                                <i data-lucide="users" class="w-5 h-5 mr-2"></i> Auto-Generate for Selected Team
                             </button>
                         </div>
                         
@@ -487,9 +512,13 @@
 
                             <!-- Integration -->
                             <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="table" class="w-4 h-4 mr-2"></i> Built-in Schedule Engine</h3>
-                                <p class="text-xs text-gray-400 mb-4">Paste your complex schedules straight from Excel into our built-in spreadsheet view. The system will automatically construct events and passes for you.</p>
-                                <button onclick="window.location.hash='#/sheet'" class="w-full px-4 py-3 bg-brand-yellow hover:bg-yellow-500 rounded-lg text-sm font-bold text-black flex justify-center items-center shadow transition-colors"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> <span>Open Spreadsheet Editor</span></button>
+                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-2"></i> Embed Google Sheets Configuration</h3>
+                                <p class="text-xs text-gray-400 mb-3">Paste the <b>"Publish to Web" (HTML)</b> links here. The system will embed them for viewing in the Live Sheets tab, and fetch the CSV version automatically during auto-sync.</p>
+                                <div class="space-y-3 mb-3">
+                                    <input type="text" id="set-sheet-live" placeholder="Live Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
+                                    <input type="text" id="set-sheet-data" placeholder="Data Show Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
+                                </div>
+                                <button onclick="saveSheetUrls()" class="w-full px-4 py-3 bg-brand-border hover:bg-gray-600 rounded-lg text-sm font-bold text-white shadow transition-colors">Save Links</button>
                             </div>
 
                             <!-- Events & Masses -->
@@ -695,10 +724,7 @@
                         GLOBAL_SETTINGS = doc.data();
                         if(!GLOBAL_SETTINGS.events) GLOBAL_SETTINGS.events = [];
                         GLOBAL_SETTINGS.events.forEach(e => { if(!e.date) e.date = ""; if(!e.allowedZones) e.allowedZones = GLOBAL_SETTINGS.zones || []; });
-                        if(GLOBAL_SETTINGS.teamColors && GLOBAL_SETTINGS.teamColors["N/A"]) {
-                            delete GLOBAL_SETTINGS.teamColors["N/A"];
-                            await this.updateSettings(GLOBAL_SETTINGS);
-                        }
+                        if(!GLOBAL_SETTINGS.colMapping) GLOBAL_SETTINGS.colMapping = { names: "", event: "", phone: "" };
                     } else {
                         GLOBAL_SETTINGS = {
                             firstTimePassword: "LTW@SGAA26", adminPasswords: [],
@@ -707,7 +733,10 @@
                             locations: ["St George Church", "St Anthony Church"],
                             zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                             events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                            logos: { church: "", ltw: "", scout: "" }
+                            logos: { church: "", ltw: "", scout: "" },
+                            sheetUrlLive: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtXECvY2N3TEf7UdVp-vlXcV1NYOiJOMrpwn0QuDc01qcj74iy6uGHVxO2M20FNaOPc4Wjjv8-wrVE/pubhtml?widget=true&amp;headers=false", 
+                            sheetUrlData: "",
+                            colMapping: { names: "", event: "", phone: "" }
                         };
                         await firestoreDB.collection('admin').doc('settings').set(GLOBAL_SETTINGS);
                     }
@@ -768,246 +797,16 @@
             }
         };
 
-        // --- SPREADSHEET EDITOR COMPONENT ---
-        let sheetGridData = [];
-        
-        function initSpreadsheet() {
-            const tbody = document.getElementById('spreadsheet-body');
-            const thead = document.getElementById('spreadsheet-header');
-            
-            // Render Headers (A to L)
-            let headerHtml = '<tr><th class="row-header"></th>';
-            for (let i = 0; i < 12; i++) {
-                headerHtml += `<th>${String.fromCharCode(65 + i)}</th>`;
-            }
-            headerHtml += '</tr>';
-            thead.innerHTML = headerHtml;
-
-            // Render 40 Rows
-            let bodyHtml = '';
-            for (let r = 0; r < 40; r++) {
-                bodyHtml += `<tr><td class="row-header font-bold text-gray-500">${r + 1}</td>`;
-                for (let c = 0; c < 12; c++) {
-                    bodyHtml += `<td><div contenteditable="true" data-r="${r}" data-c="${c}"></div></td>`;
-                }
-                bodyHtml += '</tr>';
-            }
-            tbody.innerHTML = bodyHtml;
-
-            // Arrow key navigation inside grid
-            tbody.addEventListener('keydown', (e) => {
-                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
-                    const cell = e.target;
-                    if (!cell.hasAttribute('contenteditable')) return;
-                    
-                    let r = parseInt(cell.getAttribute('data-r'));
-                    let c = parseInt(cell.getAttribute('data-c'));
-                    
-                    if (e.key === 'ArrowUp') r = Math.max(0, r - 1);
-                    if (e.key === 'ArrowDown') r = Math.min(39, r + 1);
-                    if (e.key === 'ArrowLeft') c = Math.max(0, c - 1);
-                    if (e.key === 'ArrowRight') c = Math.min(11, c + 1);
-
-                    const nextCell = tbody.querySelector(`div[data-r="${r}"][data-c="${c}"]`);
-                    if (nextCell) {
-                        e.preventDefault();
-                        nextCell.focus();
-                        // Move cursor to end of text
-                        const range = document.createRange();
-                        const sel = window.getSelection();
-                        range.selectNodeContents(nextCell);
-                        range.collapse(false);
-                        sel.removeAllRanges();
-                        sel.addRange(range);
-                    }
-                }
-            });
-
-            // Advanced Paste handler to distribute Excel/Google Sheets data across cells
-            tbody.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-                if (!text) return;
-
-                const activeCell = e.target;
-                if (!activeCell.hasAttribute('contenteditable')) return;
-
-                const startRow = parseInt(activeCell.getAttribute('data-r'));
-                const startCol = parseInt(activeCell.getAttribute('data-c'));
-
-                // Parse TSV (Tab-Separated Values)
-                const rows = [];
-                let currentRow = [];
-                let currentContent = '';
-                let inQuotes = false;
-
-                for (let i = 0; i < text.length; i++) {
-                    let char = text[i];
-                    if (char === '"' && text[i+1] === '"') { currentContent += '"'; i++; }
-                    else if (char === '"') { inQuotes = !inQuotes; }
-                    else if (char === '\t' && !inQuotes) { currentRow.push(currentContent); currentContent = ''; }
-                    else if (char === '\n' && !inQuotes) { currentRow.push(currentContent); rows.push(currentRow); currentRow = []; currentContent = ''; }
-                    else if (char !== '\r') { currentContent += char; }
-                }
-                if (currentContent || currentRow.length > 0) { currentRow.push(currentContent); rows.push(currentRow); }
-
-                // Distribute parsed data to DOM grid
-                for (let r = 0; r < rows.length; r++) {
-                    for (let c = 0; c < rows[r].length; c++) {
-                        const targetCell = tbody.querySelector(`div[data-r="${startRow + r}"][data-c="${startCol + c}"]`);
-                        if (targetCell) {
-                            targetCell.innerText = rows[r][c].trim();
-                        }
-                    }
-                }
-            });
-        }
-
-        function clearSheet() {
-            if(confirm("Clear all data in the grid?")) {
-                document.querySelectorAll('#spreadsheet-body div').forEach(div => div.innerText = '');
+        function logToConsole(msg) {
+            const consoleEl = document.getElementById('sync-console');
+            const wrapper = document.getElementById('sync-console-wrapper');
+            if(consoleEl && wrapper) {
+                wrapper.classList.remove('hidden');
+                const time = new Date().toLocaleTimeString();
+                consoleEl.innerHTML += `<div><span class="text-gray-500">[${time}]</span> ${msg}</div>`;
+                consoleEl.scrollTop = consoleEl.scrollHeight;
             }
         }
-
-        async function processBuiltInSheet() {
-            const teamSelect = document.getElementById('sheet-team-select');
-            const teamName = teamSelect.value;
-            if(!teamName) return alert("Please select a Team from the dropdown first.");
-
-            const btn = document.getElementById('btn-process-sheet');
-            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Processing...`;
-            lucide.createIcons();
-
-            // Extract 2D array from DOM grid
-            const rows = [];
-            const trs = document.querySelectorAll('#spreadsheet-body tr');
-            trs.forEach(tr => {
-                const rowData = [];
-                tr.querySelectorAll('td div').forEach(div => rowData.push(div.innerText.trim()));
-                // Only push if row has some data
-                if(rowData.some(cell => cell !== '')) {
-                    rows.push(rowData);
-                }
-            });
-
-            if(rows.length < 2) {
-                btn.innerHTML = `<i data-lucide="cpu" class="w-4 h-4 mr-2"></i> Process & Sync`;
-                lucide.createIcons();
-                return alert("No readable data found. Ensure you pasted a schedule with headers.");
-            }
-
-            await fetchServantsData();
-            const existingNames = new Set(localServants.map(srv => srv.Name.toLowerCase()));
-            const existingPasses = await DB.fetchAllPasses();
-            const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
-            
-            let newCount = 0; let passesCount = 0;
-            const s = GLOBAL_SETTINGS;
-
-            try {
-                let nameIndices = []; let timingIdx = -1; let phoneIdx = -1;
-                for(let r = 0; r < Math.min(6, rows.length); r++) {
-                    const hdrs = rows[r].map(h => h.toLowerCase());
-                    hdrs.forEach((h, idx) => {
-                        if(h.includes('اسم') && !h.includes('مواعيد')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
-                        if(h.includes('مواعيد') || h.includes('مكان') || h.includes('timing') || h.includes('المكان')) timingIdx = idx;
-                        if(phoneIdx === -1 && (h.includes('phone') || h.includes('mobile') || h.includes('رقم') || h.includes('تليفون') || h.includes('موبايل'))) phoneIdx = idx;
-                    });
-                }
-                if(nameIndices.length === 0) nameIndices = [1, 2, 3]; // fallback
-                
-                const invalidPhrases = ['الاسم', 'تسلسل', 'المكان', 'المواعيد', 'note', 'شريطة', 'قديم', 'جديد', 'no need', 'ملاحظات', 'فقط', 'only'];
-
-                for(let i=0; i<rows.length; i++) {
-                    const row = rows[i]; if(!row || row.length === 0) continue;
-                    
-                    let timingText = '';
-                    if(timingIdx !== -1 && row[timingIdx]) {
-                        timingText = row[timingIdx].replace(/"/g, '').trim();
-                    } else {
-                        let foundTiming = row.find(c => (c.includes('ص') && c.includes('الى')) || c.includes('جوارجيوس') || c.includes('انطونيوس'));
-                        if(foundTiming) timingText = foundTiming.replace(/"/g, '').trim();
-                    }
-                    
-                    if(!timingText || invalidPhrases.some(inv => timingText.toLowerCase() === inv)) continue;
-
-                    // Dynamic Location Extractor
-                    let loc = "St. George Church";
-                    if (timingText.includes("جوار")) loc = "St. George Church";
-                    else if (timingText.includes("نطونيوس")) loc = "St. Antonios Church";
-                    else if (timingText.includes("يوسف سلامة")) loc = "Youssef Salama Hall";
-
-                    // Clean Event Name
-                    let eventName = timingText
-                        .replace(/كنيسة جوارجيوس/g, '')
-                        .replace(/كنيسة جوارديوس/g, '')
-                        .replace(/كنيسة انبا أنطونيوس/g, '')
-                        .replace(/كنيسة الانبا انطونيوس/g, '')
-                        .replace(/قاعة يوسف سلامة/g, '')
-                        .replace(/\n/g, ' ')
-                        .replace(/ +/g, ' ')
-                        .trim();
-
-                    if(!eventName) continue;
-
-                    // Register Event Automatically
-                    let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === eventName);
-                    if(!existingEv) {
-                        existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: eventName, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
-                        GLOBAL_SETTINGS.events.push(existingEv);
-                        await DB.updateSettings(GLOBAL_SETTINGS); 
-                    }
-
-                    for(let idx of nameIndices) {
-                        if(idx < row.length && row[idx]) {
-                            let rawName = row[idx].replace(/"/g, '').trim();
-                            let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
-                            for(let name of subNames) {
-                                let isInv = invalidPhrases.some(inv => name.toLowerCase().includes(inv));
-                                if(isInv || name.length <= 2 || name.match(/^[\d\s\W]+$/)) continue;
-
-                                let phone = 'N/A';
-                                if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
-                                    let p = row[phoneIdx].replace(/"/g, '').trim();
-                                    if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
-                                }
-
-                                // Update Directory
-                                if(!existingNames.has(name.toLowerCase())) {
-                                    await DB.saveServant({ Name: name, Phone: phone, Team: teamName, PhotoURL: "" });
-                                    existingNames.add(name.toLowerCase());
-                                    newCount++;
-                                }
-
-                                // Auto Assign Pass
-                                const passKey = `${name.toLowerCase()}_${existingEv.id}`;
-                                if(!passCache.has(passKey)) {
-                                    const passId = `LWT-` + Math.random().toString(36).substring(2, 8).toUpperCase();
-                                    let zones = teamName === 'IT Team' ? 'ALL ZONES' : (existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES');
-                                    
-                                    await DB.savePass({
-                                        PassID: passId, Name: name, Phone: phone, Team: teamName,
-                                        Event: existingEv.id, Mass: 'N/A', Location: loc,
-                                        AllowedZones: zones, PhotoURL: "", Status: 'VALID', EntryTime: new Date().toISOString()
-                                    });
-                                    passCache.add(passKey);
-                                    passesCount++;
-                                }
-                            }
-                        }
-                    }
-                }
-                alert(`Sync Complete! Added ${newCount} servants & auto-assigned ${passesCount} shifts to Passes tab.`);
-            } catch (e) {
-                console.error("Error processing sheet data:", e);
-                alert("Error processing the grid data.");
-            } finally {
-                btn.innerHTML = `<i data-lucide="cpu" class="w-4 h-4 mr-2"></i> Process & Sync`;
-                lucide.createIcons();
-                await fetchServantsData();
-            }
-        }
-
 
         // --- UI STATE & LOGIC ---
         let currentSubmitAction = 'generate';
@@ -1042,7 +841,6 @@
             populateDropdown('g-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('s-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
-            populateDropdown('sheet-team-select', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             
             const activeEvents = settings.events;
             populateDropdown('g-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
@@ -1178,13 +976,20 @@
             }
         }
 
+        // --- Iframe Loader ---
+        function loadIframe() {
+            const team = document.getElementById('iframe-team-select').value;
+            const iframe = document.getElementById('live-google-sheet-iframe');
+            if (team === 'live') iframe.src = GLOBAL_SETTINGS.sheetUrlLive || '';
+            else iframe.src = GLOBAL_SETTINGS.sheetUrlData || '';
+        }
+
         // --- ROUTING ---
         let scanner = null;
         let isAdminLoggedIn = false;
         window.addEventListener('hashchange', handleRoute);
         window.addEventListener('load', async () => { 
             await applyGlobalSettings(); 
-            initSpreadsheet(); // Init grid
             if(!window.location.hash) window.location.hash = '#/scan'; 
             handleRoute(); 
         });
@@ -1205,6 +1010,7 @@
 
             if(scanner) { scanner.clear(); scanner = null; }
 
+            // Security logic: User navigates away from admin, lock session
             if (!hash.startsWith('#/admin') && hash !== '#/sheet') {
                 isAdminLoggedIn = false;
             }
@@ -1214,20 +1020,22 @@
                 document.getElementById('nav-scan').classList.add('text-brand-yellow', 'bg-brand-panel');
                 scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
                 scanner.render(onScanSuccess, ()=>{});
+            } else if (hash === '#/sheet') {
+                if(!isAdminLoggedIn) { window.location.hash = '#/admin'; return; }
+                document.getElementById('view-sheet').classList.add('active');
+                loadIframe(); 
             } else if (hash.startsWith('#/admin')) {
-                document.getElementById('view-admin').classList.add('active');
                 document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
                 if(isAdminLoggedIn) {
                     document.getElementById('admin-login').classList.add('hidden');
                     document.getElementById('admin-dashboard').classList.remove('hidden');
-                    if(!document.querySelector('.admin-tab.bg-brand-yellow')) switchAdminTab('generate');
+                    document.getElementById('view-admin').classList.add('active');
+                    if(!document.querySelector('.admin-tab.bg-brand-yellow')) switchAdminTab('sync');
                 } else {
                     document.getElementById('admin-login').classList.remove('hidden');
                     document.getElementById('admin-dashboard').classList.add('hidden');
+                    document.getElementById('view-admin').classList.add('active');
                 }
-            } else if (hash === '#/sheet') {
-                if(!isAdminLoggedIn) { window.location.hash = '#/admin'; return; }
-                document.getElementById('view-sheet').classList.add('active');
             } else if (hash.startsWith('#/pass/')) {
                 document.getElementById('view-pass').classList.add('active');
                 verifyPass(hash.split('#/pass/')[1]);
@@ -1327,8 +1135,7 @@
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 
-                // Always default to generate tab upon login
-                switchAdminTab('generate');
+                switchAdminTab('sync');
                 renderSettingsUI();
             } else {
                 document.getElementById('login-msg').textContent = "Incorrect password."; document.getElementById('login-msg').classList.add('text-red-500');
@@ -1355,7 +1162,7 @@
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 
-                switchAdminTab('generate');
+                switchAdminTab('sync');
                 renderSettingsUI();
             } else {
                 alert("Incorrect Emergency password.");
@@ -1372,7 +1179,7 @@
                 locations: ["St George Church", "St Anthony Church"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                logos: { church: "", ltw: "", scout: "" }
+                logos: { church: "", ltw: "", scout: "" }, sheetUrlLive: "", sheetUrlData: "", colMapping: { names: "", event: "", phone: "" }
             };
 
             if(type === 'passes') {
@@ -1393,6 +1200,213 @@
                 await DB.updateSettings(defaultSettings);
                 alert("Complete factory reset successful. All data cleared.");
                 loadManageTable(); loadStats(); fetchServantsData();
+            }
+        }
+
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
+            
+            const targetSec = document.getElementById(`admin-tab-${tab}`);
+            const targetTab = document.getElementById(`tab-${tab}`);
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetTab) {
+                targetTab.classList.add('bg-brand-yellow', 'text-black');
+                targetTab.classList.remove('text-gray-400', 'bg-transparent');
+            }
+            
+            if(tab === 'manage') loadManageTable(); 
+            if(tab === 'servants') loadServantsTable();
+            if(tab === 'stats') loadStats();
+        }
+
+        // --- BUILT-IN SYNC HUB WITH COLUMN MAPPING ---
+        async function saveMappingSettings() {
+            GLOBAL_SETTINGS.colMapping.names = document.getElementById('map-names').value.trim().toUpperCase();
+            GLOBAL_SETTINGS.colMapping.event = document.getElementById('map-event').value.trim().toUpperCase();
+            GLOBAL_SETTINGS.colMapping.phone = document.getElementById('map-phone').value.trim().toUpperCase();
+            await DB.updateSettings(GLOBAL_SETTINGS);
+            alert("Column mapping saved!");
+        }
+
+        function letterToIdx(letter) {
+            if(!letter) return -1;
+            let col = 0;
+            for(let i=0; i<letter.length; i++) {
+                col = col * 26 + (letter.charCodeAt(i) - 64);
+            }
+            return col - 1;
+        }
+
+        async function startBuiltInSync() {
+            const btn = document.querySelector('#admin-tab-sync button i.lucide-zap').parentNode;
+            btn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing... Do not close window.</span>`;
+            document.getElementById('sync-console-wrapper').classList.remove('hidden');
+            document.getElementById('sync-console').innerHTML = ''; // clear log
+            lucide.createIcons();
+
+            await syncBuiltInSheets();
+            
+            btn.innerHTML = `<i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Scan Live Sheets & Generate Passes</span>`;
+            lucide.createIcons();
+        }
+
+        async function syncBuiltInSheets() {
+            logToConsole("Starting Built-in Spreadsheet Sync...");
+            let newCount = 0; let passesCount = 0;
+            const s = GLOBAL_SETTINGS;
+            
+            await fetchServantsData();
+            const existingNames = new Set(localServants.map(srv => srv.Name.toLowerCase()));
+            const existingPasses = await DB.fetchAllPasses();
+            const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
+
+            async function processGrid(url, teamName) {
+                if(!url) {
+                    logToConsole(`Skipping ${teamName} - No URL provided.`);
+                    return;
+                }
+                try {
+                    logToConsole(`Downloading ${teamName} schedule...`);
+                    let fetchUrl = url.trim();
+                    if (fetchUrl.includes('/edit')) fetchUrl = fetchUrl.split('/edit')[0] + '/export?format=csv';
+                    else if (fetchUrl.includes('/pubhtml')) fetchUrl = fetchUrl.replace('/pubhtml', '/pub') + '?output=csv';
+                    else if (fetchUrl.includes('/pub?') && !fetchUrl.includes('output=csv')) fetchUrl += '&output=csv';
+
+                    const res = await fetch(fetchUrl);
+                    const text = await res.text();
+                    if (text.toLowerCase().includes('<!doctype html>')) {
+                        logToConsole(`<span class="text-red-500">ERROR: Invalid format. Ensure the sheet is published to the web.</span>`);
+                        throw new Error('Not CSV Format');
+                    }
+                    
+                    const rows = [];
+                    let currentRow = []; let currentCell = ''; let inQuotes = false;
+                    for (let i = 0; i < text.length; i++) {
+                        let char = text[i];
+                        if (char === '"') inQuotes = !inQuotes;
+                        else if (char === ',' && !inQuotes) { currentRow.push(currentCell.trim()); currentCell = ''; }
+                        else if (char === '\n' && !inQuotes) { currentRow.push(currentCell.trim()); rows.push(currentRow); currentRow = []; currentCell = ''; }
+                        else if (char !== '\r') currentCell += char;
+                    }
+                    if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
+
+                    if(rows.length >= 2) {
+                        let nameIndices = []; let timingIdx = -1; let phoneIdx = -1;
+
+                        // Check if manual mapping is provided
+                        if(s.colMapping && s.colMapping.names) {
+                            nameIndices = s.colMapping.names.split(',').map(l => letterToIdx(l.trim()));
+                            timingIdx = letterToIdx(s.colMapping.event);
+                            phoneIdx = letterToIdx(s.colMapping.phone);
+                            logToConsole(`Using custom column mapping...`);
+                        } else {
+                            // Auto-detect
+                            for(let r = 0; r < Math.min(6, rows.length); r++) {
+                                const hdrs = rows[r].map(h => h.toLowerCase());
+                                hdrs.forEach((h, idx) => {
+                                    if(h.includes('اسم') && !h.includes('مواعيد')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
+                                    if(h.includes('مواعيد') || h.includes('مكان') || h.includes('timing') || h.includes('المكان')) timingIdx = idx;
+                                    if(phoneIdx === -1 && (h.includes('phone') || h.includes('mobile') || h.includes('رقم') || h.includes('تليفون') || h.includes('موبايل'))) phoneIdx = idx;
+                                });
+                            }
+                            if(nameIndices.length === 0) nameIndices = [1, 2, 3]; 
+                            logToConsole(`Auto-detected headers. Parsing ${rows.length} rows...`);
+                        }
+
+                        const invalidPhrases = ['الاسم', 'تسلسل', 'المكان', 'المواعيد', 'note', 'شريطة', 'قديم', 'جديد', 'no need', 'ملاحظات', 'فقط', 'only'];
+
+                        for(let i=0; i<rows.length; i++) {
+                            const row = rows[i]; if(!row || row.length === 0) continue;
+                            
+                            let timingText = '';
+                            if(timingIdx !== -1 && row[timingIdx]) {
+                                timingText = row[timingIdx].replace(/"/g, '').trim();
+                            } else {
+                                let foundTiming = row.find(c => (c.includes('ص') && c.includes('الى')) || c.includes('جوارجيوس') || c.includes('انطونيوس'));
+                                if(foundTiming) timingText = foundTiming.replace(/"/g, '').trim();
+                            }
+                            
+                            if(!timingText || invalidPhrases.some(inv => timingText.toLowerCase() === inv)) continue;
+
+                            let loc = "St. George Church";
+                            if (timingText.includes("جوار")) loc = "St. George Church";
+                            else if (timingText.includes("نطونيوس")) loc = "St. Antonios Church";
+                            else if (timingText.includes("يوسف سلامة")) loc = "Youssef Salama Hall";
+
+                            let eventName = timingText
+                                .replace(/كنيسة جوارجيوس/g, '')
+                                .replace(/كنيسة جوارديوس/g, '')
+                                .replace(/كنيسة انبا أنطونيوس/g, '')
+                                .replace(/كنيسة الانبا انطونيوس/g, '')
+                                .replace(/قاعة يوسف سلامة/g, '')
+                                .replace(/\n/g, ' ')
+                                .replace(/ +/g, ' ')
+                                .trim();
+
+                            if(!eventName) continue;
+
+                            let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === eventName);
+                            if(!existingEv) {
+                                existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: eventName, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
+                                GLOBAL_SETTINGS.events.push(existingEv);
+                                await DB.updateSettings(GLOBAL_SETTINGS); 
+                                logToConsole(`Created new event: <b>${eventName}</b>`);
+                            }
+
+                            for(let idx of nameIndices) {
+                                if(idx !== -1 && idx < row.length && row[idx]) {
+                                    let rawName = row[idx].replace(/"/g, '').trim();
+                                    let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
+                                    for(let name of subNames) {
+                                        let isInv = invalidPhrases.some(inv => name.toLowerCase().includes(inv));
+                                        if(isInv || name.length <= 2 || name.match(/^[\d\s\W]+$/)) continue;
+
+                                        let phone = 'N/A';
+                                        if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
+                                            let p = row[phoneIdx].replace(/"/g, '').trim();
+                                            if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
+                                        }
+
+                                        if(!existingNames.has(name.toLowerCase())) {
+                                            await DB.saveServant({ Name: name, Phone: phone, Team: teamName, PhotoURL: "" });
+                                            existingNames.add(name.toLowerCase());
+                                            newCount++;
+                                            logToConsole(`Added servant: ${name}`);
+                                        }
+
+                                        const passKey = `${name.toLowerCase()}_${existingEv.id}`;
+                                        if(!passCache.has(passKey)) {
+                                            const passId = `LWT-` + Math.random().toString(36).substring(2, 8).toUpperCase();
+                                            let zones = teamName === 'IT Team' ? 'ALL ZONES' : (existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES');
+                                            
+                                            await DB.savePass({
+                                                PassID: passId, Name: name, Phone: phone, Team: teamName,
+                                                Event: existingEv.id, Mass: 'N/A', Location: loc,
+                                                AllowedZones: zones, PhotoURL: "", Status: 'VALID', EntryTime: new Date().toISOString()
+                                            });
+                                            passCache.add(passKey);
+                                            passesCount++;
+                                            logToConsole(`Generated pass for ${name} (${eventName})`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.error("Error processing " + teamName, e);
+                    logToConsole(`<span class="text-red-500">Error processing ${teamName}: ${e.message}</span>`);
+                }
+            }
+
+            await processGrid(s.sheetUrlLive, "Live Team");
+            await processGrid(s.sheetUrlData, "Data Show Team");
+
+            logToConsole(`<span class="text-green-400 font-bold">Sync Complete! Added ${newCount} servants & generated ${passesCount} passes.</span>`);
+            await fetchServantsData();
+            if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) {
+                loadServantsTable();
             }
         }
 
@@ -1459,6 +1473,7 @@
 
         async function loadServantsTable() {
             const tbody = document.getElementById('servants-table-body');
+            if (!tbody) return;
             tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
             lucide.createIcons();
             
@@ -1688,7 +1703,13 @@
         function renderSettingsUI() {
             const s = GLOBAL_SETTINGS;
             document.getElementById('set-first-pwd').value = s.firstTimePassword;
+            if(document.getElementById('set-sheet-live')) document.getElementById('set-sheet-live').value = s.sheetUrlLive || '';
+            if(document.getElementById('set-sheet-data')) document.getElementById('set-sheet-data').value = s.sheetUrlData || '';
             
+            if(document.getElementById('map-names')) document.getElementById('map-names').value = s.colMapping.names || '';
+            if(document.getElementById('map-event')) document.getElementById('map-event').value = s.colMapping.event || '';
+            if(document.getElementById('map-phone')) document.getElementById('map-phone').value = s.colMapping.phone || '';
+
             document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `
                 <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
                     <span>${'*'.repeat(p.length)}</span>
@@ -1762,6 +1783,12 @@
         }
 
         async function updateSettingsField(field, value) { GLOBAL_SETTINGS[field] = value; await DB.updateSettings(GLOBAL_SETTINGS); }
+        async function saveSheetUrls() {
+            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
+            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
+            await DB.updateSettings(GLOBAL_SETTINGS);
+            alert("Google Sheet Links saved.");
+        }
         async function addItemToSettingArray(field, inputId) { const val = document.getElementById(inputId).value.trim(); if(val) { GLOBAL_SETTINGS[field].push(val); document.getElementById(inputId).value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
         async function removeSettingItem(field, idx) { if(confirm('Delete item?')) { GLOBAL_SETTINGS[field].splice(idx, 1); await DB.updateSettings(GLOBAL_SETTINGS); } }
         
