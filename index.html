@@ -86,12 +86,6 @@
                         <i data-lucide="shield" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Admin
                     </a>
                 </div>
-
-                <div id="sheet-nav-links" class="flex items-center hidden">
-                    <a href="#/admin" class="px-4 py-2 rounded-lg text-sm font-bold bg-brand-border text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm">
-                        <i data-lucide="arrow-right" class="w-4 h-4 mr-2"></i> Back to Admin
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
@@ -175,26 +169,6 @@
             </div>
         </div>
 
-        <!-- View: EMBEDDED SPREADSHEET VIEWER -->
-        <div id="view-sheet" class="view w-full h-full flex-grow flex flex-col min-h-[70vh]">
-            <div class="bg-brand-panel p-4 rounded-t-3xl shadow-2xl border-x border-t border-brand-border flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-black text-white flex items-center"><i data-lucide="table" class="w-5 h-5 mr-2 text-brand-yellow"></i> Live Google Sheet</h2>
-                    <p class="text-xs text-gray-400 mt-1">Servants write their names directly in this live document.</p>
-                </div>
-                <div class="flex items-center space-x-3 w-full sm:w-auto">
-                    <select id="iframe-team-select" onchange="loadIframe()" class="px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-dark border border-brand-border text-white w-full sm:w-auto">
-                        <option value="live">Live Team Schedule</option>
-                        <option value="data">Data Show Team Schedule</option>
-                    </select>
-                </div>
-            </div>
-            <!-- The Iframe Container -->
-            <div class="flex-grow w-full bg-white rounded-b-3xl overflow-hidden border-x border-b border-brand-border shadow-2xl relative">
-                <iframe id="live-google-sheet-iframe" src="" class="absolute top-0 left-0 w-full h-full border-none"></iframe>
-            </div>
-        </div>
-
         <!-- View: ADMIN -->
         <div id="view-admin" class="view">
             <!-- Login Overlay -->
@@ -252,37 +226,71 @@
                 <!-- Tab: Sync Hub -->
                 <div id="admin-tab-sync" class="admin-section hidden space-y-6">
                     <div class="bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border">
-                        <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+                        <div class="flex flex-col md:flex-row justify-between md:items-start mb-6 gap-4 border-b border-brand-border pb-6">
                             <div>
-                                <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="refresh-cw" class="w-6 h-6 mr-2 text-brand-yellow"></i> Auto-Generate from Google Sheets</h2>
-                                <p class="text-sm text-gray-400 mt-1">Servants write their names in the "Live Sheets" tab. Click Sync below to instantly extract their names, map the events, and build their passes.</p>
+                                <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="refresh-cw" class="w-6 h-6 mr-2 text-brand-yellow"></i> Precise Range Mapping Sync</h2>
+                                <p class="text-sm text-gray-400 mt-1">Define the exact ranges (columns & rows) where your data lives. The system reads row by row. If an event or location cell is blank, it automatically inherits from the row above it!</p>
                             </div>
-                            <a href="#/sheet" class="px-6 py-3 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-xl font-bold text-sm transition-colors shadow flex items-center whitespace-nowrap"><i data-lucide="external-link" class="w-4 h-4 mr-2"></i> View Live Sheets</a>
-                        </div>
-                        
-                        <div class="p-6 bg-brand-dark rounded-2xl border border-brand-border mb-6">
-                            <h3 class="text-xs font-bold text-brand-yellow mb-4 uppercase tracking-wider"><i data-lucide="settings-2" class="w-4 h-4 inline mr-1"></i> Column Mapping Config (Optional)</h3>
-                            <p class="text-xs text-gray-400 mb-4">The AI auto-detects names and timings, but you can force it to read specific columns (e.g. A, B, C) if the sheet layout is very unusual.</p>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Name Columns (Comma separated)</label>
-                                    <input type="text" id="map-names" placeholder="e.g. B, C, D" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Event / Timing Column</label>
-                                    <input type="text" id="map-event" placeholder="e.g. E" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Phone Column</label>
-                                    <input type="text" id="map-phone" placeholder="e.g. F" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
-                                </div>
-                            </div>
-                            <button onclick="saveMappingSettings()" class="mt-3 px-4 py-2 bg-brand-border hover:bg-gray-600 text-white rounded text-xs font-bold transition-colors">Save Column Mapping</button>
                         </div>
 
-                        <button onclick="startBuiltInSync()" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
-                            <i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Scan Live Sheets & Generate Passes</span>
-                        </button>
+                        <!-- Column Mapping Engine -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <!-- Team 1 -->
+                            <div class="p-6 bg-brand-dark rounded-2xl border border-brand-border">
+                                <h3 class="text-sm font-black text-brand-yellow mb-4 uppercase tracking-wider border-b border-brand-border pb-2"><i data-lucide="table" class="w-4 h-4 inline mr-1"></i> Live Team Sheet Setup</h3>
+                                <input type="text" id="set-sheet-live" placeholder="Live Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm mb-4 bg-brand-panel text-white">
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Events (Name + Time) Range:</label>
+                                        <input type="text" id="live-event-rng" placeholder="e.g. A3:A50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Locations Range:</label>
+                                        <input type="text" id="live-loc-rng" placeholder="e.g. B3:B50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Servant Names Range(s):</label>
+                                        <input type="text" id="live-name-rng" placeholder="e.g. C3:E50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Team 2 -->
+                            <div class="p-6 bg-brand-dark rounded-2xl border border-brand-border">
+                                <h3 class="text-sm font-black text-blue-500 mb-4 uppercase tracking-wider border-b border-brand-border pb-2"><i data-lucide="table" class="w-4 h-4 inline mr-1"></i> Data Show Team Setup</h3>
+                                <input type="text" id="set-sheet-data" placeholder="Data Show Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm mb-4 bg-brand-panel text-white">
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Events (Name + Time) Range:</label>
+                                        <input type="text" id="data-event-rng" placeholder="e.g. A3:A50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Locations Range:</label>
+                                        <input type="text" id="data-loc-rng" placeholder="e.g. B3:B50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Servant Names Range(s):</label>
+                                        <input type="text" id="data-name-rng" placeholder="e.g. C3:E50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Global Skip Words -->
+                        <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border mb-6">
+                            <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-2">Global Skip Words (Comma Separated)</h3>
+                            <p class="text-xs text-gray-400 mb-3">If a cell contains any of these words, the system will completely ignore that cell. Prevents headers or placeholders from becoming passes.</p>
+                            <input type="text" id="global-skip-words" placeholder="e.g. no need, -, الاسم الاول, تسلسل" class="w-full px-4 py-3 rounded-lg text-sm border border-brand-border bg-[#1A1A1A]">
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button onclick="saveSyncSettings()" class="w-full sm:w-1/3 py-4 bg-brand-border hover:bg-gray-700 text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
+                                <i data-lucide="save" class="w-5 h-5 mr-2"></i> Save Config
+                            </button>
+                            <button onclick="startBuiltInSync()" class="w-full flex-1 py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
+                                <i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Sync & Generate Passes</span>
+                            </button>
+                        </div>
                         
                         <div id="sync-console-wrapper" class="hidden mt-6">
                             <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase">Sync Console Log</h3>
@@ -510,17 +518,6 @@
                                 </div>
                             </div>
 
-                            <!-- Integration -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="link" class="w-4 h-4 mr-2"></i> Embed Google Sheets Configuration</h3>
-                                <p class="text-xs text-gray-400 mb-3">Paste the <b>"Publish to Web" (HTML)</b> links here. The system will embed them for viewing in the Live Sheets tab, and fetch the CSV version automatically during auto-sync.</p>
-                                <div class="space-y-3 mb-3">
-                                    <input type="text" id="set-sheet-live" placeholder="Live Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                    <input type="text" id="set-sheet-data" placeholder="Data Show Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                </div>
-                                <button onclick="saveSheetUrls()" class="w-full px-4 py-3 bg-brand-border hover:bg-gray-600 rounded-lg text-sm font-bold text-white shadow transition-colors">Save Links</button>
-                            </div>
-
                             <!-- Events & Masses -->
                             <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Events & Dates</h3>
@@ -724,7 +721,16 @@
                         GLOBAL_SETTINGS = doc.data();
                         if(!GLOBAL_SETTINGS.events) GLOBAL_SETTINGS.events = [];
                         GLOBAL_SETTINGS.events.forEach(e => { if(!e.date) e.date = ""; if(!e.allowedZones) e.allowedZones = GLOBAL_SETTINGS.zones || []; });
-                        if(!GLOBAL_SETTINGS.colMapping) GLOBAL_SETTINGS.colMapping = { names: "", event: "", phone: "" };
+                        
+                        // Default structures for new mapping variables if not present
+                        if(!GLOBAL_SETTINGS.liveMapping) GLOBAL_SETTINGS.liveMapping = { events: "A3:A100", locations: "B3:B100", names: "C3:E100" };
+                        if(!GLOBAL_SETTINGS.dataMapping) GLOBAL_SETTINGS.dataMapping = { events: "A3:A100", locations: "B3:B100", names: "C3:E100" };
+                        if(!GLOBAL_SETTINGS.skipWords) GLOBAL_SETTINGS.skipWords = "no need, -, الاسم, تسلسل, شريطة, ملاحظات";
+
+                        if(GLOBAL_SETTINGS.teamColors && GLOBAL_SETTINGS.teamColors["N/A"]) {
+                            delete GLOBAL_SETTINGS.teamColors["N/A"];
+                            await this.updateSettings(GLOBAL_SETTINGS);
+                        }
                     } else {
                         GLOBAL_SETTINGS = {
                             firstTimePassword: "LTW@SGAA26", adminPasswords: [],
@@ -734,9 +740,10 @@
                             zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                             events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
                             logos: { church: "", ltw: "", scout: "" },
-                            sheetUrlLive: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtXECvY2N3TEf7UdVp-vlXcV1NYOiJOMrpwn0QuDc01qcj74iy6uGHVxO2M20FNaOPc4Wjjv8-wrVE/pubhtml?widget=true&amp;headers=false", 
-                            sheetUrlData: "",
-                            colMapping: { names: "", event: "", phone: "" }
+                            sheetUrlLive: "", sheetUrlData: "",
+                            liveMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
+                            dataMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
+                            skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات"
                         };
                         await firestoreDB.collection('admin').doc('settings').set(GLOBAL_SETTINGS);
                     }
@@ -806,6 +813,60 @@
                 consoleEl.innerHTML += `<div><span class="text-gray-500">[${time}]</span> ${msg}</div>`;
                 consoleEl.scrollTop = consoleEl.scrollHeight;
             }
+        }
+
+        // --- RANGE MAPPING LOGIC ---
+        function colToIdx(letter) {
+            let col = 0;
+            for(let i=0; i<letter.length; i++) col = col * 26 + (letter.toUpperCase().charCodeAt(i) - 64);
+            return col - 1;
+        }
+
+        function parseRange(rangeStr) {
+            if (!rangeStr) return [];
+            return rangeStr.split(',').map(s => s.trim()).filter(s=>s).map(part => {
+                const match = part.match(/([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?/i);
+                if (!match) return null;
+                const c1 = colToIdx(match[1]);
+                const r1 = parseInt(match[2]) - 1;
+                const c2 = match[3] ? colToIdx(match[3]) : c1;
+                const r2 = match[4] ? parseInt(match[4]) - 1 : r1;
+                return {
+                    minCol: Math.min(c1, c2), maxCol: Math.max(c1, c2),
+                    minRow: Math.min(r1, r2), maxRow: Math.max(r1, r2)
+                };
+            }).filter(r => r !== null);
+        }
+
+        function extractFromRanges(rowArr, rowIndex, ranges) {
+            let texts = [];
+            for (let rng of ranges) {
+                if (rowIndex >= rng.minRow && rowIndex <= rng.maxRow) {
+                    for (let c = rng.minCol; c <= rng.maxCol; c++) {
+                        if (c < rowArr.length && rowArr[c]) {
+                            texts.push(rowArr[c].replace(/"/g, '').trim());
+                        }
+                    }
+                }
+            }
+            return texts;
+        }
+
+        async function saveSyncSettings() {
+            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
+            GLOBAL_SETTINGS.liveMapping.events = document.getElementById('live-event-rng').value;
+            GLOBAL_SETTINGS.liveMapping.locations = document.getElementById('live-loc-rng').value;
+            GLOBAL_SETTINGS.liveMapping.names = document.getElementById('live-name-rng').value;
+            
+            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
+            GLOBAL_SETTINGS.dataMapping.events = document.getElementById('data-event-rng').value;
+            GLOBAL_SETTINGS.dataMapping.locations = document.getElementById('data-loc-rng').value;
+            GLOBAL_SETTINGS.dataMapping.names = document.getElementById('data-name-rng').value;
+            
+            GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
+            
+            await DB.updateSettings(GLOBAL_SETTINGS);
+            alert("Mapping Settings Saved!");
         }
 
         // --- UI STATE & LOGIC ---
@@ -976,14 +1037,6 @@
             }
         }
 
-        // --- Iframe Loader ---
-        function loadIframe() {
-            const team = document.getElementById('iframe-team-select').value;
-            const iframe = document.getElementById('live-google-sheet-iframe');
-            if (team === 'live') iframe.src = GLOBAL_SETTINGS.sheetUrlLive || '';
-            else iframe.src = GLOBAL_SETTINGS.sheetUrlData || '';
-        }
-
         // --- ROUTING ---
         let scanner = null;
         let isAdminLoggedIn = false;
@@ -998,20 +1051,10 @@
             const hash = window.location.hash;
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             
-            // Handle Navigation Bar Toggles
-            if (hash === '#/sheet') {
-                document.getElementById('main-nav-links').classList.add('hidden');
-                document.getElementById('sheet-nav-links').classList.remove('hidden');
-            } else {
-                document.getElementById('main-nav-links').classList.remove('hidden');
-                document.getElementById('sheet-nav-links').classList.add('hidden');
-                document.querySelectorAll('#main-nav-links .nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
-            }
-
             if(scanner) { scanner.clear(); scanner = null; }
 
             // Security logic: User navigates away from admin, lock session
-            if (!hash.startsWith('#/admin') && hash !== '#/sheet') {
+            if (!hash.startsWith('#/admin')) {
                 isAdminLoggedIn = false;
             }
 
@@ -1020,10 +1063,6 @@
                 document.getElementById('nav-scan').classList.add('text-brand-yellow', 'bg-brand-panel');
                 scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
                 scanner.render(onScanSuccess, ()=>{});
-            } else if (hash === '#/sheet') {
-                if(!isAdminLoggedIn) { window.location.hash = '#/admin'; return; }
-                document.getElementById('view-sheet').classList.add('active');
-                loadIframe(); 
             } else if (hash.startsWith('#/admin')) {
                 document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
                 if(isAdminLoggedIn) {
@@ -1179,7 +1218,10 @@
                 locations: ["St George Church", "St Anthony Church"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
-                logos: { church: "", ltw: "", scout: "" }, sheetUrlLive: "", sheetUrlData: "", colMapping: { names: "", event: "", phone: "" }
+                logos: { church: "", ltw: "", scout: "" }, sheetUrlLive: "", sheetUrlData: "",
+                liveMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
+                dataMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
+                skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات"
             };
 
             if(type === 'passes') {
@@ -1220,24 +1262,7 @@
             if(tab === 'stats') loadStats();
         }
 
-        // --- BUILT-IN SYNC HUB WITH COLUMN MAPPING ---
-        async function saveMappingSettings() {
-            GLOBAL_SETTINGS.colMapping.names = document.getElementById('map-names').value.trim().toUpperCase();
-            GLOBAL_SETTINGS.colMapping.event = document.getElementById('map-event').value.trim().toUpperCase();
-            GLOBAL_SETTINGS.colMapping.phone = document.getElementById('map-phone').value.trim().toUpperCase();
-            await DB.updateSettings(GLOBAL_SETTINGS);
-            alert("Column mapping saved!");
-        }
-
-        function letterToIdx(letter) {
-            if(!letter) return -1;
-            let col = 0;
-            for(let i=0; i<letter.length; i++) {
-                col = col * 26 + (letter.charCodeAt(i) - 64);
-            }
-            return col - 1;
-        }
-
+        // --- BUILT-IN SYNC HUB WITH PRECISE RANGE MAPPING ---
         async function startBuiltInSync() {
             const btn = document.querySelector('#admin-tab-sync button i.lucide-zap').parentNode;
             btn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing... Do not close window.</span>`;
@@ -1247,12 +1272,12 @@
 
             await syncBuiltInSheets();
             
-            btn.innerHTML = `<i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Scan Live Sheets & Generate Passes</span>`;
+            btn.innerHTML = `<i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Sync & Generate Passes</span>`;
             lucide.createIcons();
         }
 
         async function syncBuiltInSheets() {
-            logToConsole("Starting Built-in Spreadsheet Sync...");
+            logToConsole("Starting Precise Range Sync...");
             let newCount = 0; let passesCount = 0;
             const s = GLOBAL_SETTINGS;
             
@@ -1261,11 +1286,13 @@
             const existingPasses = await DB.fetchAllPasses();
             const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
 
-            async function processGrid(url, teamName) {
-                if(!url) {
-                    logToConsole(`Skipping ${teamName} - No URL provided.`);
-                    return;
-                }
+            const liveMap = { events: parseRange(s.liveMapping.events), locs: parseRange(s.liveMapping.locations), names: parseRange(s.liveMapping.names) };
+            const dataMap = { events: parseRange(s.dataMapping.events), locs: parseRange(s.dataMapping.locations), names: parseRange(s.dataMapping.names) };
+            const skipWords = s.skipWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w);
+
+            async function processSheet(url, teamName) {
+                if(!url) { logToConsole(`Skipping ${teamName} - No URL provided.`); return; }
+                
                 try {
                     logToConsole(`Downloading ${teamName} schedule...`);
                     let fetchUrl = url.trim();
@@ -1276,7 +1303,7 @@
                     const res = await fetch(fetchUrl);
                     const text = await res.text();
                     if (text.toLowerCase().includes('<!doctype html>')) {
-                        logToConsole(`<span class="text-red-500">ERROR: Invalid format. Ensure the sheet is published to the web.</span>`);
+                        logToConsole(`<span class="text-red-500">ERROR: Invalid format. Ensure the sheet is published to the web as CSV.</span>`);
                         throw new Error('Not CSV Format');
                     }
                     
@@ -1284,57 +1311,29 @@
                     let currentRow = []; let currentCell = ''; let inQuotes = false;
                     for (let i = 0; i < text.length; i++) {
                         let char = text[i];
-                        if (char === '"') inQuotes = !inQuotes;
+                        if (char === '"' && text[i+1] === '"') { currentCell += '"'; i++; }
+                        else if (char === '"') { inQuotes = !inQuotes; }
                         else if (char === ',' && !inQuotes) { currentRow.push(currentCell.trim()); currentCell = ''; }
                         else if (char === '\n' && !inQuotes) { currentRow.push(currentCell.trim()); rows.push(currentRow); currentRow = []; currentCell = ''; }
                         else if (char !== '\r') currentCell += char;
                     }
                     if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
 
-                    if(rows.length >= 2) {
-                        let nameIndices = []; let timingIdx = -1; let phoneIdx = -1;
+                    logToConsole(`Parsing data mapped ranges...`);
 
-                        // Check if manual mapping is provided
-                        if(s.colMapping && s.colMapping.names) {
-                            nameIndices = s.colMapping.names.split(',').map(l => letterToIdx(l.trim()));
-                            timingIdx = letterToIdx(s.colMapping.event);
-                            phoneIdx = letterToIdx(s.colMapping.phone);
-                            logToConsole(`Using custom column mapping...`);
-                        } else {
-                            // Auto-detect
-                            for(let r = 0; r < Math.min(6, rows.length); r++) {
-                                const hdrs = rows[r].map(h => h.toLowerCase());
-                                hdrs.forEach((h, idx) => {
-                                    if(h.includes('اسم') && !h.includes('مواعيد')) if(!nameIndices.includes(idx)) nameIndices.push(idx);
-                                    if(h.includes('مواعيد') || h.includes('مكان') || h.includes('timing') || h.includes('المكان')) timingIdx = idx;
-                                    if(phoneIdx === -1 && (h.includes('phone') || h.includes('mobile') || h.includes('رقم') || h.includes('تليفون') || h.includes('موبايل'))) phoneIdx = idx;
-                                });
-                            }
-                            if(nameIndices.length === 0) nameIndices = [1, 2, 3]; 
-                            logToConsole(`Auto-detected headers. Parsing ${rows.length} rows...`);
-                        }
+                    const mapping = teamName === "Live Team" ? liveMap : dataMap;
 
-                        const invalidPhrases = ['الاسم', 'تسلسل', 'المكان', 'المواعيد', 'note', 'شريطة', 'قديم', 'جديد', 'no need', 'ملاحظات', 'فقط', 'only'];
+                    let currentEvent = "";
+                    let currentLocation = "St. George Church";
 
-                        for(let i=0; i<rows.length; i++) {
-                            const row = rows[i]; if(!row || row.length === 0) continue;
-                            
-                            let timingText = '';
-                            if(timingIdx !== -1 && row[timingIdx]) {
-                                timingText = row[timingIdx].replace(/"/g, '').trim();
-                            } else {
-                                let foundTiming = row.find(c => (c.includes('ص') && c.includes('الى')) || c.includes('جوارجيوس') || c.includes('انطونيوس'));
-                                if(foundTiming) timingText = foundTiming.replace(/"/g, '').trim();
-                            }
-                            
-                            if(!timingText || invalidPhrases.some(inv => timingText.toLowerCase() === inv)) continue;
-
-                            let loc = "St. George Church";
-                            if (timingText.includes("جوار")) loc = "St. George Church";
-                            else if (timingText.includes("نطونيوس")) loc = "St. Antonios Church";
-                            else if (timingText.includes("يوسف سلامة")) loc = "Youssef Salama Hall";
-
-                            let eventName = timingText
+                    for(let r = 0; r < rows.length; r++) {
+                        const row = rows[r]; if(!row || row.length === 0) continue;
+                        
+                        // Extract Event and Location using inheritance
+                        let rowEvents = extractFromRanges(row, r, mapping.events);
+                        let eventText = rowEvents.join(' ').trim();
+                        if(eventText) {
+                            currentEvent = eventText
                                 .replace(/كنيسة جوارجيوس/g, '')
                                 .replace(/كنيسة جوارديوس/g, '')
                                 .replace(/كنيسة انبا أنطونيوس/g, '')
@@ -1343,53 +1342,60 @@
                                 .replace(/\n/g, ' ')
                                 .replace(/ +/g, ' ')
                                 .trim();
+                        }
+                        
+                        let rowLocs = extractFromRanges(row, r, mapping.locs);
+                        let locText = rowLocs.join(' ').trim();
+                        if(locText) {
+                            if (locText.includes("جوار")) currentLocation = "St. George Church";
+                            else if (locText.includes("نطونيوس")) currentLocation = "St. Antonios Church";
+                            else if (locText.includes("يوسف سلامة")) currentLocation = "Youssef Salama Hall";
+                            else currentLocation = locText;
+                        }
 
-                            if(!eventName) continue;
+                        if(!currentEvent) continue; 
 
-                            let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === eventName);
-                            if(!existingEv) {
-                                existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: eventName, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
-                                GLOBAL_SETTINGS.events.push(existingEv);
-                                await DB.updateSettings(GLOBAL_SETTINGS); 
-                                logToConsole(`Created new event: <b>${eventName}</b>`);
-                            }
+                        // Register Event Automatically
+                        let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === currentEvent);
+                        if(!existingEv) {
+                            existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: currentEvent, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
+                            GLOBAL_SETTINGS.events.push(existingEv);
+                            await DB.updateSettings(GLOBAL_SETTINGS); 
+                            logToConsole(`Created new event: <b>${currentEvent}</b>`);
+                        }
 
-                            for(let idx of nameIndices) {
-                                if(idx !== -1 && idx < row.length && row[idx]) {
-                                    let rawName = row[idx].replace(/"/g, '').trim();
-                                    let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
-                                    for(let name of subNames) {
-                                        let isInv = invalidPhrases.some(inv => name.toLowerCase().includes(inv));
-                                        if(isInv || name.length <= 2 || name.match(/^[\d\s\W]+$/)) continue;
+                        // Extract and Process Names for this row
+                        let rawNames = extractFromRanges(row, r, mapping.names);
+                        for(let rawName of rawNames) {
+                            if(!rawName) continue;
+                            let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
+                            
+                            for(let name of subNames) {
+                                let lowerName = name.toLowerCase();
+                                let shouldSkip = skipWords.some(w => lowerName.includes(w));
+                                
+                                if(shouldSkip || name.length <= 2 || name.match(/^[\d\s\W]+$/)) continue;
 
-                                        let phone = 'N/A';
-                                        if(phoneIdx !== -1 && phoneIdx < row.length && row[phoneIdx]) {
-                                            let p = row[phoneIdx].replace(/"/g, '').trim();
-                                            if(p && p.toLowerCase() !== 'no need' && p.match(/\d/)) phone = p;
-                                        }
+                                if(!existingNames.has(lowerName)) {
+                                    await DB.saveServant({ Name: name, Phone: 'N/A', Team: teamName, PhotoURL: "" });
+                                    existingNames.add(lowerName);
+                                    newCount++;
+                                    logToConsole(`Added servant: ${name}`);
+                                }
 
-                                        if(!existingNames.has(name.toLowerCase())) {
-                                            await DB.saveServant({ Name: name, Phone: phone, Team: teamName, PhotoURL: "" });
-                                            existingNames.add(name.toLowerCase());
-                                            newCount++;
-                                            logToConsole(`Added servant: ${name}`);
-                                        }
-
-                                        const passKey = `${name.toLowerCase()}_${existingEv.id}`;
-                                        if(!passCache.has(passKey)) {
-                                            const passId = `LWT-` + Math.random().toString(36).substring(2, 8).toUpperCase();
-                                            let zones = teamName === 'IT Team' ? 'ALL ZONES' : (existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES');
-                                            
-                                            await DB.savePass({
-                                                PassID: passId, Name: name, Phone: phone, Team: teamName,
-                                                Event: existingEv.id, Mass: 'N/A', Location: loc,
-                                                AllowedZones: zones, PhotoURL: "", Status: 'VALID', EntryTime: new Date().toISOString()
-                                            });
-                                            passCache.add(passKey);
-                                            passesCount++;
-                                            logToConsole(`Generated pass for ${name} (${eventName})`);
-                                        }
-                                    }
+                                const passKey = `${lowerName}_${existingEv.id}`;
+                                if(!passCache.has(passKey)) {
+                                    const passId = `LWT-` + Math.random().toString(36).substring(2, 8).toUpperCase();
+                                    let zones = teamName === 'IT Team' ? 'ALL ZONES' : (existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES');
+                                    
+                                    await DB.savePass({
+                                        PassID: passId, Name: name, Phone: 'N/A', Team: teamName,
+                                        Event: existingEv.id, Mass: 'N/A', Location: currentLocation,
+                                        AllowedZones: zones, PhotoURL: "", Status: 'VALID', EntryTime: new Date().toISOString()
+                                    });
+                                    passCache.add(passKey);
+                                    passesCount++;
+                                    logToConsole(`Generated pass for ${name} (${currentEvent})`);
                                 }
                             }
                         }
@@ -1400,8 +1406,8 @@
                 }
             }
 
-            await processGrid(s.sheetUrlLive, "Live Team");
-            await processGrid(s.sheetUrlData, "Data Show Team");
+            await processSheet(document.getElementById('set-sheet-live').value, "Live Team");
+            await processSheet(document.getElementById('set-sheet-data').value, "Data Show Team");
 
             logToConsole(`<span class="text-green-400 font-bold">Sync Complete! Added ${newCount} servants & generated ${passesCount} passes.</span>`);
             await fetchServantsData();
@@ -1699,6 +1705,98 @@
             handleTeamLogic(); lucide.createIcons();
         }
 
+        // --- PERFECT ARABIC PDF GENERATOR (html2canvas) ---
+        async function generatePerfectPDF(pass) {
+            const s = GLOBAL_SETTINGS;
+            
+            if(pass.PhotoURL) {
+                document.getElementById('pdf-photo').src = pass.PhotoURL;
+                document.getElementById('pdf-photo').classList.remove('hidden');
+                document.getElementById('pdf-no-photo').classList.add('hidden');
+            } else {
+                document.getElementById('pdf-photo').classList.add('hidden');
+                document.getElementById('pdf-no-photo').classList.remove('hidden');
+            }
+
+            document.getElementById('pdf-name').textContent = pass.Name;
+            document.getElementById('pdf-team').textContent = pass.Team.toUpperCase();
+            document.getElementById('pdf-team').style.color = s.teamColors[pass.Team] || "#FFFFFF";
+            
+            let evName = pass.Event;
+            if(pass.Team !== 'IT Team') {
+                const ev = s.events.find(e => e.id === pass.Event); 
+                if(ev) {
+                    evName = ev.name;
+                    if (pass.Mass && pass.Mass !== 'N/A') {
+                        const m = ev.masses.find(x => x.id === pass.Mass);
+                        if (m) evName += ` - ${m.name}`;
+                    }
+                }
+            }
+            document.getElementById('pdf-event').textContent = `Event: ${evName}`;
+            document.getElementById('pdf-location').textContent = `Loc: ${pass.Location}`;
+            document.getElementById('pdf-id').textContent = pass.PassID;
+
+            const qrUrl = `${window.location.origin}${window.location.pathname}#/pass/${pass.PassID}`;
+            document.getElementById('qrcode-container').innerHTML = '';
+            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 256, height: 256 });
+            await new Promise(r => setTimeout(r, 100));
+            document.getElementById('pdf-qr').src = document.getElementById('qrcode-container').querySelector('canvas').toDataURL("image/png");
+
+            document.getElementById('pdf-footer-contacts').innerHTML = s.contacts.map(c => `${c.name}: ${c.phone}`).join(' | ');
+
+            const cardEl = document.getElementById('pdf-card');
+            const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
+            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
+            doc.save(`LWT-Pass-${pass.PassID}.pdf`);
+        }
+        
+        async function downloadPass(id) {
+            const pass = await DB.fetchPass(id);
+            if(pass) await generatePerfectPDF(pass);
+            else alert("Pass data not found.");
+        }
+
+        async function loadManageTable() {
+            const tbody = document.getElementById('manage-table-body');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
+            lucide.createIcons();
+            
+            let passes = await DB.fetchAllPasses(); 
+            passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
+            passes.reverse();
+            
+            const s = GLOBAL_SETTINGS;
+            if(passes.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No valid passes generated.</td></tr>`;
+
+            tbody.innerHTML = passes.map(p => {
+                const tColor = s.teamColors[p.Team] || "#fff";
+                const ev = s.events.find(e => e.id === p.Event);
+                const evName = p.Team === 'IT Team' ? 'ALL ACCESS' : (ev ? ev.name : p.Event);
+                return `
+                <tr class="hover:bg-brand-dark transition border-b border-brand-border last:border-0">
+                    <td class="px-6 py-4 font-mono font-bold text-gray-400">${p.PassID}</td>
+                    <td class="px-6 py-4"><p class="font-black text-white text-base">${p.Name}</p><p class="text-xs mt-1" style="color:${tColor}">${p.Team}</p></td>
+                    <td class="px-6 py-4 text-gray-300 text-xs">${evName}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 rounded text-xs font-black ${p.Status==='VALID'?'bg-green-900 text-green-300':'bg-red-900 text-red-300'}">${p.Status}</span></td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="editPass('${p.PassID}')" class="text-blue-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Edit</button>
+                        <button onclick="downloadPass('${p.PassID}')" class="text-brand-yellow hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="download" class="w-3 h-3"></i></button>
+                        <a href="#/pass/${p.PassID}" target="_blank" class="text-gray-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="eye" class="w-3 h-3"></i></a>
+                        ${p.Status==='VALID' ? `<button onclick="togglePassStatus('${p.PassID}', 'REVOKED')" class="text-red-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="x-circle" class="w-3 h-3"></i></button>` : `<button onclick="togglePassStatus('${p.PassID}', 'VALID')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="check-circle" class="w-3 h-3"></i></button>`}
+                        <button onclick="deletePass('${p.PassID}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
+                    </td>
+                </tr>`}).join('');
+            lucide.createIcons();
+        }
+
+        async function togglePassStatus(id, stat) { await DB.updatePassStatus(id, stat); loadManageTable(); loadStats(); }
+        async function deletePass(id) { if(confirm(`Completely Delete Pass ${id}?`)) { await DB.deletePass(id); loadManageTable(); loadStats(); } }
+
         // --- SETTINGS UI WITH INLINE EDITING ---
         function renderSettingsUI() {
             const s = GLOBAL_SETTINGS;
@@ -1706,9 +1804,15 @@
             if(document.getElementById('set-sheet-live')) document.getElementById('set-sheet-live').value = s.sheetUrlLive || '';
             if(document.getElementById('set-sheet-data')) document.getElementById('set-sheet-data').value = s.sheetUrlData || '';
             
-            if(document.getElementById('map-names')) document.getElementById('map-names').value = s.colMapping.names || '';
-            if(document.getElementById('map-event')) document.getElementById('map-event').value = s.colMapping.event || '';
-            if(document.getElementById('map-phone')) document.getElementById('map-phone').value = s.colMapping.phone || '';
+            if(document.getElementById('live-event-rng')) document.getElementById('live-event-rng').value = s.liveMapping.events || '';
+            if(document.getElementById('live-loc-rng')) document.getElementById('live-loc-rng').value = s.liveMapping.locations || '';
+            if(document.getElementById('live-name-rng')) document.getElementById('live-name-rng').value = s.liveMapping.names || '';
+
+            if(document.getElementById('data-event-rng')) document.getElementById('data-event-rng').value = s.dataMapping.events || '';
+            if(document.getElementById('data-loc-rng')) document.getElementById('data-loc-rng').value = s.dataMapping.locations || '';
+            if(document.getElementById('data-name-rng')) document.getElementById('data-name-rng').value = s.dataMapping.names || '';
+
+            if(document.getElementById('global-skip-words')) document.getElementById('global-skip-words').value = s.skipWords || '';
 
             document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `
                 <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
@@ -1783,12 +1887,6 @@
         }
 
         async function updateSettingsField(field, value) { GLOBAL_SETTINGS[field] = value; await DB.updateSettings(GLOBAL_SETTINGS); }
-        async function saveSheetUrls() {
-            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
-            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
-            await DB.updateSettings(GLOBAL_SETTINGS);
-            alert("Google Sheet Links saved.");
-        }
         async function addItemToSettingArray(field, inputId) { const val = document.getElementById(inputId).value.trim(); if(val) { GLOBAL_SETTINGS[field].push(val); document.getElementById(inputId).value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
         async function removeSettingItem(field, idx) { if(confirm('Delete item?')) { GLOBAL_SETTINGS[field].splice(idx, 1); await DB.updateSettings(GLOBAL_SETTINGS); } }
         
