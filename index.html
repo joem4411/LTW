@@ -229,32 +229,22 @@
                         <div class="flex flex-col md:flex-row justify-between md:items-start mb-6 gap-4 border-b border-brand-border pb-6">
                             <div>
                                 <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="refresh-cw" class="w-6 h-6 mr-2 text-brand-yellow"></i> Precise Range Mapping Sync</h2>
-                                <p class="text-sm text-gray-400 mt-1">Define the exact ranges (columns & rows) where your data lives. The system reads row by row. If an event or location cell is blank, it automatically inherits from the row above it!</p>
+                                <p class="text-sm text-gray-400 mt-1">Select a team tab below, connect your Google Sheet, and define the exact column/row ranges where your data lives.</p>
                             </div>
                         </div>
 
-                        <!-- Live Sheet Embed Preview -->
-                        <div class="bg-brand-dark p-4 sm:p-6 rounded-2xl border border-brand-border mb-8 flex flex-col h-[500px]">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-sm font-black text-brand-yellow uppercase tracking-wider flex items-center"><i data-lucide="eye" class="w-4 h-4 mr-2"></i> Sheet Preview</h3>
-                                <select id="iframe-team-select" onchange="loadIframe()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-panel border border-brand-border text-white outline-none focus:border-brand-yellow">
-                                    <option value="live">Preview: Live Team Sheet</option>
-                                    <option value="data">Preview: Data Show Sheet</option>
-                                </select>
-                            </div>
-                            <div class="flex-grow w-full bg-white rounded-xl overflow-hidden border border-brand-border relative">
-                                <iframe id="live-google-sheet-iframe" src="" class="absolute top-0 left-0 w-full h-full border-none bg-white"></iframe>
-                            </div>
-                            <p class="text-[10px] text-gray-500 mt-3 text-center">Use this preview to identify which columns and rows contain your data, then enter those ranges below.</p>
+                        <!-- Sync Team Tabs -->
+                        <div class="flex space-x-2 bg-brand-dark p-1.5 rounded-xl w-full sm:w-max mb-6 border border-brand-border">
+                            <button onclick="switchSyncTeamTab('live')" id="sync-tab-live" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold bg-brand-panel text-white transition-all shadow">Live Team</button>
+                            <button onclick="switchSyncTeamTab('projector')" id="sync-tab-projector" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">Projector Team</button>
                         </div>
 
-                        <!-- Column Mapping Engine -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <!-- Team 1 -->
+                        <!-- LIVE TEAM SECTION -->
+                        <div id="sync-live-section" class="space-y-6">
                             <div class="p-6 bg-brand-dark rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-brand-yellow mb-4 uppercase tracking-wider border-b border-brand-border pb-2"><i data-lucide="table" class="w-4 h-4 inline mr-1"></i> Live Team Sheet Setup</h3>
-                                <input type="text" id="set-sheet-live" placeholder="Live Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm mb-4 bg-brand-panel text-white">
-                                <div class="space-y-3">
+                                <h3 class="text-sm font-black text-brand-yellow mb-4 uppercase tracking-wider border-b border-brand-border pb-2"><i data-lucide="table" class="w-4 h-4 inline mr-1"></i> Live Team Configuration</h3>
+                                <input type="text" id="set-sheet-live" placeholder="Live Team HTML Pub Link..." class="w-full px-4 py-3 rounded-xl text-sm mb-4 bg-[#111] border border-brand-border text-white">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Events (Name + Time) Range:</label>
                                         <input type="text" id="live-event-rng" placeholder="e.g. A3:A50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
@@ -269,12 +259,17 @@
                                     </div>
                                 </div>
                             </div>
+                            <button onclick="startBuiltInSync('live')" class="w-full py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-base transition-all flex justify-center items-center shadow-lg">
+                                <i data-lucide="zap" class="w-5 h-5 mr-2"></i> <span>Execute Sync: Live Team</span>
+                            </button>
+                        </div>
 
-                            <!-- Team 2 -->
+                        <!-- PROJECTOR TEAM SECTION -->
+                        <div id="sync-projector-section" class="space-y-6 hidden">
                             <div class="p-6 bg-brand-dark rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-blue-500 mb-4 uppercase tracking-wider border-b border-brand-border pb-2"><i data-lucide="table" class="w-4 h-4 inline mr-1"></i> Data Show Team Setup</h3>
-                                <input type="text" id="set-sheet-data" placeholder="Data Show Team HTML Pub Link..." class="w-full px-4 py-2 rounded-lg text-sm mb-4 bg-brand-panel text-white">
-                                <div class="space-y-3">
+                                <h3 class="text-sm font-black text-blue-500 mb-4 uppercase tracking-wider border-b border-brand-border pb-2"><i data-lucide="table" class="w-4 h-4 inline mr-1"></i> Projector Team Configuration</h3>
+                                <input type="text" id="set-sheet-data" placeholder="Projector Team HTML Pub Link..." class="w-full px-4 py-3 rounded-xl text-sm mb-4 bg-[#111] border border-brand-border text-white">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Events (Name + Time) Range:</label>
                                         <input type="text" id="data-event-rng" placeholder="e.g. A3:A50" class="w-full px-3 py-2 rounded border border-brand-border text-sm">
@@ -289,24 +284,29 @@
                                     </div>
                                 </div>
                             </div>
+                            <button onclick="startBuiltInSync('projector')" class="w-full py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-base transition-all flex justify-center items-center shadow-lg">
+                                <i data-lucide="zap" class="w-5 h-5 mr-2"></i> <span>Execute Sync: Projector Team</span>
+                            </button>
                         </div>
 
-                        <!-- Global Skip Words -->
-                        <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border mb-6">
-                            <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-2">Global Skip Words (Comma Separated)</h3>
-                            <p class="text-xs text-gray-400 mb-3">If a cell contains any of these words, the system will completely ignore that cell. Prevents headers or placeholders from becoming passes.</p>
-                            <input type="text" id="global-skip-words" placeholder="e.g. no need, -, الاسم الاول, تسلسل" class="w-full px-4 py-3 rounded-lg text-sm border border-brand-border bg-[#1A1A1A]">
-                        </div>
+                        <!-- Global Skip Words & Preview Toggle -->
+                        <div class="mt-8 pt-6 border-t border-brand-border">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">Global Skip Words & Preview</h3>
+                                <button onclick="saveSyncSettings()" class="px-4 py-2 bg-brand-border hover:bg-gray-600 text-white rounded-lg text-xs font-bold transition-colors shadow">Save Settings</button>
+                            </div>
+                            <input type="text" id="global-skip-words" placeholder="e.g. no need, -, الاسم الاول, تسلسل" class="w-full px-4 py-3 rounded-lg text-sm border border-brand-border bg-[#1A1A1A] mb-6">
+                            
+                            <button onclick="toggleSheetPreview()" class="w-full py-3 bg-[#111] border border-brand-border hover:border-brand-yellow text-white rounded-xl font-bold text-sm transition-colors shadow flex items-center justify-center whitespace-nowrap mb-4">
+                                <i data-lucide="eye" class="w-4 h-4 mr-2"></i> Toggle Live Sheet Preview
+                            </button>
 
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <button onclick="saveSyncSettings()" class="w-full sm:w-1/3 py-4 bg-brand-border hover:bg-gray-700 text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
-                                <i data-lucide="save" class="w-5 h-5 mr-2"></i> Save Config
-                            </button>
-                            <button onclick="startBuiltInSync()" class="w-full flex-1 py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
-                                <i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Sync & Generate Passes</span>
-                            </button>
+                            <div id="sheet-preview-container" class="hidden h-[500px] w-full bg-white rounded-xl overflow-hidden border border-brand-border relative mt-4">
+                                <iframe id="live-google-sheet-iframe" src="" class="absolute top-0 left-0 w-full h-full border-none bg-white"></iframe>
+                            </div>
                         </div>
                         
+                        <!-- Console Log -->
                         <div id="sync-console-wrapper" class="hidden mt-6">
                             <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase">Sync Console Log</h3>
                             <div id="sync-console" class="bg-black border border-brand-border p-4 rounded-xl text-xs font-mono text-gray-300 h-48 overflow-y-auto space-y-1">
@@ -325,7 +325,6 @@
                         <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">1. Personal Details</h3>
-                                <button type="button" onclick="batchGenerateForTeam()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm"><i data-lucide="users" class="w-3.5 h-3.5 mr-1.5 text-brand-yellow"></i> Auto-Generate for Team</button>
                             </div>
                             <p class="text-xs text-gray-400 mb-4">Typing an imported name will auto-fill their info. Or select a team and click Auto-Generate to mass-create passes for that team.</p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -400,11 +399,19 @@
 
                 <!-- Tab: Manage Passes -->
                 <div id="admin-tab-manage" class="admin-section hidden bg-brand-panel rounded-3xl border border-brand-border overflow-hidden">
-                    <div class="p-6 border-b border-brand-border flex justify-between items-center bg-brand-dark">
+                    <div class="p-6 border-b border-brand-border flex flex-col md:flex-row justify-between items-start md:items-center bg-brand-dark gap-4">
                         <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="folder-open" class="w-5 h-5 mr-2 text-brand-yellow"></i> Pass Directory</h2>
-                        <button onclick="loadManageTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center">
-                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
+                                <button onclick="setPassFilter('all')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-all">All</button>
+                                <button onclick="setPassFilter('Live Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-liveteam">Live</button>
+                                <button onclick="setPassFilter('Projector Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-projectorteam">Projector</button>
+                                <button onclick="setPassFilter('IT Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-itteam">IT</button>
+                            </div>
+                            <button onclick="loadManageTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm whitespace-nowrap">
@@ -424,15 +431,23 @@
 
                 <!-- Tab: Servants -->
                 <div id="admin-tab-servants" class="admin-section hidden bg-brand-panel rounded-3xl border border-brand-border overflow-hidden">
-                    <div class="p-6 border-b border-brand-border flex justify-between items-center bg-brand-dark">
+                    <div class="p-6 border-b border-brand-border flex flex-col md:flex-row justify-between items-start md:items-center bg-brand-dark gap-4">
                         <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="users" class="w-5 h-5 mr-2 text-brand-yellow"></i> Servants Directory</h2>
-                        <div class="flex space-x-2">
-                            <button onclick="factoryReset('servants')" class="px-4 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-900 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm">
-                                <i data-lucide="trash-2" class="w-4 h-4 mr-1 sm:mr-2"></i> <span class="hidden sm:inline">Delete All</span>
-                            </button>
-                            <button onclick="loadServantsTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm">
-                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-1 sm:mr-2"></i> <span class="hidden sm:inline">Refresh</span>
-                            </button>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
+                                <button onclick="setServantFilter('all')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-filter-all">All</button>
+                                <button onclick="setServantFilter('Live Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-liveteam">Live</button>
+                                <button onclick="setServantFilter('Projector Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-projectorteam">Projector</button>
+                                <button onclick="setServantFilter('IT Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-itteam">IT</button>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="factoryReset('servants')" class="flex-1 px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-900 rounded-lg text-xs font-bold transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
+                                    <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Clear
+                                </button>
+                                <button onclick="loadServantsTable()" class="flex-1 px-3 py-2 bg-brand-border rounded-lg text-xs font-bold text-white hover:bg-gray-700 transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i> Refresh
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="p-6 border-b border-brand-border bg-brand-dark">
@@ -751,11 +766,16 @@
                             delete GLOBAL_SETTINGS.teamColors["N/A"];
                             await this.updateSettings(GLOBAL_SETTINGS);
                         }
+                        if(GLOBAL_SETTINGS.teamColors && GLOBAL_SETTINGS.teamColors["Data Show Team"]) {
+                            GLOBAL_SETTINGS.teamColors["Projector Team"] = GLOBAL_SETTINGS.teamColors["Data Show Team"];
+                            delete GLOBAL_SETTINGS.teamColors["Data Show Team"];
+                            await this.updateSettings(GLOBAL_SETTINGS);
+                        }
                     } else {
                         GLOBAL_SETTINGS = {
                             firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                             contacts: [{name: "Admin", phone: "+201234567890"}],
-                            teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea"},
+                            teamColors: {"Live Team": "#FACC15", "Projector Team": "#2563eb", "IT Team": "#9333ea"},
                             locations: ["St George Church", "St Anthony Church"],
                             zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                             events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
@@ -840,81 +860,147 @@
             }
         }
 
-        // --- Iframe Loader ---
-        function loadIframe() {
-            const team = document.getElementById('iframe-team-select').value;
+        // --- GLOBAL VARIABLES ---
+        let currentSubmitAction = 'generate';
+        let scanner = null;
+        let isAdminLoggedIn = false;
+        let localServants = [];
+        let currentAdminTeamFilterPasses = 'all';
+        let currentAdminTeamFilterServants = 'all';
+        let currentSyncTab = 'live';
+
+        // --- APP INIT & ROUTING ---
+        window.addEventListener('hashchange', handleRoute);
+        window.addEventListener('load', async () => { 
+            await applyGlobalSettings(); 
+            if(!window.location.hash) window.location.hash = '#/scan'; 
+            handleRoute(); 
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const gNameInput = document.getElementById('g-name');
+            if(gNameInput) {
+                gNameInput.addEventListener('input', (e) => {
+                    const val = e.target.value.trim();
+                    const internal = localServants.find(s => s.Name === val);
+                    if(internal) {
+                        document.getElementById('g-phone').value = internal.Phone !== 'N/A' ? internal.Phone : '';
+                        if(internal.Team) {
+                            document.getElementById('g-team').value = internal.Team;
+                            handleTeamLogic();
+                        }
+                    }
+                });
+            }
+        });
+
+        function handleRoute() {
+            const hash = window.location.hash;
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
+            
+            if(scanner) { scanner.clear(); scanner = null; }
+
+            if (!hash.startsWith('#/admin')) {
+                isAdminLoggedIn = false;
+            }
+
+            if (hash.startsWith('#/scan')) {
+                document.getElementById('view-scan').classList.add('active');
+                document.getElementById('nav-scan').classList.add('text-brand-yellow', 'bg-brand-panel');
+                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+                scanner.render(onScanSuccess, ()=>{});
+            } else if (hash.startsWith('#/admin')) {
+                document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
+                if(isAdminLoggedIn) {
+                    document.getElementById('admin-login').classList.add('hidden');
+                    document.getElementById('admin-dashboard').classList.remove('hidden');
+                    document.getElementById('view-admin').classList.add('active');
+                    if(!document.querySelector('.admin-tab.bg-brand-yellow')) switchAdminTab('sync');
+                } else {
+                    document.getElementById('admin-login').classList.remove('hidden');
+                    document.getElementById('admin-dashboard').classList.add('hidden');
+                    document.getElementById('view-admin').classList.add('active');
+                }
+            } else if (hash.startsWith('#/pass/')) {
+                document.getElementById('view-pass').classList.add('active');
+                verifyPass(hash.split('#/pass/')[1]);
+            } else { window.location.hash = '#/scan'; }
+        }
+
+        // --- Iframe & Sync Tabs Logic ---
+        function switchSyncTeamTab(tab) {
+            currentSyncTab = tab;
+            document.getElementById('sync-live-section').classList.add('hidden');
+            document.getElementById('sync-projector-section').classList.add('hidden');
+            
+            document.getElementById('sync-tab-live').classList.remove('bg-brand-panel', 'text-white', 'shadow');
+            document.getElementById('sync-tab-live').classList.add('text-gray-400');
+            document.getElementById('sync-tab-projector').classList.remove('bg-brand-panel', 'text-white', 'shadow');
+            document.getElementById('sync-tab-projector').classList.add('text-gray-400');
+            
+            document.getElementById(`sync-${tab}-section`).classList.remove('hidden');
+            document.getElementById(`sync-tab-${tab}`).classList.remove('text-gray-400');
+            document.getElementById(`sync-tab-${tab}`).classList.add('bg-brand-panel', 'text-white', 'shadow');
+            
+            document.getElementById('iframe-team-select').value = tab;
+            loadIframePreview();
+        }
+
+        function toggleSheetPreview() {
+            const container = document.getElementById('sheet-preview-container');
+            container.classList.toggle('hidden');
+            if(!container.classList.contains('hidden')) {
+                loadIframePreview();
+            }
+        }
+
+        function loadIframePreview() {
             const iframe = document.getElementById('live-google-sheet-iframe');
             if(!iframe) return;
+            const container = document.getElementById('sheet-preview-container');
+            if(container.classList.contains('hidden')) return; // Save resources
+            
+            const team = document.getElementById('iframe-team-select')?.value || currentSyncTab;
             if (team === 'live') iframe.src = GLOBAL_SETTINGS.sheetUrlLive || '';
             else iframe.src = GLOBAL_SETTINGS.sheetUrlData || '';
         }
-
-        // --- RANGE MAPPING LOGIC ---
-        function colToIdx(letter) {
-            if (!letter) return 0;
-            let col = 0;
-            for(let i=0; i<letter.length; i++) col = col * 26 + (letter.toUpperCase().charCodeAt(i) - 64);
-            return col - 1;
+        
+        function loadIframe() {
+            loadIframePreview(); // Used by select dropdown
         }
 
-        function parseRange(rangeStr) {
-            if (!rangeStr) return [];
-            return rangeStr.split(',').map(s => s.trim()).filter(s=>s).map(part => {
-                const match = part.match(/([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?/i);
-                if (!match) return null;
-                const c1 = colToIdx(match[1]);
-                const r1 = parseInt(match[2]) - 1;
-                const c2 = match[3] ? colToIdx(match[3]) : c1;
-                const r2 = match[4] ? parseInt(match[4]) - 1 : r1;
-                return {
-                    minCol: Math.min(c1, c2), maxCol: Math.max(c1, c2),
-                    minRow: Math.min(r1, r2), maxRow: Math.max(r1, r2)
-                };
-            }).filter(r => r !== null);
+        // --- FILTERING LOGIC ---
+        function setPassFilter(team) {
+            currentAdminTeamFilterPasses = team;
+            document.querySelectorAll('.pass-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-panel', 'text-white');
+                btn.classList.add('text-gray-400', 'hover:text-white');
+            });
+            document.querySelector(`.filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.remove('text-gray-400', 'hover:text-white');
+            document.querySelector(`.filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.add('bg-brand-panel', 'text-white');
+            loadManageTable();
         }
 
-        function extractFromRanges(rowArr, rowIndex, ranges) {
-            let texts = [];
-            if (!ranges) return texts;
-            for (let rng of ranges) {
-                if (rowIndex >= rng.minRow && rowIndex <= rng.maxRow) {
-                    for (let c = rng.minCol; c <= rng.maxCol; c++) {
-                        if (c < rowArr.length && rowArr[c]) {
-                            texts.push(rowArr[c].replace(/"/g, '').trim());
-                        }
-                    }
-                }
-            }
-            return texts;
+        function setServantFilter(team) {
+            currentAdminTeamFilterServants = team;
+            document.querySelectorAll('.servant-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-panel', 'text-white');
+                btn.classList.add('text-gray-400', 'hover:text-white');
+            });
+            document.querySelector(`.s-filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.remove('text-gray-400', 'hover:text-white');
+            document.querySelector(`.s-filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.add('bg-brand-panel', 'text-white');
+            loadServantsTable();
         }
 
-        async function saveSyncSettings() {
-            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
-            GLOBAL_SETTINGS.liveMapping.events = document.getElementById('live-event-rng').value;
-            GLOBAL_SETTINGS.liveMapping.locations = document.getElementById('live-loc-rng').value;
-            GLOBAL_SETTINGS.liveMapping.names = document.getElementById('live-name-rng').value;
-            
-            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
-            GLOBAL_SETTINGS.dataMapping.events = document.getElementById('data-event-rng').value;
-            GLOBAL_SETTINGS.dataMapping.locations = document.getElementById('data-loc-rng').value;
-            GLOBAL_SETTINGS.dataMapping.names = document.getElementById('data-name-rng').value;
-            
-            GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
-            
-            await DB.updateSettings(GLOBAL_SETTINGS);
-            loadIframe();
-            alert("Mapping Settings Saved!");
-        }
-
-        // --- UI STATE & LOGIC ---
-        let currentSubmitAction = 'generate';
+        // --- SETTINGS AND UI LOGIC ---
         function setSubmitAction(action) { currentSubmitAction = action; }
 
         async function applyGlobalSettings() {
             const settings = await DB.getSettings();
             
             const fCont = document.getElementById('footer-contacts');
-            fCont.innerHTML = settings.contacts.map(c => `<span class="bg-brand-panel px-3 py-1.5 rounded-lg border border-brand-border text-xs"><span class="text-brand-yellow font-bold">${c.name}:</span> <span class="text-white">${c.phone}</span></span>`).join('');
+            if(fCont) fCont.innerHTML = settings.contacts.map(c => `<span class="bg-brand-panel px-3 py-1.5 rounded-lg border border-brand-border text-xs"><span class="text-brand-yellow font-bold">${c.name}:</span> <span class="text-white">${c.phone}</span></span>`).join('');
 
             if(settings.logos.ltw) { 
                 document.getElementById('nav-logo-ltw').src = settings.logos.ltw; document.getElementById('nav-logo-ltw').classList.remove('hidden'); 
@@ -951,7 +1037,9 @@
         }
 
         function handleTeamLogic() {
-            const team = document.getElementById('g-team').value;
+            const teamInput = document.getElementById('g-team');
+            if(!teamInput) return;
+            const team = teamInput.value;
             const assignSec = document.getElementById('assignment-section');
             if(team === 'IT Team') {
                 assignSec.classList.add('hidden');
@@ -1009,13 +1097,16 @@
         }
 
         function autoSelectZones() {
-            const team = document.getElementById('g-team').value.toLowerCase();
+            const teamInput = document.getElementById('g-team');
+            if(!teamInput) return;
+            const team = teamInput.value.toLowerCase();
             const checkboxes = document.querySelectorAll('input[name="zone"]');
             checkboxes.forEach(cb => cb.checked = false); 
             checkboxes.forEach(cb => {
                 const val = cb.value.toLowerCase();
                 if(team.includes('live') && val.includes('live')) cb.checked = true;
                 if(team.includes('data') && (val.includes('sound') || val.includes('projector'))) cb.checked = true;
+                if(team.includes('projector') && (val.includes('sound') || val.includes('projector'))) cb.checked = true;
             });
         }
 
@@ -1067,50 +1158,7 @@
             }
         }
 
-        // --- ROUTING ---
-        let scanner = null;
-        let isAdminLoggedIn = false;
-        window.addEventListener('hashchange', handleRoute);
-        window.addEventListener('load', async () => { 
-            await applyGlobalSettings(); 
-            if(!window.location.hash) window.location.hash = '#/scan'; 
-            handleRoute(); 
-        });
-
-        function handleRoute() {
-            const hash = window.location.hash;
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
-            
-            if(scanner) { scanner.clear(); scanner = null; }
-
-            if (!hash.startsWith('#/admin')) {
-                isAdminLoggedIn = false;
-            }
-
-            if (hash.startsWith('#/scan')) {
-                document.getElementById('view-scan').classList.add('active');
-                document.getElementById('nav-scan').classList.add('text-brand-yellow', 'bg-brand-panel');
-                scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-                scanner.render(onScanSuccess, ()=>{});
-            } else if (hash.startsWith('#/admin')) {
-                document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
-                if(isAdminLoggedIn) {
-                    document.getElementById('admin-login').classList.add('hidden');
-                    document.getElementById('admin-dashboard').classList.remove('hidden');
-                    document.getElementById('view-admin').classList.add('active');
-                    if(!document.querySelector('.admin-tab.bg-brand-yellow')) switchAdminTab('sync');
-                } else {
-                    document.getElementById('admin-login').classList.remove('hidden');
-                    document.getElementById('admin-dashboard').classList.add('hidden');
-                    document.getElementById('view-admin').classList.add('active');
-                }
-            } else if (hash.startsWith('#/pass/')) {
-                document.getElementById('view-pass').classList.add('active');
-                verifyPass(hash.split('#/pass/')[1]);
-            } else { window.location.hash = '#/scan'; }
-        }
-
+        // --- SCANNER & VERIFICATION ---
         function onScanSuccess(decodedText) {
             if(scanner) scanner.clear();
             let passId = decodedText.includes('#/pass/') ? decodedText.split('#/pass/')[1] : decodedText;
@@ -1119,7 +1167,6 @@
         function simulateScanPrompt() { const id = prompt("Enter Pass ID:"); if(id) window.location.hash = `#/pass/${id}`; }
         function handleEnter(e, func) { if(e.key === 'Enter') func(); }
 
-        // --- VERIFICATION ---
         async function verifyPass(id) {
             const pass = await DB.fetchPass(id);
             const settings = GLOBAL_SETTINGS;
@@ -1191,7 +1238,7 @@
             }
         }
 
-        // --- ADMIN LOGIN ---
+        // --- ADMIN LOGIC ---
         async function loginAdmin() {
             const pwd = document.getElementById('admin-password').value;
             const s = GLOBAL_SETTINGS;
@@ -1243,7 +1290,7 @@
             const defaultSettings = {
                 firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                 contacts: [{name: "Admin", phone: "+201234567890"}],
-                teamColors: {"Live Team": "#FACC15", "Data Show Team": "#2563eb", "IT Team": "#9333ea"},
+                teamColors: {"Live Team": "#FACC15", "Projector Team": "#2563eb", "IT Team": "#9333ea"},
                 locations: ["St George Church", "St Anthony Church"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
@@ -1278,47 +1325,71 @@
             }
         }
 
-        function switchAdminTab(tab) {
-            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
-            
-            const targetSec = document.getElementById(`admin-tab-${tab}`);
-            const targetTab = document.getElementById(`tab-${tab}`);
-            if (targetSec) targetSec.classList.remove('hidden');
-            if (targetTab) {
-                targetTab.classList.add('bg-brand-yellow', 'text-black');
-                targetTab.classList.remove('text-gray-400', 'bg-transparent');
-            }
-            
-            if(tab === 'manage') loadManageTable(); 
-            if(tab === 'servants') loadServantsTable();
-            if(tab === 'stats') loadStats();
-            if(tab === 'sync') loadIframe();
+        // --- RANGE MAPPING LOGIC ---
+        function colToIdx(letter) {
+            if (!letter) return 0;
+            let col = 0;
+            for(let i=0; i<letter.length; i++) col = col * 26 + (letter.toUpperCase().charCodeAt(i) - 64);
+            return col - 1;
         }
 
-        // --- BUILT-IN SYNC HUB WITH PRECISE RANGE MAPPING ---
-        async function startBuiltInSync() {
-            const btn = document.querySelector('#admin-tab-sync button i.lucide-zap').parentNode;
+        function parseRange(rangeStr) {
+            if (!rangeStr) return [];
+            return rangeStr.split(',').map(s => s.trim()).filter(s=>s).map(part => {
+                const match = part.match(/([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?/i);
+                if (!match) return null;
+                const c1 = colToIdx(match[1]);
+                const r1 = parseInt(match[2]) - 1;
+                const c2 = match[3] ? colToIdx(match[3]) : c1;
+                const r2 = match[4] ? parseInt(match[4]) - 1 : r1;
+                return {
+                    minCol: Math.min(c1, c2), maxCol: Math.max(c1, c2),
+                    minRow: Math.min(r1, r2), maxRow: Math.max(r1, r2)
+                };
+            }).filter(r => r !== null);
+        }
+
+        function extractFromRanges(rowArr, rowIndex, ranges) {
+            let texts = [];
+            if (!ranges) return texts;
+            for (let rng of ranges) {
+                if (rowIndex >= rng.minRow && rowIndex <= rng.maxRow) {
+                    for (let c = rng.minCol; c <= rng.maxCol; c++) {
+                        if (c < rowArr.length && rowArr[c]) {
+                            // strictly ensure it's converted to string to prevent replace crashes on numbers
+                            texts.push(String(rowArr[c]).replace(/"/g, '').trim());
+                        }
+                    }
+                }
+            }
+            return texts;
+        }
+
+        // --- BUILT-IN SYNC ENGINE ---
+        async function startBuiltInSync(targetTeam) {
+            const container = targetTeam === 'live' ? document.getElementById('sync-live-section') : document.getElementById('sync-projector-section');
+            const btn = container.querySelector('button');
             const originalHTML = btn.innerHTML;
             
             try {
                 btn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing... Do not close window.</span>`;
                 document.getElementById('sync-console-wrapper').classList.remove('hidden');
-                document.getElementById('sync-console').innerHTML = ''; // clear log
+                document.getElementById('sync-console').innerHTML = ''; 
                 lucide.createIcons();
 
-                await syncBuiltInSheets();
+                await syncBuiltInSheets(targetTeam);
             } catch (e) {
                 console.error(e);
                 logToConsole(`<span class="text-red-500">Critical Sync Error: ${e.message}</span>`);
             } finally {
-                btn.innerHTML = `<i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Sync & Generate Passes</span>`;
+                const teamLabel = targetTeam === 'live' ? 'Live Team' : 'Projector Team';
+                btn.innerHTML = `<i data-lucide="zap" class="w-5 h-5 mr-2"></i> <span>Execute Sync: ${teamLabel}</span>`;
                 lucide.createIcons();
             }
         }
 
-        async function syncBuiltInSheets() {
-            logToConsole("Starting Precise Range Sync...");
+        async function syncBuiltInSheets(targetTeam) {
+            logToConsole(`Starting Precise Range Sync for ${targetTeam === 'live' ? 'Live Team' : 'Projector Team'}...`);
             let newCount = 0; let passesCount = 0;
             const s = GLOBAL_SETTINGS;
             
@@ -1327,8 +1398,12 @@
             let existingPasses = await DB.fetchAllPasses();
             const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
 
-            const liveMap = { events: parseRange(s.liveMapping?.events), locs: parseRange(s.liveMapping?.locations), names: parseRange(s.liveMapping?.names) };
-            const dataMap = { events: parseRange(s.dataMapping?.events), locs: parseRange(s.dataMapping?.locations), names: parseRange(s.dataMapping?.names) };
+            const mappingObj = targetTeam === 'live' ? s.liveMapping : s.dataMapping;
+            const parsedMap = { 
+                events: parseRange(mappingObj?.events), 
+                locs: parseRange(mappingObj?.locations), 
+                names: parseRange(mappingObj?.names) 
+            };
             const skipWords = s.skipWords ? s.skipWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w) : [];
 
             async function processSheet(url, teamName) {
@@ -1338,7 +1413,7 @@
                     logToConsole(`Downloading ${teamName} schedule...`);
                     let fetchUrl = url.trim();
                     if (fetchUrl.includes('/edit')) fetchUrl = fetchUrl.split('/edit')[0] + '/export?format=csv';
-                    else if (fetchUrl.includes('/pubhtml')) fetchUrl = fetchUrl.replace('/pubhtml', '/pub') + '?output=csv';
+                    else if (fetchUrl.includes('/pubhtml')) fetchUrl = fetchUrl.split('/pubhtml')[0] + '/pub?output=csv';
                     else if (fetchUrl.includes('/pub?') && !fetchUrl.includes('output=csv')) fetchUrl += '&output=csv';
 
                     const res = await fetch(fetchUrl);
@@ -1362,15 +1437,13 @@
 
                     logToConsole(`Parsing data mapped ranges for ${rows.length} rows...`);
 
-                    const mapping = teamName === "Live Team" ? liveMap : dataMap;
-
                     let currentEvent = "";
                     let currentLocation = "St. George Church";
 
                     for(let r = 0; r < rows.length; r++) {
                         const row = rows[r]; if(!row || row.length === 0) continue;
                         
-                        let rowEvents = extractFromRanges(row, r, mapping.events);
+                        let rowEvents = extractFromRanges(row, r, parsedMap.events);
                         let eventText = rowEvents.join(' ').trim();
                         if(eventText) {
                             currentEvent = eventText
@@ -1384,7 +1457,7 @@
                                 .trim();
                         }
                         
-                        let rowLocs = extractFromRanges(row, r, mapping.locs);
+                        let rowLocs = extractFromRanges(row, r, parsedMap.locs);
                         let locText = rowLocs.join(' ').trim();
                         if(locText) {
                             if (locText.includes("جوار")) currentLocation = "St. George Church";
@@ -1403,7 +1476,7 @@
                             logToConsole(`Created new event: <b>${currentEvent}</b>`);
                         }
 
-                        let rawNames = extractFromRanges(row, r, mapping.names);
+                        let rawNames = extractFromRanges(row, r, parsedMap.names);
                         for(let rawName of rawNames) {
                             if(!rawName) continue;
                             let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
@@ -1444,8 +1517,11 @@
                 }
             }
 
-            await processSheet(document.getElementById('set-sheet-live').value, "Live Team");
-            await processSheet(document.getElementById('set-sheet-data').value, "Data Show Team");
+            if(targetTeam === 'live') {
+                await processSheet(document.getElementById('set-sheet-live').value, "Live Team");
+            } else {
+                await processSheet(document.getElementById('set-sheet-data').value, "Projector Team");
+            }
 
             logToConsole(`<span class="text-green-400 font-bold">Sync Complete! Added ${newCount} servants & generated ${passesCount} passes.</span>`);
             await fetchServantsData();
@@ -1454,20 +1530,15 @@
             }
         }
 
-        // Auto-fill phone/team when name is selected from list
-        document.getElementById('g-name').addEventListener('input', (e) => {
-            const val = e.target.value.trim();
-            const internal = localServants.find(s => s.Name === val);
-            if(internal) {
-                document.getElementById('g-phone').value = internal.Phone !== 'N/A' ? internal.Phone : '';
-                if(internal.Team) {
-                    document.getElementById('g-team').value = internal.Team;
-                    handleTeamLogic();
-                }
+        // --- SERVANTS DIRECTORY LOGIC ---
+        async function fetchServantsData() {
+            localServants = await DB.fetchAllServants();
+            const dl = document.getElementById('servants-list');
+            if(dl) {
+                dl.innerHTML = localServants.map(s => `<option value="${s.Name}">`).join('');
             }
-        });
+        }
 
-        // Manual add in Servants Directory
         async function manualSaveServant() {
             const name = document.getElementById('s-name').value.trim();
             const phone = document.getElementById('s-phone').value.trim() || 'N/A';
@@ -1510,9 +1581,14 @@
             
             await fetchServantsData(); 
             
-            if(localServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass or Sync to auto-save them!</td></tr>`;
+            let displayServants = localServants;
+            if(currentAdminTeamFilterServants !== 'all') {
+                displayServants = displayServants.filter(s => s.Team === currentAdminTeamFilterServants);
+            }
+            
+            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored for this filter yet. Generate a pass or Sync to auto-save them!</td></tr>`;
 
-            tbody.innerHTML = localServants.map(s => {
+            tbody.innerHTML = displayServants.map(s => {
                 const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
                 return `
                 <tr class="hover:bg-brand-dark transition border-b border-brand-border last:border-0">
@@ -1548,7 +1624,7 @@
             }
         }
 
-        // --- GENERATE / EDIT PASS ---
+        // --- PASS MANAGEMENT ---
         async function batchGenerateForTeam() {
             const team = document.getElementById('g-team').value;
             const targetServants = localServants.filter(s => s.Team === team);
@@ -1725,6 +1801,61 @@
             document.getElementById('create-buttons').classList.remove('hidden');
             document.getElementById('edit-buttons').classList.add('hidden');
             handleTeamLogic(); lucide.createIcons();
+        }
+
+        async function generatePerfectPDF(pass) {
+            const s = GLOBAL_SETTINGS;
+            
+            if(pass.PhotoURL) {
+                document.getElementById('pdf-photo').src = pass.PhotoURL;
+                document.getElementById('pdf-photo').classList.remove('hidden');
+                document.getElementById('pdf-no-photo').classList.add('hidden');
+            } else {
+                document.getElementById('pdf-photo').classList.add('hidden');
+                document.getElementById('pdf-no-photo').classList.remove('hidden');
+            }
+
+            document.getElementById('pdf-name').textContent = pass.Name;
+            document.getElementById('pdf-team').textContent = pass.Team.toUpperCase();
+            document.getElementById('pdf-team').style.color = s.teamColors[pass.Team] || "#FFFFFF";
+            
+            let evName = pass.Event;
+            if(pass.Team !== 'IT Team') {
+                const ev = s.events.find(e => e.id === pass.Event); 
+                if(ev) {
+                    evName = ev.name;
+                    if (pass.Mass && pass.Mass !== 'N/A') {
+                        const m = ev.masses.find(x => x.id === pass.Mass);
+                        if (m) evName += ` - ${m.name}`;
+                    }
+                }
+            }
+            document.getElementById('pdf-event').textContent = `Event: ${evName}`;
+            document.getElementById('pdf-location').textContent = `Loc: ${pass.Location}`;
+            document.getElementById('pdf-id').textContent = pass.PassID;
+
+            const qrUrl = `${window.location.origin}${window.location.pathname}#/pass/${pass.PassID}`;
+            document.getElementById('qrcode-container').innerHTML = '';
+            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 256, height: 256 });
+            await new Promise(r => setTimeout(r, 100));
+            document.getElementById('pdf-qr').src = document.getElementById('qrcode-container').querySelector('canvas').toDataURL("image/png");
+
+            document.getElementById('pdf-footer-contacts').innerHTML = s.contacts.map(c => `${c.name}: ${c.phone}`).join(' | ');
+
+            const cardEl = document.getElementById('pdf-card');
+            const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
+            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
+            doc.save(`LWT-Pass-${pass.PassID}.pdf`);
+        }
+        
+        async function downloadPass(id) {
+            const pass = await DB.fetchPass(id);
+            if(pass) await generatePerfectPDF(pass);
+            else alert("Pass data not found.");
         }
     </script>
 </body>
