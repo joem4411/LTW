@@ -411,9 +411,14 @@
                 <div id="admin-tab-servants" class="admin-section hidden bg-brand-panel rounded-3xl border border-brand-border overflow-hidden">
                     <div class="p-6 border-b border-brand-border flex justify-between items-center bg-brand-dark">
                         <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="users" class="w-5 h-5 mr-2 text-brand-yellow"></i> Servants Directory</h2>
-                        <button onclick="loadServantsTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center">
-                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh
-                        </button>
+                        <div class="flex space-x-2">
+                            <button onclick="factoryReset('servants')" class="px-4 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-900 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm">
+                                <i data-lucide="trash-2" class="w-4 h-4 mr-1 sm:mr-2"></i> <span class="hidden sm:inline">Delete All</span>
+                            </button>
+                            <button onclick="loadServantsTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-1 sm:mr-2"></i> <span class="hidden sm:inline">Refresh</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="p-6 border-b border-brand-border bg-brand-dark">
                         <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Add / Edit Servant</h3>
@@ -601,8 +606,9 @@
                             <div class="bg-red-950/20 p-6 rounded-2xl border border-red-900/50 mt-10">
                                 <h3 class="text-sm font-black text-red-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Danger Zone (Factory Resets)</h3>
                                 <p class="text-xs text-gray-400 mb-4">Warning: These actions cannot be undone. They will permanently delete data from the database.</p>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                                     <button onclick="factoryReset('passes')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Delete All Passes</button>
+                                    <button onclick="factoryReset('servants')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="users-x" class="w-4 h-4 mr-2"></i> Delete All Servants</button>
                                     <button onclick="factoryReset('logs')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="file-minus" class="w-4 h-4 mr-2"></i> Clear Stats & Logs</button>
                                     <button onclick="factoryReset('settings')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Settings</button>
                                 </div>
@@ -1228,6 +1234,10 @@
                 await DB.clearCollection('passes');
                 alert("All passes have been deleted.");
                 loadManageTable(); loadStats();
+            } else if(type === 'servants') {
+                await DB.clearCollection('servants');
+                alert("All servants have been deleted from the directory.");
+                loadServantsTable();
             } else if(type === 'logs') {
                 await DB.clearCollection('logs');
                 alert("All activity logs and stats have been cleared.");
