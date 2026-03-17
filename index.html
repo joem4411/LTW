@@ -91,7 +91,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative flex flex-col">
+    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
         
         <!-- View: SCANNER -->
         <div id="view-scan" class="view">
@@ -231,6 +231,21 @@
                                 <h2 class="text-xl font-black flex items-center text-white"><i data-lucide="refresh-cw" class="w-6 h-6 mr-2 text-brand-yellow"></i> Precise Range Mapping Sync</h2>
                                 <p class="text-sm text-gray-400 mt-1">Define the exact ranges (columns & rows) where your data lives. The system reads row by row. If an event or location cell is blank, it automatically inherits from the row above it!</p>
                             </div>
+                        </div>
+
+                        <!-- Live Sheet Embed Preview -->
+                        <div class="bg-brand-dark p-4 sm:p-6 rounded-2xl border border-brand-border mb-8 flex flex-col h-[500px]">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-sm font-black text-brand-yellow uppercase tracking-wider flex items-center"><i data-lucide="eye" class="w-4 h-4 mr-2"></i> Sheet Preview</h3>
+                                <select id="iframe-team-select" onchange="loadIframe()" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-panel border border-brand-border text-white outline-none focus:border-brand-yellow">
+                                    <option value="live">Preview: Live Team Sheet</option>
+                                    <option value="data">Preview: Data Show Sheet</option>
+                                </select>
+                            </div>
+                            <div class="flex-grow w-full bg-white rounded-xl overflow-hidden border border-brand-border relative">
+                                <iframe id="live-google-sheet-iframe" src="" class="absolute top-0 left-0 w-full h-full border-none bg-white"></iframe>
+                            </div>
+                            <p class="text-[10px] text-gray-500 mt-3 text-center">Use this preview to identify which columns and rows contain your data, then enter those ranges below.</p>
                         </div>
 
                         <!-- Column Mapping Engine -->
@@ -728,7 +743,6 @@
                         if(!GLOBAL_SETTINGS.events) GLOBAL_SETTINGS.events = [];
                         GLOBAL_SETTINGS.events.forEach(e => { if(!e.date) e.date = ""; if(!e.allowedZones) e.allowedZones = GLOBAL_SETTINGS.zones || []; });
                         
-                        // Default structures for new mapping variables if not present
                         if(!GLOBAL_SETTINGS.liveMapping) GLOBAL_SETTINGS.liveMapping = { events: "A3:A100", locations: "B3:B100", names: "C3:E100" };
                         if(!GLOBAL_SETTINGS.dataMapping) GLOBAL_SETTINGS.dataMapping = { events: "A3:A100", locations: "B3:B100", names: "C3:E100" };
                         if(!GLOBAL_SETTINGS.skipWords) GLOBAL_SETTINGS.skipWords = "no need, -, الاسم, تسلسل, شريطة, ملاحظات";
@@ -761,8 +775,10 @@
                 catch(e) { alert("Failed to save settings."); }
             },
             async fetchAllPasses() {
-                try { const snapshot = await firestoreDB.collection('passes').get(); return snapshot.docs.map(doc => doc.data()); } 
-                catch(e) { return []; }
+                try { 
+                    const snapshot = await firestoreDB.collection('passes').get(); 
+                    return snapshot.docs.map(doc => doc.data()).filter(p => p && p.PassID && p.Name && p.PassID !== "undefined"); 
+                } catch(e) { return []; }
             },
             async fetchPass(id) {
                 try { const doc = await firestoreDB.collection('passes').doc(id).get(); return doc.exists ? doc.data() : undefined; } 
@@ -777,11 +793,14 @@
             
             // SERVANTS API
             async fetchAllServants() {
-                try { const snapshot = await firestoreDB.collection('servants').get(); return snapshot.docs.map(doc => doc.data()); } 
-                catch(e) { return []; }
+                try { 
+                    const snapshot = await firestoreDB.collection('servants').get(); 
+                    return snapshot.docs.map(doc => doc.data()).filter(s => s && s.Name); 
+                } catch(e) { return []; }
             },
             async saveServant(servant) {
                 try {
+                    if(!servant || !servant.Name) return;
                     const id = servant.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
                     await firestoreDB.collection('servants').doc(id).set(servant);
                 } catch(e) { console.error(e); }
@@ -821,8 +840,18 @@
             }
         }
 
+        // --- Iframe Loader ---
+        function loadIframe() {
+            const team = document.getElementById('iframe-team-select').value;
+            const iframe = document.getElementById('live-google-sheet-iframe');
+            if(!iframe) return;
+            if (team === 'live') iframe.src = GLOBAL_SETTINGS.sheetUrlLive || '';
+            else iframe.src = GLOBAL_SETTINGS.sheetUrlData || '';
+        }
+
         // --- RANGE MAPPING LOGIC ---
         function colToIdx(letter) {
+            if (!letter) return 0;
             let col = 0;
             for(let i=0; i<letter.length; i++) col = col * 26 + (letter.toUpperCase().charCodeAt(i) - 64);
             return col - 1;
@@ -846,6 +875,7 @@
 
         function extractFromRanges(rowArr, rowIndex, ranges) {
             let texts = [];
+            if (!ranges) return texts;
             for (let rng of ranges) {
                 if (rowIndex >= rng.minRow && rowIndex <= rng.maxRow) {
                     for (let c = rng.minCol; c <= rng.maxCol; c++) {
@@ -872,6 +902,7 @@
             GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
             
             await DB.updateSettings(GLOBAL_SETTINGS);
+            loadIframe();
             alert("Mapping Settings Saved!");
         }
 
@@ -882,11 +913,9 @@
         async function applyGlobalSettings() {
             const settings = await DB.getSettings();
             
-            // Footer Contacts
             const fCont = document.getElementById('footer-contacts');
             fCont.innerHTML = settings.contacts.map(c => `<span class="bg-brand-panel px-3 py-1.5 rounded-lg border border-brand-border text-xs"><span class="text-brand-yellow font-bold">${c.name}:</span> <span class="text-white">${c.phone}</span></span>`).join('');
 
-            // Logos
             if(settings.logos.ltw) { 
                 document.getElementById('nav-logo-ltw').src = settings.logos.ltw; document.getElementById('nav-logo-ltw').classList.remove('hidden'); 
                 document.getElementById('nav-icon-fallback').classList.add('hidden');
@@ -904,7 +933,6 @@
                 document.getElementById('logo-scout-scan').src = settings.logos.scout; document.getElementById('logo-scout-scan').classList.remove('hidden'); 
             }
             
-            // Dropdowns
             populateDropdown('g-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('s-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
             populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
@@ -945,7 +973,6 @@
             const zCont = document.getElementById('zones-container');
             
             if(ev) {
-                // Render zones specific to event
                 const eventZones = ev.allowedZones || settings.zones;
                 zCont.innerHTML = eventZones.map(z => `
                     <label class="relative cursor-pointer">
@@ -959,7 +986,6 @@
                 lucide.createIcons();
                 autoSelectZones();
 
-                // Masses
                 const now = new Date();
                 const activeMasses = ev.masses.filter(m => {
                     if(!m.end || !ev.date) return true;
@@ -970,7 +996,7 @@
                 if(activeMasses.length > 0) {
                     mCont.classList.remove('hidden');
                     mSel.innerHTML = `<option value="N/A">-- Select Mass --</option>` + activeMasses.map(m => `<option value="${m.id}">${m.name} (${m.start} - ${m.end})</option>`).join('');
-                    if(activeMasses.length === 1) mSel.value = activeMasses[0].id; // Auto select if only 1 mass
+                    if(activeMasses.length === 1) mSel.value = activeMasses[0].id;
                 } else {
                     mCont.classList.add('hidden');
                     mSel.innerHTML = `<option value="N/A">N/A</option>`;
@@ -1005,8 +1031,6 @@
             const filter = filterEl ? filterEl.value : 'all';
             
             let allPasses = await DB.fetchAllPasses();
-            allPasses = allPasses.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
-            
             let logs = await DB.fetchLogs();
             
             let passes = allPasses;
@@ -1056,10 +1080,10 @@
         function handleRoute() {
             const hash = window.location.hash;
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
             
             if(scanner) { scanner.clear(); scanner = null; }
 
-            // Security logic: User navigates away from admin, lock session
             if (!hash.startsWith('#/admin')) {
                 isAdminLoggedIn = false;
             }
@@ -1135,7 +1159,6 @@
             if (!pass || !pass.PassID || pass.PassID === 'undefined') { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await DB.logEntry(id, "INVALID"); return; }
             if (pass.Status === 'REVOKED') { statusHeader.textContent = "PASS REVOKED"; statusHeader.classList.add('bg-gray-800'); await DB.logEntry(id, "REVOKED"); return; }
 
-            // Expiration Logic
             let isExpired = false;
             if (pass.Team !== 'IT Team' && pass.Mass && pass.Mass !== 'N/A') {
                 const ev = settings.events.find(e => e.id === pass.Event);
@@ -1270,20 +1293,28 @@
             if(tab === 'manage') loadManageTable(); 
             if(tab === 'servants') loadServantsTable();
             if(tab === 'stats') loadStats();
+            if(tab === 'sync') loadIframe();
         }
 
         // --- BUILT-IN SYNC HUB WITH PRECISE RANGE MAPPING ---
         async function startBuiltInSync() {
             const btn = document.querySelector('#admin-tab-sync button i.lucide-zap').parentNode;
-            btn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing... Do not close window.</span>`;
-            document.getElementById('sync-console-wrapper').classList.remove('hidden');
-            document.getElementById('sync-console').innerHTML = ''; // clear log
-            lucide.createIcons();
-
-            await syncBuiltInSheets();
+            const originalHTML = btn.innerHTML;
             
-            btn.innerHTML = `<i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Sync & Generate Passes</span>`;
-            lucide.createIcons();
+            try {
+                btn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing... Do not close window.</span>`;
+                document.getElementById('sync-console-wrapper').classList.remove('hidden');
+                document.getElementById('sync-console').innerHTML = ''; // clear log
+                lucide.createIcons();
+
+                await syncBuiltInSheets();
+            } catch (e) {
+                console.error(e);
+                logToConsole(`<span class="text-red-500">Critical Sync Error: ${e.message}</span>`);
+            } finally {
+                btn.innerHTML = `<i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Sync & Generate Passes</span>`;
+                lucide.createIcons();
+            }
         }
 
         async function syncBuiltInSheets() {
@@ -1293,12 +1324,12 @@
             
             await fetchServantsData();
             const existingNames = new Set(localServants.map(srv => srv.Name.toLowerCase()));
-            const existingPasses = await DB.fetchAllPasses();
+            let existingPasses = await DB.fetchAllPasses();
             const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
 
-            const liveMap = { events: parseRange(s.liveMapping.events), locs: parseRange(s.liveMapping.locations), names: parseRange(s.liveMapping.names) };
-            const dataMap = { events: parseRange(s.dataMapping.events), locs: parseRange(s.dataMapping.locations), names: parseRange(s.dataMapping.names) };
-            const skipWords = s.skipWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w);
+            const liveMap = { events: parseRange(s.liveMapping?.events), locs: parseRange(s.liveMapping?.locations), names: parseRange(s.liveMapping?.names) };
+            const dataMap = { events: parseRange(s.dataMapping?.events), locs: parseRange(s.dataMapping?.locations), names: parseRange(s.dataMapping?.names) };
+            const skipWords = s.skipWords ? s.skipWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w) : [];
 
             async function processSheet(url, teamName) {
                 if(!url) { logToConsole(`Skipping ${teamName} - No URL provided.`); return; }
@@ -1329,7 +1360,7 @@
                     }
                     if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
 
-                    logToConsole(`Parsing data mapped ranges...`);
+                    logToConsole(`Parsing data mapped ranges for ${rows.length} rows...`);
 
                     const mapping = teamName === "Live Team" ? liveMap : dataMap;
 
@@ -1339,7 +1370,6 @@
                     for(let r = 0; r < rows.length; r++) {
                         const row = rows[r]; if(!row || row.length === 0) continue;
                         
-                        // Extract Event and Location using inheritance
                         let rowEvents = extractFromRanges(row, r, mapping.events);
                         let eventText = rowEvents.join(' ').trim();
                         if(eventText) {
@@ -1365,7 +1395,6 @@
 
                         if(!currentEvent) continue; 
 
-                        // Register Event Automatically
                         let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === currentEvent);
                         if(!existingEv) {
                             existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: currentEvent, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
@@ -1374,7 +1403,6 @@
                             logToConsole(`Created new event: <b>${currentEvent}</b>`);
                         }
 
-                        // Extract and Process Names for this row
                         let rawNames = extractFromRanges(row, r, mapping.names);
                         for(let rawName of rawNames) {
                             if(!rawName) continue;
@@ -1426,17 +1454,6 @@
             }
         }
 
-        // --- SERVANTS DIRECTORY LOGIC ---
-        let localServants = [];
-
-        async function fetchServantsData() {
-            localServants = await DB.fetchAllServants();
-            const dl = document.getElementById('servants-list');
-            if(dl) {
-                dl.innerHTML = localServants.map(s => `<option value="${s.Name}">`).join('');
-            }
-        }
-
         // Auto-fill phone/team when name is selected from list
         document.getElementById('g-name').addEventListener('input', (e) => {
             const val = e.target.value.trim();
@@ -1464,10 +1481,8 @@
             
             if(photoFile) photoB64 = await resizeImage(photoFile, 300, false);
 
-            // 1. Update Profile in Directory
             await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photoB64 });
             
-            // 2. Cascade changes to all pre-generated shift passes
             const allPasses = await DB.fetchAllPasses();
             const servantPasses = allPasses.filter(p => p.Name.toLowerCase() === name.toLowerCase());
             for(let p of servantPasses) {
@@ -1567,7 +1582,6 @@
 
             try {
                 for (const servant of targetServants) {
-                    // Check if pass already exists for this exact name and event to avoid duplicates
                     const exists = existingPasses.find(p => p.Name.toLowerCase() === servant.Name.toLowerCase() && p.Event === eventId);
                     if(exists) continue;
 
@@ -1584,7 +1598,7 @@
                         Mass: massId,
                         Location: loc,
                         AllowedZones: zones,
-                        PhotoURL: servant.PhotoURL || "", // Pull existing photo if available
+                        PhotoURL: servant.PhotoURL || "", 
                         Status: 'VALID',
                         EntryTime: new Date().toISOString()
                     };
@@ -1633,7 +1647,6 @@
                 const photoFile = document.getElementById('g-photo').files[0];
                 let photoB64 = existingPass ? existingPass.PhotoURL : "";
                 
-                // If generating fresh and no photo uploaded, pull from internal directory if available
                 if (!photoFile && !existingPass) {
                     const internal = localServants.find(s => s.Name === nameInput);
                     if(internal && internal.PhotoURL) photoB64 = internal.PhotoURL;
@@ -1657,7 +1670,6 @@
 
                 const saved = await DB.savePass(passData);
                 if(saved) {
-                    // Auto-upsert into Servants Directory
                     await DB.saveServant({
                         Name: passData.Name,
                         Phone: passData.Phone,
@@ -1714,220 +1726,6 @@
             document.getElementById('edit-buttons').classList.add('hidden');
             handleTeamLogic(); lucide.createIcons();
         }
-
-        // --- PERFECT ARABIC PDF GENERATOR (html2canvas) ---
-        async function generatePerfectPDF(pass) {
-            const s = GLOBAL_SETTINGS;
-            
-            if(pass.PhotoURL) {
-                document.getElementById('pdf-photo').src = pass.PhotoURL;
-                document.getElementById('pdf-photo').classList.remove('hidden');
-                document.getElementById('pdf-no-photo').classList.add('hidden');
-            } else {
-                document.getElementById('pdf-photo').classList.add('hidden');
-                document.getElementById('pdf-no-photo').classList.remove('hidden');
-            }
-
-            document.getElementById('pdf-name').textContent = pass.Name;
-            document.getElementById('pdf-team').textContent = pass.Team.toUpperCase();
-            document.getElementById('pdf-team').style.color = s.teamColors[pass.Team] || "#FFFFFF";
-            
-            let evName = pass.Event;
-            if(pass.Team !== 'IT Team') {
-                const ev = s.events.find(e => e.id === pass.Event); 
-                if(ev) {
-                    evName = ev.name;
-                    if (pass.Mass && pass.Mass !== 'N/A') {
-                        const m = ev.masses.find(x => x.id === pass.Mass);
-                        if (m) evName += ` - ${m.name}`;
-                    }
-                }
-            }
-            document.getElementById('pdf-event').textContent = `Event: ${evName}`;
-            document.getElementById('pdf-location').textContent = `Loc: ${pass.Location}`;
-            document.getElementById('pdf-id').textContent = pass.PassID;
-
-            const qrUrl = `${window.location.origin}${window.location.pathname}#/pass/${pass.PassID}`;
-            document.getElementById('qrcode-container').innerHTML = '';
-            new QRCode(document.getElementById('qrcode-container'), { text: qrUrl, width: 256, height: 256 });
-            await new Promise(r => setTimeout(r, 100));
-            document.getElementById('pdf-qr').src = document.getElementById('qrcode-container').querySelector('canvas').toDataURL("image/png");
-
-            document.getElementById('pdf-footer-contacts').innerHTML = s.contacts.map(c => `${c.name}: ${c.phone}`).join(' | ');
-
-            const cardEl = document.getElementById('pdf-card');
-            const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
-            doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
-            doc.save(`LWT-Pass-${pass.PassID}.pdf`);
-        }
-        
-        async function downloadPass(id) {
-            const pass = await DB.fetchPass(id);
-            if(pass) await generatePerfectPDF(pass);
-            else alert("Pass data not found.");
-        }
-
-        async function loadManageTable() {
-            const tbody = document.getElementById('manage-table-body');
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
-            lucide.createIcons();
-            
-            let passes = await DB.fetchAllPasses(); 
-            passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
-            passes.reverse();
-            
-            const s = GLOBAL_SETTINGS;
-            if(passes.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No valid passes generated.</td></tr>`;
-
-            tbody.innerHTML = passes.map(p => {
-                const tColor = s.teamColors[p.Team] || "#fff";
-                const ev = s.events.find(e => e.id === p.Event);
-                const evName = p.Team === 'IT Team' ? 'ALL ACCESS' : (ev ? ev.name : p.Event);
-                return `
-                <tr class="hover:bg-brand-dark transition border-b border-brand-border last:border-0">
-                    <td class="px-6 py-4 font-mono font-bold text-gray-400">${p.PassID}</td>
-                    <td class="px-6 py-4"><p class="font-black text-white text-base">${p.Name}</p><p class="text-xs mt-1" style="color:${tColor}">${p.Team}</p></td>
-                    <td class="px-6 py-4 text-gray-300 text-xs">${evName}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 rounded text-xs font-black ${p.Status==='VALID'?'bg-green-900 text-green-300':'bg-red-900 text-red-300'}">${p.Status}</span></td>
-                    <td class="px-6 py-4 text-right space-x-2">
-                        <button onclick="editPass('${p.PassID}')" class="text-blue-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Edit</button>
-                        <button onclick="downloadPass('${p.PassID}')" class="text-brand-yellow hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="download" class="w-3 h-3"></i></button>
-                        <a href="#/pass/${p.PassID}" target="_blank" class="text-gray-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="eye" class="w-3 h-3"></i></a>
-                        ${p.Status==='VALID' ? `<button onclick="togglePassStatus('${p.PassID}', 'REVOKED')" class="text-red-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="x-circle" class="w-3 h-3"></i></button>` : `<button onclick="togglePassStatus('${p.PassID}', 'VALID')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="check-circle" class="w-3 h-3"></i></button>`}
-                        <button onclick="deletePass('${p.PassID}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
-                    </td>
-                </tr>`}).join('');
-            lucide.createIcons();
-        }
-
-        async function togglePassStatus(id, stat) { await DB.updatePassStatus(id, stat); loadManageTable(); loadStats(); }
-        async function deletePass(id) { if(confirm(`Completely Delete Pass ${id}?`)) { await DB.deletePass(id); loadManageTable(); loadStats(); } }
-
-        // --- SETTINGS UI WITH INLINE EDITING ---
-        function renderSettingsUI() {
-            const s = GLOBAL_SETTINGS;
-            document.getElementById('set-first-pwd').value = s.firstTimePassword;
-            if(document.getElementById('set-sheet-live')) document.getElementById('set-sheet-live').value = s.sheetUrlLive || '';
-            if(document.getElementById('set-sheet-data')) document.getElementById('set-sheet-data').value = s.sheetUrlData || '';
-            
-            if(document.getElementById('live-event-rng')) document.getElementById('live-event-rng').value = s.liveMapping.events || '';
-            if(document.getElementById('live-loc-rng')) document.getElementById('live-loc-rng').value = s.liveMapping.locations || '';
-            if(document.getElementById('live-name-rng')) document.getElementById('live-name-rng').value = s.liveMapping.names || '';
-
-            if(document.getElementById('data-event-rng')) document.getElementById('data-event-rng').value = s.dataMapping.events || '';
-            if(document.getElementById('data-loc-rng')) document.getElementById('data-loc-rng').value = s.dataMapping.locations || '';
-            if(document.getElementById('data-name-rng')) document.getElementById('data-name-rng').value = s.dataMapping.names || '';
-
-            if(document.getElementById('global-skip-words')) document.getElementById('global-skip-words').value = s.skipWords || '';
-
-            document.getElementById('set-pwd-list').innerHTML = s.adminPasswords.map((p, i) => `
-                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
-                    <span>${'*'.repeat(p.length)}</span>
-                    <button onclick="removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                </div>
-            `).join('');
-
-            // Editable Contacts
-            document.getElementById('set-contacts-list').innerHTML = s.contacts.map((c, i) => `
-                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                    <input type="text" id="edit-contact-name-${i}" value="${c.name}" class="w-1/3 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                    <input type="text" id="edit-contact-phone-${i}" value="${c.phone}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                    <button onclick="updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                    <button onclick="removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                </div>
-            `).join('');
-
-            // Editable Teams
-            document.getElementById('set-teams-list').innerHTML = Object.entries(s.teamColors).map(([name, color]) => {
-                const idBase = name.replace(/[^a-zA-Z0-9]/g, '');
-                return `
-                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                    <input type="text" id="edit-team-name-${idBase}" value="${name}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                    <input type="color" id="edit-team-color-${idBase}" value="${color}" class="h-8 w-12 rounded cursor-pointer border-0 p-0 bg-transparent">
-                    <button onclick="updateTeam('${name}', '${idBase}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                    <button onclick="removeTeam('${name}')" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                </div>
-                `
-            }).join('');
-
-            // Editable Arrays
-            const renderEditableArr = (arr, id, field) => document.getElementById(id).innerHTML = arr.map((item, i) => `
-                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                    <input type="text" id="edit-${field}-${i}" value="${item}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                    <button onclick="updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                    <button onclick="removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                </div>
-            `).join('');
-            
-            renderEditableArr(s.locations, 'set-loc-list', 'locations'); 
-            renderEditableArr(s.zones, 'set-zone-list', 'zones');
-
-            // Editable Events
-            document.getElementById('set-events-list').innerHTML = s.events.map((ev, eIdx) => `
-                <div class="bg-brand-panel p-4 rounded-xl border border-brand-border">
-                    <div class="flex justify-between items-center mb-2 gap-2">
-                        <input type="text" id="edit-ev-name-${eIdx}" value="${ev.name}" class="font-bold text-brand-yellow bg-transparent border-b border-brand-border px-1 w-1/2">
-                        <input type="date" id="edit-ev-date-${eIdx}" value="${ev.date}" class="text-gray-400 bg-transparent border-b border-brand-border px-1 w-1/3">
-                        <button onclick="updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Name/Date"><i data-lucide="save" class="w-4 h-4"></i></button>
-                        <button onclick="removeSettingItem('events', ${eIdx})" class="text-red-500 text-xs flex items-center bg-brand-dark px-2 py-1 rounded"><i data-lucide="trash" class="w-3 h-3 mr-1"></i> Delete</button>
-                    </div>
-                    
-                    <div class="mb-3 mt-3">
-                        <p class="text-[10px] text-gray-500 mb-1">Active Zones for this event:</p>
-                        <div class="flex flex-wrap gap-1">
-                            ${s.zones.map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="toggleEventZone(${eIdx}, '${z}')" ${ev.allowedZones.includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${z}</label>`).join('')}
-                        </div>
-                    </div>
-
-                    <div class="pl-4 border-l-2 border-brand-border space-y-2 mb-3">
-                        ${ev.masses.map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${m.name} (${m.start} - ${m.end})</span><button onclick="removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
-                    </div>
-                    <div class="flex gap-2 text-xs">
-                        <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                        <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                        <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                        <button onclick="addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
-                    </div>
-                </div>`).join('');
-            lucide.createIcons();
-        }
-
-        async function updateSettingsField(field, value) { GLOBAL_SETTINGS[field] = value; await DB.updateSettings(GLOBAL_SETTINGS); }
-        async function addItemToSettingArray(field, inputId) { const val = document.getElementById(inputId).value.trim(); if(val) { GLOBAL_SETTINGS[field].push(val); document.getElementById(inputId).value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
-        async function removeSettingItem(field, idx) { if(confirm('Delete item?')) { GLOBAL_SETTINGS[field].splice(idx, 1); await DB.updateSettings(GLOBAL_SETTINGS); } }
-        
-        async function updateArrayItem(field, idx, inputId) { GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim(); await DB.updateSettings(GLOBAL_SETTINGS); }
-        async function updateContact(idx) { GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim(); GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim(); await DB.updateSettings(GLOBAL_SETTINGS); }
-        async function updateTeam(oldName, idBase) {
-            const newName = document.getElementById(`edit-team-name-${idBase}`).value.trim();
-            const newColor = document.getElementById(`edit-team-color-${idBase}`).value;
-            if(!newName) return alert("Team name cannot be empty.");
-            if(oldName !== newName) { delete GLOBAL_SETTINGS.teamColors[oldName]; }
-            GLOBAL_SETTINGS.teamColors[newName] = newColor; await DB.updateSettings(GLOBAL_SETTINGS);
-        }
-        async function updateEvent(idx) { GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim(); GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value; await DB.updateSettings(GLOBAL_SETTINGS); }
-
-        async function addContact() { const n = document.getElementById('new-contact-name').value.trim(); const p = document.getElementById('new-contact-phone').value.trim(); if(n && p) { GLOBAL_SETTINGS.contacts.push({name: n, phone: p}); document.getElementById('new-contact-name').value = ''; document.getElementById('new-contact-phone').value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
-        async function addTeam() { const n = document.getElementById('new-team-name').value.trim(); const c = document.getElementById('new-team-color').value; if(n) { GLOBAL_SETTINGS.teamColors[n] = c; document.getElementById('new-team-name').value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } }
-        async function removeTeam(name) { if(confirm('Delete team?')) { delete GLOBAL_SETTINGS.teamColors[name]; await DB.updateSettings(GLOBAL_SETTINGS); } }
-        
-        async function addEvent() { 
-            const n = document.getElementById('new-event-name').value.trim(), d = document.getElementById('new-event-date').value; 
-            if(n && d) { GLOBAL_SETTINGS.events.push({ id: 'ev_'+Date.now(), name: n, date: d, masses: [], allowedZones: GLOBAL_SETTINGS.zones }); document.getElementById('new-event-name').value = ''; await DB.updateSettings(GLOBAL_SETTINGS); } else alert("Name and Date required.");
-        }
-        async function toggleEventZone(eIdx, zone) {
-            const ev = GLOBAL_SETTINGS.events[eIdx];
-            if(ev.allowedZones.includes(zone)) ev.allowedZones = ev.allowedZones.filter(z => z !== zone);
-            else ev.allowedZones.push(zone);
-            await DB.updateSettings(GLOBAL_SETTINGS);
-        }
-        async function addMass(eIdx) { const n = document.getElementById(`m-name-${eIdx}`).value.trim(), s = document.getElementById(`m-start-${eIdx}`).value, e = document.getElementById(`m-end-${eIdx}`).value; if(n && s && e) { GLOBAL_SETTINGS.events[eIdx].masses.push({ id: 'm_'+Date.now(), name: n, start: s, end: e }); await DB.updateSettings(GLOBAL_SETTINGS); } else alert('Fill all mass fields'); }
-        async function removeMass(eIdx, mIdx) { GLOBAL_SETTINGS.events[eIdx].masses.splice(mIdx, 1); await DB.updateSettings(GLOBAL_SETTINGS); }
-        async function uploadLogo(type) { const file = document.getElementById(`set-logo-${type}`).files[0]; if(file) { GLOBAL_SETTINGS.logos[type] = await resizeImage(file, 300, true); await DB.updateSettings(GLOBAL_SETTINGS); alert('Logo saved globally.'); } }
     </script>
 </body>
 </html>
