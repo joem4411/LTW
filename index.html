@@ -82,7 +82,7 @@
                     <a href="#/scan" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400" id="nav-scan">
                         <i data-lucide="scan" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Scanner
                     </a>
-                    <a href="#/admin" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400" id="nav-admin">
+                    <a href="#/admin" class="nav-link px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400" id="nav-admin" style="display: none;">
                         <i data-lucide="shield" class="w-4 h-4 mr-1.5 hidden sm:block"></i> Admin
                     </a>
                 </div>
@@ -91,7 +91,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative">
+    <main class="flex-grow w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 relative flex flex-col">
         
         <!-- View: SCANNER -->
         <div id="view-scan" class="view">
@@ -696,13 +696,14 @@
     </main>
 
     <!-- Support Footer -->
-    <footer class="bg-brand-dark text-gray-400 py-8 text-center text-xs mt-auto border-t border-brand-border">
+    <footer class="bg-brand-dark text-gray-400 py-8 text-center text-xs mt-auto border-t border-brand-border relative">
         <div class="max-w-4xl mx-auto px-4">
             <p class="font-bold text-white mb-4 text-sm">If there is any issue please contact the team leader or system administrator.</p>
             <div id="footer-contacts" class="flex flex-wrap justify-center items-center gap-3 font-medium">
                 <!-- Injected via JS -->
             </div>
             <p class="mt-8 font-bold tracking-wider text-[10px] text-gray-600 uppercase">&copy; 2026 SGAA Church - Light The World</p>
+            <a href="#/admin" class="text-[9px] text-[#111] hover:text-gray-600 mt-2 block transition-colors">admin</a>
         </div>
     </footer>
 
@@ -811,7 +812,6 @@
             async updatePassStatus(id, newStatus) { await firestoreDB.collection('passes').doc(id).update({ Status: newStatus }); },
             async deletePass(id) { await firestoreDB.collection('passes').doc(id).delete(); },
             
-            // SERVANTS API
             async fetchAllServants() {
                 try { 
                     const snapshot = await firestoreDB.collection('servants').get(); 
@@ -829,7 +829,6 @@
                 try { await firestoreDB.collection('servants').doc(id).delete(); } catch(e) { console.error(e); }
             },
 
-            // LOGS
             async fetchLogs() {
                 try { const snapshot = await firestoreDB.collection('logs').get(); return snapshot.docs.map(doc => doc.data()); } 
                 catch(e) { return []; }
@@ -905,13 +904,19 @@
                 isAdminLoggedIn = false;
             }
 
+            const adminNavBtn = document.getElementById('nav-admin');
+
             if (hash.startsWith('#/scan')) {
                 document.getElementById('view-scan').classList.add('active');
                 document.getElementById('nav-scan').classList.add('text-brand-yellow', 'bg-brand-panel');
+                if(adminNavBtn) adminNavBtn.style.display = 'none'; // Completely hidden on Scanner view
+                
                 scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
                 scanner.render(onScanSuccess, ()=>{});
             } else if (hash.startsWith('#/admin')) {
+                if(adminNavBtn) adminNavBtn.style.display = 'flex'; // Visible in Admin area
                 document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
+                
                 if(isAdminLoggedIn) {
                     document.getElementById('admin-login').classList.add('hidden');
                     document.getElementById('admin-dashboard').classList.remove('hidden');
@@ -923,6 +928,7 @@
                     document.getElementById('view-admin').classList.add('active');
                 }
             } else if (hash.startsWith('#/pass/')) {
+                if(adminNavBtn) adminNavBtn.style.display = 'flex';
                 document.getElementById('view-pass').classList.add('active');
                 verifyPass(hash.split('#/pass/')[1]);
             } else { window.location.hash = '#/scan'; }
@@ -943,7 +949,8 @@
             document.getElementById(`sync-tab-${tab}`).classList.remove('text-gray-400');
             document.getElementById(`sync-tab-${tab}`).classList.add('bg-brand-panel', 'text-white', 'shadow');
             
-            document.getElementById('iframe-team-select').value = tab;
+            const selectEl = document.getElementById('iframe-team-select');
+            if(selectEl) selectEl.value = tab;
             loadIframePreview();
         }
 
@@ -959,15 +966,16 @@
             const iframe = document.getElementById('live-google-sheet-iframe');
             if(!iframe) return;
             const container = document.getElementById('sheet-preview-container');
-            if(container.classList.contains('hidden')) return; // Save resources
+            if(container.classList.contains('hidden')) return; 
             
-            const team = document.getElementById('iframe-team-select')?.value || currentSyncTab;
+            const selectEl = document.getElementById('iframe-team-select');
+            const team = selectEl ? selectEl.value : currentSyncTab;
             if (team === 'live') iframe.src = GLOBAL_SETTINGS.sheetUrlLive || '';
             else iframe.src = GLOBAL_SETTINGS.sheetUrlData || '';
         }
         
         function loadIframe() {
-            loadIframePreview(); // Used by select dropdown
+            loadIframePreview(); 
         }
 
         // --- FILTERING LOGIC ---
@@ -1325,6 +1333,24 @@
             }
         }
 
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
+            
+            const targetSec = document.getElementById(`admin-tab-${tab}`);
+            const targetTab = document.getElementById(`tab-${tab}`);
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetTab) {
+                targetTab.classList.add('bg-brand-yellow', 'text-black');
+                targetTab.classList.remove('text-gray-400', 'bg-transparent');
+            }
+            
+            if(tab === 'manage') loadManageTable(); 
+            if(tab === 'servants') loadServantsTable();
+            if(tab === 'stats') loadStats();
+            if(tab === 'sync') loadIframe();
+        }
+
         // --- RANGE MAPPING LOGIC ---
         function colToIdx(letter) {
             if (!letter) return 0;
@@ -1356,7 +1382,6 @@
                 if (rowIndex >= rng.minRow && rowIndex <= rng.maxRow) {
                     for (let c = rng.minCol; c <= rng.maxCol; c++) {
                         if (c < rowArr.length && rowArr[c]) {
-                            // strictly ensure it's converted to string to prevent replace crashes on numbers
                             texts.push(String(rowArr[c]).replace(/"/g, '').trim());
                         }
                     }
@@ -1586,7 +1611,7 @@
                 displayServants = displayServants.filter(s => s.Team === currentAdminTeamFilterServants);
             }
             
-            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored for this filter yet. Generate a pass or Sync to auto-save them!</td></tr>`;
+            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass or Sync to auto-save them!</td></tr>`;
 
             tbody.innerHTML = displayServants.map(s => {
                 const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
@@ -1624,7 +1649,7 @@
             }
         }
 
-        // --- PASS MANAGEMENT ---
+        // --- GENERATE / EDIT PASS ---
         async function batchGenerateForTeam() {
             const team = document.getElementById('g-team').value;
             const targetServants = localServants.filter(s => s.Team === team);
