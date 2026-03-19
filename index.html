@@ -699,7 +699,7 @@
                 <!-- Injected via JS -->
             </div>
             <p class="mt-8 font-bold tracking-wider text-[10px] text-gray-600 uppercase">&copy; 2026 SGAA Church - Light The World</p>
-            <a href="#/admin" class="text-[9px] text-[#111] hover:text-[#333] mt-2 block transition-colors w-max mx-auto">admin</a>
+            <a href="#/admin" class="text-[#1A1A1A] hover:text-gray-500 mt-2 block transition-colors w-max mx-auto font-black cursor-pointer">admin</a>
         </div>
     </footer>
 
@@ -753,14 +753,14 @@
                     firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                     contacts: [{name: "Admin", phone: "+201234567890"}],
                     teamColors: {"Live Team": "#FACC15", "Projector Team": "#2563eb", "IT Team": "#9333ea"},
-                    locations: ["St George Church", "St Anthony Church"],
+                    locations: ["St George Church", "St Anthony Church", "Youssef Salama Hall"],
                     zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                     events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
                     logos: { church: "", ltw: "", scout: "" },
                     sheetUrlLive: "", sheetUrlData: "",
                     liveMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
                     dataMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
-                    skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات"
+                    skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات, قديم, جديد, فقط"
                 };
 
                 try {
@@ -1433,6 +1433,7 @@
             logToConsole(`Starting Precise Range Sync...`);
             let newCount = 0; let passesCount = 0;
             const s = GLOBAL_SETTINGS;
+            let settingsModified = false;
             
             await fetchServantsData();
             const existingNames = new Set(localServants.map(srv => srv.Name.toLowerCase()));
@@ -1509,7 +1510,7 @@
                         if(!existingEv) {
                             existingEv = { id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), name: currentEvent, date: '', masses: [], allowedZones: GLOBAL_SETTINGS.zones };
                             GLOBAL_SETTINGS.events.push(existingEv);
-                            await DB.updateSettings(GLOBAL_SETTINGS); 
+                            settingsModified = true;
                             logToConsole(`Created new event: <b>${currentEvent}</b>`);
                         }
 
@@ -1556,6 +1557,10 @@
 
             await processSheet(s.sheetUrlLive, "Live Team");
             await processSheet(s.sheetUrlData, "Projector Team");
+            
+            if(settingsModified) {
+                await DB.updateSettings(GLOBAL_SETTINGS);
+            }
 
             logToConsole(`<span class="text-green-400 font-bold">Sync Complete! Added ${newCount} servants & generated ${passesCount} passes.</span>`);
             
@@ -1622,7 +1627,7 @@
                 displayServants = displayServants.filter(s => s.Team === currentAdminTeamFilterServants);
             }
             
-            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass or Sync to auto-save them!</td></tr>`;
+            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored for this filter yet. Generate a pass or Sync to auto-save them!</td></tr>`;
 
             tbody.innerHTML = displayServants.map(s => {
                 const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
@@ -1660,7 +1665,7 @@
             }
         }
 
-        // --- PASS MANAGEMENT ---
+        // --- GENERATE / EDIT PASS ---
         async function batchGenerateForTeam() {
             const team = document.getElementById('g-team').value;
             const targetServants = localServants.filter(s => s.Team === team);
