@@ -447,20 +447,35 @@
                         </div>
                     </div>
                     <div class="p-6 border-b border-brand-border bg-brand-dark">
-                        <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Add / Edit Servant</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">Add / Edit Servant</h3>
+                            <button onclick="toggleBulkServantImport()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm">
+                                <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 mr-1.5 text-brand-yellow"></i> Bulk Import
+                            </button>
+                        </div>
                         <p class="text-xs text-gray-400 mb-3">Updating a servant's Photo or Phone number here will <b>automatically update all of their existing passes</b>!</p>
                         
-                        <div class="flex flex-col sm:flex-row gap-3 mt-3">
-                            <input type="text" id="s-name" placeholder="Servant Name *" class="flex-1 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow">
-                            <input type="text" id="s-phone" placeholder="Phone" class="w-full sm:w-1/4 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow">
-                            <select id="s-team" class="w-full sm:w-1/4 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow"></select>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-3 mt-3 items-center">
-                            <div class="flex-1 text-xs text-gray-400">
-                                Upload Photo to attach to all their generated passes:
-                                <input type="file" id="s-photo" accept="image/*" class="mt-1 w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer p-1">
+                        <div id="manual-servant-form">
+                            <div class="flex flex-col sm:flex-row gap-3 mt-3">
+                                <input type="text" id="s-name" placeholder="Servant Name *" class="flex-1 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow">
+                                <input type="text" id="s-phone" placeholder="Phone" class="w-full sm:w-1/4 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow">
+                                <select id="s-team" class="w-full sm:w-1/4 px-4 py-2 rounded-lg text-sm bg-brand-dark border-brand-border text-white focus:border-brand-yellow"></select>
                             </div>
-                            <button onclick="manualSaveServant()" class="px-6 py-3 h-full bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm whitespace-nowrap"><i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Save & Update Passes</button>
+                            <div class="flex flex-col sm:flex-row gap-3 mt-3 items-center">
+                                <div class="flex-1 text-xs text-gray-400">
+                                    Upload Photo to attach to all their generated passes:
+                                    <input type="file" id="s-photo" accept="image/*" class="mt-1 w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer p-1">
+                                </div>
+                                <button onclick="manualSaveServant()" class="px-6 py-3 h-full bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm whitespace-nowrap"><i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Save & Update Passes</button>
+                            </div>
+                        </div>
+
+                        <div id="bulk-servant-form" class="hidden mt-3">
+                            <p class="text-xs text-gray-400 mb-2">Paste rows directly from Excel. Expected columns: <b>Name | Phone | Team | Photo URL (Optional)</b></p>
+                            <textarea id="bulk-servant-data" rows="5" class="w-full px-4 py-3 rounded-lg text-sm bg-[#111] border border-brand-border text-white focus:border-brand-yellow mb-3" placeholder="Mina Youssef&#9;+20123...&#9;Live Team&#9;https://...&#10;Kirollos&#9;N/A&#9;IT Team"></textarea>
+                            <button onclick="processBulkServantImport()" class="w-full px-6 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm flex justify-center items-center">
+                                <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Import Servants
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -1145,6 +1160,8 @@
         }
 
         // --- SETTINGS AND UI LOGIC ---
+        function setSubmitAction(action) { currentSubmitAction = action; }
+
         async function applyGlobalSettings() {
             const settings = await DB.getSettings();
             if(!settings) return;
@@ -1414,7 +1431,6 @@
             }
         }
 
-        // Settings Database Triggers with Success Alerts
         async function updateSettingsField(field, value) { 
             GLOBAL_SETTINGS[field] = value; 
             await DB.updateSettings(GLOBAL_SETTINGS); 
@@ -1566,7 +1582,7 @@
             }
         }
 
-        // --- ADMIN LOGIC ---
+        // --- ADMIN UI ---
         async function loginAdmin() {
             const pwd = document.getElementById('admin-password').value;
             const s = GLOBAL_SETTINGS;
@@ -1652,39 +1668,70 @@
             }
         }
 
+        async function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
+            
+            const targetSec = document.getElementById(`admin-tab-${tab}`);
+            const targetTab = document.getElementById(`tab-${tab}`);
+            if (targetSec) targetSec.classList.remove('hidden');
+            if (targetTab) {
+                targetTab.classList.add('bg-brand-yellow', 'text-black');
+                targetTab.classList.remove('text-gray-400', 'bg-transparent');
+            }
+            
+            if(tab === 'manage') loadManageTable(); 
+            if(tab === 'servants') loadServantsTable();
+            if(tab === 'stats') loadStats();
+            
+            if(tab === 'sync' || tab === 'settings' || tab === 'generate') {
+                await applyGlobalSettings(); 
+                if(tab === 'settings') renderSettingsUI();
+            }
+        }
+
         // --- BUILT-IN SYNC ENGINE ---
-        async function startBuiltInSync(targetTeam) {
-            if(!targetTeam) targetTeam = currentSyncTab; 
+        async function saveSyncSettings() {
+            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
+            GLOBAL_SETTINGS.liveMapping.events = document.getElementById('live-event-rng').value;
+            GLOBAL_SETTINGS.liveMapping.locations = document.getElementById('live-loc-rng').value;
+            GLOBAL_SETTINGS.liveMapping.names = document.getElementById('live-name-rng').value;
             
-            const container = targetTeam === 'live' ? document.getElementById('sync-live-section') : document.getElementById('sync-projector-section');
-            const btn = container.querySelector('button');
-            const globalBtn = document.querySelector('#global-sync-btn');
+            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
+            GLOBAL_SETTINGS.dataMapping.events = document.getElementById('data-event-rng').value;
+            GLOBAL_SETTINGS.dataMapping.locations = document.getElementById('data-loc-rng').value;
+            GLOBAL_SETTINGS.dataMapping.names = document.getElementById('data-name-rng').value;
             
+            GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
+            
+            await DB.updateSettings(GLOBAL_SETTINGS);
+            loadIframe();
+            alert("Mapping Settings Saved!");
+        }
+
+        async function startBuiltInSync() {
+            const btn = document.querySelector('#global-sync-btn');
             const originalHTML = btn.innerHTML;
-            const globalOriginalHTML = globalBtn.innerHTML;
             
             try {
-                btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> <span>Syncing...</span>`;
-                globalBtn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing in background...</span>`;
+                btn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing in background...</span>`;
                 
                 document.getElementById('sync-console-wrapper').classList.remove('hidden');
                 document.getElementById('sync-console').innerHTML = ''; 
                 lucide.createIcons();
 
-                await syncBuiltInSheets(targetTeam);
+                await syncBuiltInSheets(currentSyncTab);
             } catch (e) {
                 console.error(e);
                 logToConsole(`<span class="text-red-500">Critical Sync Error: ${e.message}</span>`);
             } finally {
                 btn.innerHTML = originalHTML;
-                globalBtn.innerHTML = globalOriginalHTML;
                 lucide.createIcons();
             }
         }
 
         async function syncBuiltInSheets(targetTeam) {
-            const teamName = targetTeam === 'live' ? "Live Team" : "Projector Team";
-            logToConsole(`Starting Range Sync for ${teamName}...`);
+            logToConsole(`Starting Precise Range Sync...`);
             let newCount = 0; let passesCount = 0;
             const s = GLOBAL_SETTINGS;
             let settingsModified = false;
@@ -1694,12 +1741,8 @@
             let existingPasses = await DB.fetchAllPasses();
             const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
 
-            const mappingObj = targetTeam === 'live' ? s.liveMapping : s.dataMapping;
-            const parsedMap = { 
-                events: parseRange(mappingObj?.events), 
-                locs: parseRange(mappingObj?.locations), 
-                names: parseRange(mappingObj?.names) 
-            };
+            const liveMap = { events: parseRange(s.liveMapping?.events), locs: parseRange(s.liveMapping?.locations), names: parseRange(s.liveMapping?.names) };
+            const dataMap = { events: parseRange(s.dataMapping?.events), locs: parseRange(s.dataMapping?.locations), names: parseRange(s.dataMapping?.names) };
             const skipWords = s.skipWords ? s.skipWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w) : [];
 
             async function processSheet(url, teamNameStr) {
@@ -1732,14 +1775,14 @@
                     if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
 
                     logToConsole(`Parsing data mapped ranges for ${rows.length} rows...`);
-
+                    const mapping = teamNameStr === "Live Team" ? liveMap : dataMap;
                     let currentEvent = "";
                     let currentLocation = "St. George Church";
 
                     for(let r = 0; r < rows.length; r++) {
                         const row = rows[r]; if(!row || row.length === 0) continue;
                         
-                        let rowEvents = extractFromRanges(row, r, parsedMap.events);
+                        let rowEvents = extractFromRanges(row, r, mapping.events);
                         let eventText = rowEvents.join(' ').trim();
                         if(eventText) {
                             currentEvent = eventText
@@ -1753,7 +1796,7 @@
                                 .trim();
                         }
                         
-                        let rowLocs = extractFromRanges(row, r, parsedMap.locs);
+                        let rowLocs = extractFromRanges(row, r, mapping.locs);
                         let locText = rowLocs.join(' ').trim();
                         if(locText) {
                             if (locText.includes("جوار")) currentLocation = "St. George Church";
@@ -1772,7 +1815,7 @@
                             logToConsole(`Created new event: <b>${currentEvent}</b>`);
                         }
 
-                        let rawNames = extractFromRanges(row, r, parsedMap.names);
+                        let rawNames = extractFromRanges(row, r, mapping.names);
                         for(let rawName of rawNames) {
                             if(!rawName) continue;
                             let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
@@ -1813,27 +1856,20 @@
                 }
             }
 
-            if(targetTeam === 'live') {
-                await processSheet(document.getElementById('set-sheet-live').value, "Live Team");
-            } else {
-                await processSheet(document.getElementById('set-sheet-data').value, "Projector Team");
-            }
+            await processSheet(s.sheetUrlLive, "Live Team");
+            await processSheet(s.sheetUrlData, "Projector Team");
 
             logToConsole(`<span class="text-green-400 font-bold">Sync Complete! Added ${newCount} servants & generated ${passesCount} passes.</span>`);
             
             if(settingsModified) {
                 await DB.updateSettings(GLOBAL_SETTINGS);
             } else {
-                await applyGlobalSettings(); // Cascade UI refresh if no settings were modified
+                await applyGlobalSettings();
             }
             
             await fetchServantsData();
-            if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) {
-                loadServantsTable();
-            }
-            if(!document.getElementById('admin-tab-manage').classList.contains('hidden')) {
-                loadManageTable();
-            }
+            if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) loadServantsTable();
+            if(!document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
             loadStats();
         }
 
@@ -1878,6 +1914,70 @@
             await fetchServantsData();
             loadServantsTable();
             loadManageTable();
+        }
+
+        function toggleBulkServantImport() {
+            const manual = document.getElementById('manual-servant-form');
+            const bulk = document.getElementById('bulk-servant-form');
+            if (manual.classList.contains('hidden')) {
+                manual.classList.remove('hidden');
+                bulk.classList.add('hidden');
+            } else {
+                manual.classList.add('hidden');
+                bulk.classList.remove('hidden');
+            }
+        }
+
+        async function processBulkServantImport() {
+            const text = document.getElementById('bulk-servant-data').value.trim();
+            if (!text) return alert("Please paste some data first.");
+
+            const btn = document.querySelector('#bulk-servant-form button');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Importing...`;
+            btn.disabled = true;
+            lucide.createIcons();
+
+            const rows = text.split('\n');
+            let importedCount = 0;
+            const allPasses = await DB.fetchAllPasses() || [];
+
+            for (let row of rows) {
+                if (!row.trim()) continue;
+                
+                let cols = row.split('\t'); 
+                if (cols.length === 1 && row.includes(',')) cols = row.split(',');
+                if (cols.length === 1 && row.includes('|')) cols = row.split('|');
+
+                const name = (cols[0] || '').trim();
+                if (!name || name.toLowerCase() === 'name') continue; // skip header or empty row
+
+                const phone = (cols[1] || 'N/A').trim() || 'N/A';
+                const team = (cols[2] || 'Live Team').trim();
+                const photo = (cols[3] || '').trim();
+
+                await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photo });
+                importedCount++;
+
+                const servantPasses = allPasses.filter(p => p.Name.toLowerCase() === name.toLowerCase());
+                for (let p of servantPasses) {
+                    p.Phone = phone;
+                    p.Team = team;
+                    if (photo) p.PhotoURL = photo;
+                    await DB.savePass(p);
+                }
+            }
+
+            document.getElementById('bulk-servant-data').value = '';
+            alert(`Successfully imported/updated ${importedCount} servants!`);
+            
+            await fetchServantsData();
+            loadServantsTable();
+            loadManageTable();
+
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            lucide.createIcons();
         }
 
         async function loadServantsTable() {
