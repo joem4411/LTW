@@ -61,7 +61,7 @@
         ::-webkit-scrollbar-thumb:hover { background: #FACC15; }
 
         #export-canvas-container { position: absolute; top: -9999px; left: -9999px; z-index: -100; }
-        .pdf-card { width: 408px; height: 650px; background: #050505; color: white; position: relative; overflow: hidden; border: 2px solid #111; box-sizing: border-box; }
+        .pdf-card { width: 408px; height: 650px; background: #050505; color: white; position: relative; overflow: hidden; border: 2px solid; box-sizing: border-box; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-brand-yellow selection:text-black">
@@ -115,7 +115,7 @@
 
         <!-- View: PASS VERIFICATION -->
         <div id="view-pass" class="view max-w-2xl mx-auto">
-            <div id="pass-result-container" class="bg-brand-panel rounded-3xl shadow-2xl overflow-hidden border border-brand-border">
+            <div id="pass-result-container" class="bg-brand-panel rounded-3xl shadow-2xl overflow-hidden border-2 border-brand-border transition-colors duration-300">
                 <div id="pass-status-header" class="p-6 text-center text-white font-black text-3xl sm:text-4xl uppercase tracking-wider shadow-inner">
                     <!-- Status -->
                 </div>
@@ -138,7 +138,7 @@
                             <div class="grid grid-cols-2 gap-4 bg-brand-dark p-4 rounded-xl border border-brand-border">
                                 <div>
                                     <h3 class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Team</h3>
-                                    <p id="pass-team" class="text-base font-bold text-white"></p>
+                                    <p id="pass-team" class="text-base font-bold transition-colors duration-300"></p>
                                 </div>
                                 <div>
                                     <h3 class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Event & Mass</h3>
@@ -595,18 +595,6 @@
                                 </div>
                             </div>
 
-                            <!-- Teams & Colors -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="palette" class="w-4 h-4 mr-2"></i> Teams & Colors</h3>
-                                <p class="text-xs text-gray-400 mb-3">Team field is always required when generating a pass. You can edit existing team names or colors directly.</p>
-                                <div id="set-teams-list" class="space-y-3 mb-4"></div>
-                                <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                    <input type="text" id="new-team-name" placeholder="New Team Name" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                    <input type="color" id="new-team-color" class="h-10 w-14 rounded cursor-pointer border-0 p-0 bg-transparent">
-                                    <button onclick="addTeam()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                </div>
-                            </div>
-
                             <!-- Locations & Global Zones -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
@@ -670,7 +658,7 @@
 
         <!-- Hidden Canvas Area for Perfect Arabic PDF Generation via html2canvas (High Resolution) -->
         <div id="export-canvas-container">
-            <div id="pdf-card" class="pdf-card flex flex-col pt-6 px-6 pb-4 font-['Cairo']">
+            <div id="pdf-card" class="pdf-card flex flex-col pt-6 px-6 pb-4 font-['Cairo'] border-2">
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-4">
                     <img id="pdf-church-logo" src="" class="w-16 h-16 object-contain">
@@ -691,7 +679,7 @@
                 <!-- Info -->
                 <div class="text-center flex-1">
                     <p id="pdf-name" class="font-black text-[26px] text-white leading-tight mb-2" dir="auto"></p>
-                    <p id="pdf-team" class="font-bold text-[18px] mb-3"></p>
+                    <p id="pdf-team" class="font-bold text-[18px] mb-3 transition-colors duration-300"></p>
                     <p id="pdf-event" class="font-medium text-[14px] text-[#aaa] leading-tight mb-1" dir="auto"></p>
                     <p id="pdf-location" class="font-medium text-[14px] text-[#aaa] leading-tight" dir="auto"></p>
                     <div class="flex justify-center mt-4">
@@ -764,7 +752,7 @@
             console.error("Firebase Initialization failed:", e);
         }
 
-        // --- IMAGE COMPRESSOR ---
+        // --- UTILS ---
         function resizeImage(file, maxSize = 300, preserveTransparency = false) {
             return new Promise((resolve) => {
                 if(!file) return resolve("");
@@ -778,7 +766,6 @@
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        
                         if (preserveTransparency) { resolve(canvas.toDataURL('image/png')); } 
                         else { resolve(canvas.toDataURL('image/jpeg', 0.6)); }
                     };
@@ -786,6 +773,15 @@
                 };
                 reader.readAsDataURL(file);
             });
+        }
+
+        function getTeamColor(team) {
+            if (!team) return '#ffffff';
+            const t = team.toLowerCase();
+            if (t.includes('it')) return '#3b82f6'; // Blue
+            if (t.includes('live')) return '#8b0000'; // Dark Red
+            if (t.includes('projector') || t.includes('data show')) return '#ffffff'; // White
+            return '#ffffff';
         }
 
         // --- DATABASE SERVICE ---
@@ -798,7 +794,6 @@
                 const defaultSettings = {
                     firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                     contacts: [{name: "Admin", phone: "+201234567890"}],
-                    teamColors: {"Live Team": "#FACC15", "Projector Team": "#2563eb", "IT Team": "#9333ea"},
                     locations: ["St George Church", "St Anthony Church", "Youssef Salama Hall"],
                     zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                     events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
@@ -818,7 +813,6 @@
                             firstTimePassword: d.firstTimePassword || defaultSettings.firstTimePassword,
                             adminPasswords: d.adminPasswords || defaultSettings.adminPasswords,
                             contacts: d.contacts || defaultSettings.contacts,
-                            teamColors: d.teamColors || defaultSettings.teamColors,
                             locations: d.locations || defaultSettings.locations,
                             zones: d.zones || defaultSettings.zones,
                             events: d.events || defaultSettings.events,
@@ -835,15 +829,6 @@
                             if(!e.allowedZones) e.allowedZones = GLOBAL_SETTINGS.zones || []; 
                             if(!e.masses) e.masses = [];
                         });
-                        
-                        // Silent cleanup for legacy team names
-                        if(GLOBAL_SETTINGS.teamColors && GLOBAL_SETTINGS.teamColors["N/A"]) {
-                            delete GLOBAL_SETTINGS.teamColors["N/A"];
-                        }
-                        if(GLOBAL_SETTINGS.teamColors && GLOBAL_SETTINGS.teamColors["Data Show Team"]) {
-                            GLOBAL_SETTINGS.teamColors["Projector Team"] = GLOBAL_SETTINGS.teamColors["Data Show Team"];
-                            delete GLOBAL_SETTINGS.teamColors["Data Show Team"];
-                        }
                     } else {
                         GLOBAL_SETTINGS = defaultSettings;
                         await firestoreDB.collection('admin').doc('settings').set(GLOBAL_SETTINGS);
@@ -860,8 +845,8 @@
                     await firestoreDB.collection('admin').doc('settings').set(newSettings); 
                     GLOBAL_SETTINGS = newSettings; 
                     await applyGlobalSettings(); 
-                    renderSettingsUI(); 
                     
+                    if(document.getElementById('admin-tab-settings') && !document.getElementById('admin-tab-settings').classList.contains('hidden')) renderSettingsUI(); 
                     if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
                     if(document.getElementById('admin-tab-servants') && !document.getElementById('admin-tab-servants').classList.contains('hidden')) loadServantsTable();
                     if(document.getElementById('admin-tab-stats') && !document.getElementById('admin-tab-stats').classList.contains('hidden')) loadStats();
@@ -899,7 +884,6 @@
                 if(!firestoreDB) return;
                 await firestoreDB.collection('passes').doc(id).delete(); 
             },
-            
             async fetchAllServants() {
                 try { 
                     if(!firestoreDB) throw new Error("Firebase DB not initialized");
@@ -921,7 +905,6 @@
                     await firestoreDB.collection('servants').doc(id).delete(); 
                 } catch(e) { console.error(e); }
             },
-
             async fetchLogs() {
                 try { 
                     if(!firestoreDB) throw new Error("Firebase DB not initialized");
@@ -946,17 +929,6 @@
                 } catch(e) { console.error(e); return false; }
             }
         };
-
-        function logToConsole(msg) {
-            const consoleEl = document.getElementById('sync-console');
-            const wrapper = document.getElementById('sync-console-wrapper');
-            if(consoleEl && wrapper) {
-                wrapper.classList.remove('hidden');
-                const time = new Date().toLocaleTimeString();
-                consoleEl.innerHTML += `<div><span class="text-gray-500">[${time}]</span> ${msg}</div>`;
-                consoleEl.scrollTop = consoleEl.scrollHeight;
-            }
-        }
 
         // --- RANGE MAPPING LOGIC ---
         function colToIdx(letter) {
@@ -997,7 +969,8 @@
             return texts;
         }
 
-        // --- GLOBAL VARIABLES ---
+        // --- GLOBAL VARIABLES & STATE ---
+        const STATIC_TEAMS = ['Live Team', 'Projector Team', 'IT Team'];
         let currentAdminTeamFilterPasses = 'all';
         let currentAdminTeamFilterServants = 'all';
         let currentSyncTab = 'live';
@@ -1121,7 +1094,7 @@
             else iframe.src = GLOBAL_SETTINGS.sheetUrlData || '';
         }
 
-        // --- FILTERING LOGIC ---
+        // --- UI FILTERING LOGIC ---
         function setPassFilter(team) {
             currentAdminTeamFilterPasses = team;
             document.querySelectorAll('.pass-filter-btn').forEach(btn => {
@@ -1150,9 +1123,14 @@
             loadServantsTable();
         }
 
-        // --- SETTINGS AND UI LOGIC ---
         function setSubmitAction(action) { currentSubmitAction = action; }
 
+        function populateDropdown(id, items) {
+            const el = document.getElementById(id);
+            if(el) el.innerHTML = items.map(i => `<option value="${i.val}">${i.lbl}</option>`).join('');
+        }
+
+        // --- MAIN APP LOGIC ---
         async function applyGlobalSettings() {
             const settings = await DB.getSettings();
             if(!settings) return;
@@ -1178,12 +1156,11 @@
                 document.getElementById('logo-scout-scan').src = settings.logos.scout; document.getElementById('logo-scout-scan').classList.remove('hidden'); 
             }
             
-            settings.teamColors = settings.teamColors || {};
             settings.locations = settings.locations || [];
             settings.events = settings.events || [];
 
-            populateDropdown('g-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
-            populateDropdown('s-team', Object.keys(settings.teamColors).map(k=>({val:k, lbl:k})));
+            populateDropdown('g-team', STATIC_TEAMS.map(k=>({val:k, lbl:k})));
+            populateDropdown('s-team', STATIC_TEAMS.map(k=>({val:k, lbl:k})));
             populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
             
             const activeEvents = settings.events;
@@ -1193,11 +1170,6 @@
             populateStatsDropdown();
             await fetchServantsData();
             loadIframePreview();
-        }
-
-        function populateDropdown(id, items) {
-            const el = document.getElementById(id);
-            if(el) el.innerHTML = items.map(i => `<option value="${i.val}">${i.lbl}</option>`).join('');
         }
 
         function handleTeamLogic() {
@@ -1342,6 +1314,7 @@
             const statusHeader = document.getElementById('pass-status-header');
             const alertBox = document.getElementById('entry-status-alert');
             const photoCont = document.getElementById('pass-photo-container');
+            const passResultContainer = document.getElementById('pass-result-container');
 
             statusHeader.className = "p-6 text-center text-white font-black text-3xl sm:text-4xl uppercase tracking-wider shadow-inner";
             alertBox.className = "mt-6 p-4 rounded-xl text-center font-bold text-lg border hidden";
@@ -1367,7 +1340,10 @@
                         : '-';
                 }
                 
-                document.getElementById('pass-team').style.color = settings.teamColors[pass.Team] || '#FFFFFF';
+                const tColor = getTeamColor(pass.Team);
+                document.getElementById('pass-team').style.color = tColor;
+                passResultContainer.style.borderColor = tColor;
+                
                 photoCont.innerHTML = pass.PhotoURL ? `<img src="${pass.PhotoURL}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-12 h-12 text-gray-600"></i>`;
             }
             lucide.createIcons();
@@ -1407,7 +1383,7 @@
             }
         }
 
-        // --- ADMIN LOGIC ---
+        // --- ADMIN LOGIN ---
         async function loginAdmin() {
             const pwd = document.getElementById('admin-password').value;
             const s = GLOBAL_SETTINGS;
@@ -1458,7 +1434,6 @@
             const defaultSettings = {
                 firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                 contacts: [{name: "Admin", phone: "+201234567890"}],
-                teamColors: {"Live Team": "#FACC15", "Projector Team": "#2563eb", "IT Team": "#9333ea"},
                 locations: ["St George Church", "St Anthony Church", "Youssef Salama Hall"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
@@ -1519,20 +1494,217 @@
             }
         }
 
+        // --- SETTINGS UI RENDERING ---
+        function renderSettingsUI() {
+            try {
+                const s = GLOBAL_SETTINGS;
+                if(!s) return;
+
+                document.getElementById('set-first-pwd').value = s.firstTimePassword || '';
+                
+                document.getElementById('set-pwd-list').innerHTML = (s.adminPasswords || []).map((p, i) => `
+                    <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
+                        <span>${'*'.repeat(p.length)}</span>
+                        <button onclick="removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+
+                document.getElementById('set-contacts-list').innerHTML = (s.contacts || []).map((c, i) => `
+                    <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
+                        <input type="text" id="edit-contact-name-${i}" value="${c.name}" class="w-1/3 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                        <input type="text" id="edit-contact-phone-${i}" value="${c.phone}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                        <button onclick="updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                        <button onclick="removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                    </div>
+                `).join('');
+
+                const renderEditableArr = (arr, id, field) => {
+                    const el = document.getElementById(id);
+                    if(el) {
+                        el.innerHTML = (arr || []).map((item, i) => `
+                            <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
+                                <input type="text" id="edit-${field}-${i}" value="${item}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                                <button onclick="updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                <button onclick="removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                            </div>
+                        `).join('');
+                    }
+                };
+                
+                renderEditableArr(s.locations, 'set-loc-list', 'locations'); 
+                renderEditableArr(s.zones, 'set-zone-list', 'zones');
+
+                const evListEl = document.getElementById('set-events-list');
+                if(evListEl) {
+                    evListEl.innerHTML = (s.events || []).map((ev, eIdx) => `
+                        <div class="bg-brand-panel p-4 rounded-xl border border-brand-border">
+                            <div class="flex justify-between items-center mb-2 gap-2">
+                                <input type="text" id="edit-ev-name-${eIdx}" value="${ev.name}" class="font-bold text-brand-yellow bg-transparent border-b border-brand-border px-1 w-1/2">
+                                <input type="date" id="edit-ev-date-${eIdx}" value="${ev.date}" class="text-gray-400 bg-transparent border-b border-brand-border px-1 w-1/3">
+                                <button onclick="updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Name/Date"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                <button onclick="removeSettingItem('events', ${eIdx})" class="text-red-500 text-xs flex items-center bg-brand-dark px-2 py-1 rounded"><i data-lucide="trash" class="w-3 h-3 mr-1"></i> Delete</button>
+                            </div>
+                            
+                            <div class="mb-3 mt-3">
+                                <p class="text-[10px] text-gray-500 mb-1">Active Zones for this event:</p>
+                                <div class="flex flex-wrap gap-1">
+                                    ${(s.zones || []).map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="toggleEventZone(${eIdx}, '${z}')" ${(ev.allowedZones || []).includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${z}</label>`).join('')}
+                                </div>
+                            </div>
+
+                            <div class="pl-4 border-l-2 border-brand-border space-y-2 mb-3">
+                                ${(ev.masses || []).map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${m.name} (${m.start} - ${m.end})</span><button onclick="removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
+                            </div>
+                            <div class="flex gap-2 text-xs">
+                                <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border bg-brand-dark">
+                                <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
+                                <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
+                                <button onclick="addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
+                            </div>
+                        </div>`).join('');
+                }
+                lucide.createIcons();
+            } catch(e) {
+                console.error("UI Render Exception:", e);
+            }
+        }
+
+        async function updateSettingsField(field, value) { 
+            GLOBAL_SETTINGS[field] = value; 
+            await DB.updateSettings(GLOBAL_SETTINGS); 
+            alert("Password Setting Saved Successfully!"); 
+        }
+        
+        async function addItemToSettingArray(field, inputId) { 
+            const val = document.getElementById(inputId).value.trim(); 
+            if(val) { 
+                GLOBAL_SETTINGS[field] = GLOBAL_SETTINGS[field] || [];
+                GLOBAL_SETTINGS[field].push(val); 
+                document.getElementById(inputId).value = ''; 
+                await DB.updateSettings(GLOBAL_SETTINGS); 
+                alert("Added Successfully!");
+            } 
+        }
+        
+        async function removeSettingItem(field, idx) { 
+            if(confirm('Delete item?')) { 
+                GLOBAL_SETTINGS[field].splice(idx, 1); 
+                await DB.updateSettings(GLOBAL_SETTINGS); 
+            } 
+        }
+        
+        async function updateArrayItem(field, idx, inputId) { 
+            GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim(); 
+            await DB.updateSettings(GLOBAL_SETTINGS); 
+            alert('Item Updated Successfully!'); 
+        }
+        
+        async function updateContact(idx) { 
+            GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim(); 
+            GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim(); 
+            await DB.updateSettings(GLOBAL_SETTINGS); 
+            alert('Contact Updated Successfully!');
+        }
+        
+        async function updateEvent(idx) { 
+            GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim(); 
+            GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value; 
+            await DB.updateSettings(GLOBAL_SETTINGS); 
+            alert('Event Saved Successfully!');
+        }
+
+        async function addContact() { 
+            const n = document.getElementById('new-contact-name').value.trim(); 
+            const p = document.getElementById('new-contact-phone').value.trim(); 
+            if(n && p) { 
+                GLOBAL_SETTINGS.contacts.push({name: n, phone: p}); 
+                document.getElementById('new-contact-name').value = ''; 
+                document.getElementById('new-contact-phone').value = ''; 
+                await DB.updateSettings(GLOBAL_SETTINGS); 
+                alert("Contact Added Successfully!");
+            } 
+        }
+        
+        async function addEvent() { 
+            const n = document.getElementById('new-event-name').value.trim();
+            const d = document.getElementById('new-event-date').value; 
+            if(n && d) { 
+                GLOBAL_SETTINGS.events.push({ id: 'ev_'+Date.now(), name: n, date: d, masses: [], allowedZones: GLOBAL_SETTINGS.zones }); 
+                document.getElementById('new-event-name').value = ''; 
+                await DB.updateSettings(GLOBAL_SETTINGS); 
+                alert("Event Created Successfully!");
+            } else {
+                alert("Name and Date required.");
+            }
+        }
+
+        async function toggleEventZone(eIdx, zone) {
+            const ev = GLOBAL_SETTINGS.events[eIdx];
+            if(ev.allowedZones.includes(zone)) ev.allowedZones = ev.allowedZones.filter(z => z !== zone);
+            else ev.allowedZones.push(zone);
+            await DB.updateSettings(GLOBAL_SETTINGS);
+        }
+
+        async function addMass(eIdx) { 
+            const n = document.getElementById(`m-name-${eIdx}`).value.trim();
+            const s = document.getElementById(`m-start-${eIdx}`).value;
+            const e = document.getElementById(`m-end-${eIdx}`).value; 
+            if(n && s && e) { 
+                GLOBAL_SETTINGS.events[eIdx].masses = GLOBAL_SETTINGS.events[eIdx].masses || [];
+                GLOBAL_SETTINGS.events[eIdx].masses.push({ id: 'm_'+Date.now(), name: n, start: s, end: e }); 
+                await DB.updateSettings(GLOBAL_SETTINGS); 
+                alert("Mass Shift Added Successfully!");
+            } else {
+                alert('Fill all mass fields'); 
+            }
+        }
+
+        async function removeMass(eIdx, mIdx) { 
+            GLOBAL_SETTINGS.events[eIdx].masses.splice(mIdx, 1); 
+            await DB.updateSettings(GLOBAL_SETTINGS); 
+        }
+
+        async function uploadLogo(type) {
+            const file = document.getElementById(`set-logo-${type}`).files[0];
+            if(file) {
+                GLOBAL_SETTINGS.logos[type] = await resizeImage(file, 300, true);
+                await DB.updateSettings(GLOBAL_SETTINGS);
+                alert('Logo Uploaded Successfully!');
+            }
+        }
+
         // --- BUILT-IN SYNC ENGINE ---
+        async function saveSyncSettings() {
+            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
+            GLOBAL_SETTINGS.liveMapping.events = document.getElementById('live-event-rng').value;
+            GLOBAL_SETTINGS.liveMapping.locations = document.getElementById('live-loc-rng').value;
+            GLOBAL_SETTINGS.liveMapping.names = document.getElementById('live-name-rng').value;
+            
+            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
+            GLOBAL_SETTINGS.dataMapping.events = document.getElementById('data-event-rng').value;
+            GLOBAL_SETTINGS.dataMapping.locations = document.getElementById('data-loc-rng').value;
+            GLOBAL_SETTINGS.dataMapping.names = document.getElementById('data-name-rng').value;
+            
+            GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
+            
+            await DB.updateSettings(GLOBAL_SETTINGS);
+            loadIframePreview();
+            alert("Mapping Settings Saved!");
+        }
+
         async function startBuiltInSync(targetTeam) {
             if(!targetTeam) targetTeam = currentSyncTab; 
             
             const container = targetTeam === 'live' ? document.getElementById('sync-live-section') : document.getElementById('sync-projector-section');
-            const btn = container.querySelector('button');
+            const btn = container ? container.querySelector('button') : null;
             const globalBtn = document.querySelector('#global-sync-btn');
             
-            const originalHTML = btn.innerHTML;
-            const globalOriginalHTML = globalBtn.innerHTML;
+            const originalHTML = btn ? btn.innerHTML : '';
+            const globalOriginalHTML = globalBtn ? globalBtn.innerHTML : '';
             
             try {
-                btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> <span>Syncing...</span>`;
-                globalBtn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing in background...</span>`;
+                if (btn) btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> <span>Syncing...</span>`;
+                if (globalBtn) globalBtn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing ${targetTeam === 'live' ? 'Live' : 'Projector'} Team...</span>`;
                 
                 document.getElementById('sync-console-wrapper').classList.remove('hidden');
                 document.getElementById('sync-console').innerHTML = ''; 
@@ -1543,8 +1715,8 @@
                 console.error(e);
                 logToConsole(`<span class="text-red-500">Critical Sync Error: ${e.message}</span>`);
             } finally {
-                btn.innerHTML = originalHTML;
-                globalBtn.innerHTML = globalOriginalHTML;
+                if (btn && originalHTML) btn.innerHTML = originalHTML;
+                if (globalBtn && globalOriginalHTML) globalBtn.innerHTML = globalOriginalHTML;
                 lucide.createIcons();
             }
         }
@@ -1599,14 +1771,14 @@
                     if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
 
                     logToConsole(`Parsing data mapped ranges for ${rows.length} rows...`);
-                    const mapping = teamNameStr === "Live Team" ? liveMap : dataMap;
+
                     let currentEvent = "";
                     let currentLocation = "St. George Church";
 
                     for(let r = 0; r < rows.length; r++) {
                         const row = rows[r]; if(!row || row.length === 0) continue;
                         
-                        let rowEvents = extractFromRanges(row, r, mapping.events);
+                        let rowEvents = extractFromRanges(row, r, parsedMap.events);
                         let eventText = rowEvents.join(' ').trim();
                         if(eventText) {
                             currentEvent = eventText
@@ -1620,7 +1792,7 @@
                                 .trim();
                         }
                         
-                        let rowLocs = extractFromRanges(row, r, mapping.locs);
+                        let rowLocs = extractFromRanges(row, r, parsedMap.locs);
                         let locText = rowLocs.join(' ').trim();
                         if(locText) {
                             if (locText.includes("جوار")) currentLocation = "St. George Church";
@@ -1639,7 +1811,7 @@
                             logToConsole(`Created new event: <b>${currentEvent}</b>`);
                         }
 
-                        let rawNames = extractFromRanges(row, r, mapping.names);
+                        let rawNames = extractFromRanges(row, r, parsedMap.names);
                         for(let rawName of rawNames) {
                             if(!rawName) continue;
                             let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
@@ -1693,6 +1865,15 @@
             } else {
                 await applyGlobalSettings();
             }
+            
+            await fetchServantsData();
+            if(document.getElementById('admin-tab-servants') && !document.getElementById('admin-tab-servants').classList.contains('hidden')) {
+                loadServantsTable();
+            }
+            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) {
+                loadManageTable();
+            }
+            loadStats();
         }
 
         // --- SERVANTS DIRECTORY LOGIC ---
@@ -1738,7 +1919,7 @@
                 if (cols.length === 1 && row.includes('|')) cols = row.split('|');
 
                 const name = (cols[0] || '').trim();
-                if (!name || name.toLowerCase() === 'name') continue; // skip header
+                if (!name || name.toLowerCase() === 'name') continue; 
 
                 const phone = (cols[1] || 'N/A').trim() || 'N/A';
                 const team = (cols[2] || 'Live Team').trim();
@@ -1799,7 +1980,7 @@
             alert(`Servant saved! ${servantPasses.length} of their existing passes were automatically updated.`);
             await fetchServantsData();
             loadServantsTable();
-            if(!document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
+            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
         }
 
         async function loadServantsTable() {
@@ -1815,7 +1996,10 @@
                 displayServants = displayServants.filter(s => s.Team === currentAdminTeamFilterServants);
             }
             
-            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass or Sync to auto-save them!</td></tr>`;
+            if(displayServants.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass or Sync to auto-save them!</td></tr>`;
+                return;
+            }
 
             tbody.innerHTML = displayServants.map(s => {
                 const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
@@ -1869,10 +2053,13 @@
             passes.reverse();
             
             const s = GLOBAL_SETTINGS;
-            if(passes.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No valid passes found for this filter.</td></tr>`;
+            if(passes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No valid passes found for this filter.</td></tr>`;
+                return;
+            }
 
             tbody.innerHTML = passes.map(p => {
-                const tColor = s.teamColors[p.Team] || "#fff";
+                const tColor = getTeamColor(p.Team);
                 const ev = s.events.find(e => e.id === p.Event);
                 const evName = p.Team === 'IT Team' ? 'ALL ACCESS' : (ev ? ev.name : p.Event);
                 return `
@@ -2076,6 +2263,7 @@
             handleTeamLogic(); lucide.createIcons();
         }
 
+        // --- PDF ENGINE ---
         async function generatePerfectPDF(pass) {
             const s = GLOBAL_SETTINGS;
             
@@ -2090,7 +2278,10 @@
 
             document.getElementById('pdf-name').textContent = pass.Name;
             document.getElementById('pdf-team').textContent = pass.Team.toUpperCase();
-            document.getElementById('pdf-team').style.color = s.teamColors[pass.Team] || "#FFFFFF";
+            
+            const tColor = getTeamColor(pass.Team);
+            document.getElementById('pdf-team').style.color = tColor;
+            document.getElementById('pdf-card').style.borderColor = tColor;
             
             let evName = pass.Event;
             if(pass.Team !== 'IT Team') {
