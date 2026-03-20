@@ -73,7 +73,10 @@
                 <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.location.hash='#/scan'">
                     <img id="nav-logo-ltw" src="" alt="LTW Logo" class="h-8 w-8 object-contain hidden">
                     <i id="nav-icon-fallback" data-lucide="sun" class="w-7 h-7 text-brand-yellow group-hover:rotate-45 transition-transform duration-300"></i>
-                    <span class="font-black text-xl tracking-tight uppercase"><span class="text-brand-yellow">Light</span> The World</span>
+                    <div class="flex items-baseline space-x-2">
+                        <span class="font-black text-xl tracking-tight uppercase"><span class="text-brand-yellow">Light</span> The World</span>
+                        <div id="connection-status-indicator" class="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse" title="Connecting to database..."></div>
+                    </div>
                 </div>
                 
                 <div id="main-nav-links" class="flex items-center space-x-2 sm:space-x-4">
@@ -730,8 +733,36 @@
             messagingSenderId: "133608312380",
             appId: "1:133608312380:web:830e094ce536dfc63cfd39"
         };
-        firebase.initializeApp(firebaseConfig);
-        const firestoreDB = firebase.firestore();
+        
+        let firestoreDB = null;
+        
+        // --- CONNECTION INDICATOR LOGIC ---
+        function updateConnectionStatus(state) {
+            const dot = document.getElementById('connection-status-indicator');
+            if(!dot) return;
+            dot.classList.remove('bg-yellow-500', 'bg-green-500', 'bg-red-500', 'animate-pulse');
+
+            if(state === 'connected') {
+                dot.classList.add('bg-green-500');
+                dot.title = "Connected to Database";
+            } else if(state === 'error' || state === 'disconnected') {
+                dot.classList.add('bg-red-500');
+                dot.title = "Connection Error - Check Internet or Adblocker";
+            } else {
+                dot.classList.add('bg-yellow-500', 'animate-pulse');
+                dot.title = "Connecting...";
+            }
+        }
+
+        window.addEventListener('online', () => updateConnectionStatus('connected'));
+        window.addEventListener('offline', () => updateConnectionStatus('disconnected'));
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            firestoreDB = firebase.firestore();
+        } catch(e) {
+            console.error("Firebase Initialization failed:", e);
+        }
 
         // --- IMAGE COMPRESSOR ---
         function resizeImage(file, maxSize = 300, preserveTransparency = false) {
@@ -779,6 +810,7 @@
                 };
 
                 try {
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
                     const doc = await firestoreDB.collection('admin').doc('settings').get();
                     if(doc.exists) {
                         const d = doc.data();
@@ -824,61 +856,88 @@
             },
             async updateSettings(newSettings) {
                 try { 
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
                     await firestoreDB.collection('admin').doc('settings').set(newSettings); 
                     GLOBAL_SETTINGS = newSettings; 
                     await applyGlobalSettings(); 
                     renderSettingsUI(); 
                     
-                    if(!document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
-                    if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) loadServantsTable();
-                    if(!document.getElementById('admin-tab-stats').classList.contains('hidden')) loadStats();
+                    if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
+                    if(document.getElementById('admin-tab-servants') && !document.getElementById('admin-tab-servants').classList.contains('hidden')) loadServantsTable();
+                    if(document.getElementById('admin-tab-stats') && !document.getElementById('admin-tab-stats').classList.contains('hidden')) loadStats();
                 } 
                 catch(e) { alert("Failed to save settings to database."); console.error(e); }
             },
             async fetchAllPasses() {
                 try { 
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
                     const snapshot = await firestoreDB.collection('passes').get(); 
                     return snapshot.docs.map(doc => doc.data()).filter(p => p && p.PassID && p.Name && p.PassID !== "undefined"); 
                 } catch(e) { return []; }
             },
             async fetchPass(id) {
-                try { const doc = await firestoreDB.collection('passes').doc(id).get(); return doc.exists ? doc.data() : undefined; } 
+                try { 
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
+                    const doc = await firestoreDB.collection('passes').doc(id).get(); 
+                    return doc.exists ? doc.data() : undefined; 
+                } 
                 catch(e) { return undefined; }
             },
             async savePass(pass) {
-                try { await firestoreDB.collection('passes').doc(pass.PassID).set(pass); return true; } 
+                try { 
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
+                    await firestoreDB.collection('passes').doc(pass.PassID).set(pass); 
+                    return true; 
+                } 
                 catch(e) { console.error(e); return false; }
             },
-            async updatePassStatus(id, newStatus) { await firestoreDB.collection('passes').doc(id).update({ Status: newStatus }); },
-            async deletePass(id) { await firestoreDB.collection('passes').doc(id).delete(); },
+            async updatePassStatus(id, newStatus) { 
+                if(!firestoreDB) return;
+                await firestoreDB.collection('passes').doc(id).update({ Status: newStatus }); 
+            },
+            async deletePass(id) { 
+                if(!firestoreDB) return;
+                await firestoreDB.collection('passes').doc(id).delete(); 
+            },
             
             async fetchAllServants() {
                 try { 
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
                     const snapshot = await firestoreDB.collection('servants').get(); 
                     return snapshot.docs.map(doc => doc.data()).filter(s => s && s.Name); 
                 } catch(e) { return []; }
             },
             async saveServant(servant) {
                 try {
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
                     if(!servant || !servant.Name) return;
                     const id = servant.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
                     await firestoreDB.collection('servants').doc(id).set(servant);
                 } catch(e) { console.error(e); }
             },
             async deleteServant(id) {
-                try { await firestoreDB.collection('servants').doc(id).delete(); } catch(e) { console.error(e); }
+                try { 
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
+                    await firestoreDB.collection('servants').doc(id).delete(); 
+                } catch(e) { console.error(e); }
             },
 
             async fetchLogs() {
-                try { const snapshot = await firestoreDB.collection('logs').get(); return snapshot.docs.map(doc => doc.data()); } 
+                try { 
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
+                    const snapshot = await firestoreDB.collection('logs').get(); 
+                    return snapshot.docs.map(doc => doc.data()); 
+                } 
                 catch(e) { return []; }
             },
             async logEntry(passId, result) {
+                if(!firestoreDB) return null;
                 let log = { LogID: 'LOG-' + Date.now(), PassID: passId, Time: new Date().toISOString(), Result: result };
                 await firestoreDB.collection('logs').doc(log.LogID).set(log); return log;
             },
             async clearCollection(collectionName) {
                 try {
+                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
                     const snapshot = await firestoreDB.collection(collectionName).get();
                     const batch = firestoreDB.batch();
                     snapshot.docs.forEach((doc) => { batch.delete(doc.ref); });
@@ -947,94 +1006,18 @@
         let localServants = [];
         let currentSubmitAction = 'generate';
 
-        // --- SCANNER & VERIFICATION ---
-        function onScanSuccess(decodedText) {
-            if(scanner) scanner.clear();
-            let passId = decodedText.includes('#/pass/') ? decodedText.split('#/pass/')[1] : decodedText;
-            window.location.hash = `#/pass/${passId}`;
-        }
-        function simulateScanPrompt() { const id = prompt("Enter Pass ID:"); if(id) window.location.hash = `#/pass/${id}`; }
-        function handleEnter(e, func) { if(e.key === 'Enter') func(); }
-
-        async function verifyPass(id) {
-            const pass = await DB.fetchPass(id);
-            const settings = GLOBAL_SETTINGS;
-            const statusHeader = document.getElementById('pass-status-header');
-            const alertBox = document.getElementById('entry-status-alert');
-            const photoCont = document.getElementById('pass-photo-container');
-
-            statusHeader.className = "p-6 text-center text-white font-black text-3xl sm:text-4xl uppercase tracking-wider shadow-inner";
-            alertBox.className = "mt-6 p-4 rounded-xl text-center font-bold text-lg border hidden";
-            
-            document.getElementById('pass-id-display').textContent = id;
-            document.getElementById('pass-name').textContent = pass ? pass.Name : 'UNKNOWN';
-            document.getElementById('pass-team').textContent = pass ? pass.Team : '-';
-            
-            if(pass) {
-                if(pass.Team === 'IT Team') {
-                    document.getElementById('pass-event').textContent = 'ALL ACCESS';
-                    document.getElementById('pass-location-text').textContent = 'ALL CHURCHES';
-                    document.getElementById('pass-zones').innerHTML = `<span class="bg-brand-yellow text-black text-xs font-black px-3 py-1.5 rounded shadow-sm">ALL ZONES</span>`;
-                } else {
-                    document.getElementById('pass-location-text').textContent = pass.Location || 'N/A';
-                    let evName = "N/A", mName = "";
-                    const ev = settings.events.find(e => e.id === pass.Event);
-                    if(ev) { evName = ev.name; if(pass.Mass && pass.Mass !== 'N/A') { const m = ev.masses.find(x => x.id === pass.Mass); if(m) mName = ` (${m.name})`; } }
-                    document.getElementById('pass-event').textContent = evName + mName;
-                    
-                    document.getElementById('pass-zones').innerHTML = pass.AllowedZones 
-                        ? pass.AllowedZones.split(', ').map(z => `<span class="bg-brand-dark border border-brand-border text-gray-300 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm">${z}</span>`).join('')
-                        : '-';
-                }
-                
-                document.getElementById('pass-team').style.color = settings.teamColors[pass.Team] || '#FFFFFF';
-                photoCont.innerHTML = pass.PhotoURL ? `<img src="${pass.PhotoURL}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-12 h-12 text-gray-600"></i>`;
-            }
-            lucide.createIcons();
-
-            if (!pass || !pass.PassID || pass.PassID === 'undefined') { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await DB.logEntry(id, "INVALID"); return; }
-            if (pass.Status === 'REVOKED') { statusHeader.textContent = "PASS REVOKED"; statusHeader.classList.add('bg-gray-800'); await DB.logEntry(id, "REVOKED"); return; }
-
-            let isExpired = false;
-            if (pass.Team !== 'IT Team' && pass.Mass && pass.Mass !== 'N/A') {
-                const ev = settings.events.find(e => e.id === pass.Event);
-                const m = ev ? ev.masses.find(x => x.id === pass.Mass) : null;
-                if(m && m.end && ev.date) {
-                    const endDateTime = new Date(`${ev.date}T${m.end}:00`);
-                    if (new Date() > endDateTime) isExpired = true;
-                }
-            }
-
-            if (isExpired) {
-                statusHeader.textContent = "PASS EXPIRED"; statusHeader.classList.add('bg-red-800');
-                await DB.logEntry(id, "EXPIRED"); return;
-            }
-
-            statusHeader.textContent = "ACCESS GRANTED"; statusHeader.classList.add('bg-green-600');
-            const allLogs = await DB.fetchLogs();
-            const passLogsToday = allLogs.filter(l => l.PassID === id && l.Result.includes('GRANTED') && l.Time.startsWith(new Date().toISOString().split('T')[0]));
-
-            alertBox.classList.remove('hidden');
-            const timeScanned = new Date().toLocaleTimeString();
-            if (passLogsToday.length === 0) {
-                alertBox.innerHTML = `First Entry Registered<br><span class="text-sm font-normal">Scanned at ${timeScanned}</span>`;
-                alertBox.classList.add('bg-green-900', 'text-green-300', 'border-green-700');
-                await DB.logEntry(id, "GRANTED - FIRST ENTRY");
-            } else {
-                alertBox.innerHTML = `Already Entered Today<br><span class="text-sm font-normal">Last Scanned at ${timeScanned}</span>`;
-                alertBox.classList.add('bg-yellow-900', 'text-yellow-300', 'border-yellow-700');
-                await DB.logEntry(id, "GRANTED - RE-ENTRY");
-            }
-        }
-
         // --- APP INIT & ROUTING ---
         window.addEventListener('hashchange', handleRoute);
         
         window.addEventListener('load', async () => { 
+            updateConnectionStatus('connecting');
             try {
+                if(!firestoreDB) throw new Error("Firebase SDK missing/blocked");
                 await applyGlobalSettings(); 
+                updateConnectionStatus('connected');
             } catch(e) {
                 console.error("Init Error", e);
+                updateConnectionStatus('error');
             } finally {
                 if(!window.location.hash) window.location.hash = '#/scan'; 
                 handleRoute(); 
@@ -1118,9 +1101,11 @@
 
         function toggleSheetPreview() {
             const container = document.getElementById('sheet-preview-container');
-            container.classList.toggle('hidden');
-            if(!container.classList.contains('hidden')) {
-                loadIframePreview();
+            if(container) {
+                container.classList.toggle('hidden');
+                if(!container.classList.contains('hidden')) {
+                    loadIframePreview();
+                }
             }
         }
 
@@ -1128,7 +1113,7 @@
             const iframe = document.getElementById('live-google-sheet-iframe');
             if(!iframe) return;
             const container = document.getElementById('sheet-preview-container');
-            if(container.classList.contains('hidden')) return; 
+            if(!container || container.classList.contains('hidden')) return; 
             
             const selectEl = document.getElementById('iframe-team-select');
             const team = selectEl ? selectEl.value : currentSyncTab;
@@ -1143,8 +1128,11 @@
                 btn.classList.remove('bg-brand-panel', 'text-white');
                 btn.classList.add('text-gray-400', 'hover:text-white');
             });
-            document.querySelector(`.filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.remove('text-gray-400', 'hover:text-white');
-            document.querySelector(`.filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.add('bg-brand-panel', 'text-white');
+            const targetBtn = document.querySelector(`.filter-${team.replace(/\s+/g, '').toLowerCase()}`);
+            if(targetBtn) {
+                targetBtn.classList.remove('text-gray-400', 'hover:text-white');
+                targetBtn.classList.add('bg-brand-panel', 'text-white');
+            }
             loadManageTable();
         }
 
@@ -1154,8 +1142,11 @@
                 btn.classList.remove('bg-brand-panel', 'text-white');
                 btn.classList.add('text-gray-400', 'hover:text-white');
             });
-            document.querySelector(`.s-filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.remove('text-gray-400', 'hover:text-white');
-            document.querySelector(`.s-filter-${team.replace(/\s+/g, '').toLowerCase()}`).classList.add('bg-brand-panel', 'text-white');
+            const targetBtn = document.querySelector(`.s-filter-${team.replace(/\s+/g, '').toLowerCase()}`);
+            if(targetBtn) {
+                targetBtn.classList.remove('text-gray-400', 'hover:text-white');
+                targetBtn.classList.add('bg-brand-panel', 'text-white');
+            }
             loadServantsTable();
         }
 
@@ -1214,6 +1205,7 @@
             if(!teamInput) return;
             const team = teamInput.value;
             const assignSec = document.getElementById('assignment-section');
+            if(!assignSec) return;
             if(team === 'IT Team') {
                 assignSec.classList.add('hidden');
             } else {
@@ -1224,15 +1216,18 @@
         }
 
         function updateMassDropdown() {
-            if(document.getElementById('g-team').value === 'IT Team') return;
+            if(document.getElementById('g-team')?.value === 'IT Team') return;
             
-            const evId = document.getElementById('g-event').value;
+            const evId = document.getElementById('g-event')?.value;
             const settings = GLOBAL_SETTINGS;
+            if(!settings) return;
             const ev = settings.events.find(e => e.id === evId);
             const mCont = document.getElementById('mass-container');
             const mSel = document.getElementById('g-mass');
             const zCont = document.getElementById('zones-container');
             
+            if(!mCont || !mSel || !zCont) return;
+
             if(ev) {
                 const eventZones = ev.allowedZones || settings.zones || [];
                 zCont.innerHTML = eventZones.map(z => `
@@ -1311,10 +1306,10 @@
             const activePassesInSelection = passes.map(p => p.PassID);
             const actuallyEnteredFromSelection = Array.from(enteredSet).filter(id => activePassesInSelection.includes(id));
             
-            document.getElementById('stat-total').textContent = passes.length;
-            document.getElementById('stat-entered').textContent = actuallyEnteredFromSelection.length;
-            document.getElementById('stat-pending').textContent = passes.length - actuallyEnteredFromSelection.length;
-            document.getElementById('stat-revoked').textContent = revoked;
+            if(document.getElementById('stat-total')) document.getElementById('stat-total').textContent = passes.length;
+            if(document.getElementById('stat-entered')) document.getElementById('stat-entered').textContent = actuallyEnteredFromSelection.length;
+            if(document.getElementById('stat-pending')) document.getElementById('stat-pending').textContent = passes.length - actuallyEnteredFromSelection.length;
+            if(document.getElementById('stat-revoked')) document.getElementById('stat-revoked').textContent = revoked;
 
             const tbody = document.getElementById('logs-table-body');
             if(!tbody) return;
@@ -1332,257 +1327,87 @@
             }
         }
 
-        // --- SETTINGS UI RENDERING ---
-        function renderSettingsUI() {
-            try {
-                const s = GLOBAL_SETTINGS;
-                if(!s) return;
+        // --- SCANNER & VERIFICATION ---
+        function onScanSuccess(decodedText) {
+            if(scanner) scanner.clear();
+            let passId = decodedText.includes('#/pass/') ? decodedText.split('#/pass/')[1] : decodedText;
+            window.location.hash = `#/pass/${passId}`;
+        }
+        function simulateScanPrompt() { const id = prompt("Enter Pass ID:"); if(id) window.location.hash = `#/pass/${id}`; }
+        function handleEnter(e, func) { if(e.key === 'Enter') func(); }
 
-                document.getElementById('set-first-pwd').value = s.firstTimePassword || '';
-                document.getElementById('set-sheet-live').value = s.sheetUrlLive || '';
-                document.getElementById('set-sheet-data').value = s.sheetUrlData || '';
-                
-                document.getElementById('live-event-rng').value = s.liveMapping?.events || '';
-                document.getElementById('live-loc-rng').value = s.liveMapping?.locations || '';
-                document.getElementById('live-name-rng').value = s.liveMapping?.names || '';
+        async function verifyPass(id) {
+            const pass = await DB.fetchPass(id);
+            const settings = GLOBAL_SETTINGS;
+            const statusHeader = document.getElementById('pass-status-header');
+            const alertBox = document.getElementById('entry-status-alert');
+            const photoCont = document.getElementById('pass-photo-container');
 
-                document.getElementById('data-event-rng').value = s.dataMapping?.events || '';
-                document.getElementById('data-loc-rng').value = s.dataMapping?.locations || '';
-                document.getElementById('data-name-rng').value = s.dataMapping?.names || '';
-
-                document.getElementById('global-skip-words').value = s.skipWords || '';
-
-                document.getElementById('set-pwd-list').innerHTML = (s.adminPasswords || []).map((p, i) => `
-                    <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
-                        <span>${'*'.repeat(p.length)}</span>
-                        <button onclick="removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                    </div>
-                `).join('');
-
-                document.getElementById('set-contacts-list').innerHTML = (s.contacts || []).map((c, i) => `
-                    <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                        <input type="text" id="edit-contact-name-${i}" value="${c.name}" class="w-1/3 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                        <input type="text" id="edit-contact-phone-${i}" value="${c.phone}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                        <button onclick="updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                        <button onclick="removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                    </div>
-                `).join('');
-
-                document.getElementById('set-teams-list').innerHTML = Object.entries(s.teamColors || {}).map(([name, color], i) => {
-                    const safeName = name.replace(/'/g, "\\'");
-                    return `
-                    <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                        <input type="text" id="edit-team-name-${i}" value="${name}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                        <input type="color" id="edit-team-color-${i}" value="${color}" class="h-8 w-12 rounded cursor-pointer border-0 p-0 bg-transparent">
-                        <button onclick="updateTeam('${safeName}', '${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                        <button onclick="removeTeam('${safeName}')" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                    </div>
-                    `
-                }).join('');
-
-                const renderEditableArr = (arr, id, field) => {
-                    const el = document.getElementById(id);
-                    if(el) {
-                        el.innerHTML = (arr || []).map((item, i) => `
-                            <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                                <input type="text" id="edit-${field}-${i}" value="${item}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                                <button onclick="updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                                <button onclick="removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                            </div>
-                        `).join('');
-                    }
-                };
-                
-                renderEditableArr(s.locations, 'set-loc-list', 'locations'); 
-                renderEditableArr(s.zones, 'set-zone-list', 'zones');
-
-                const evListEl = document.getElementById('set-events-list');
-                if(evListEl) {
-                    evListEl.innerHTML = (s.events || []).map((ev, eIdx) => `
-                        <div class="bg-brand-panel p-4 rounded-xl border border-brand-border">
-                            <div class="flex justify-between items-center mb-2 gap-2">
-                                <input type="text" id="edit-ev-name-${eIdx}" value="${ev.name}" class="font-bold text-brand-yellow bg-transparent border-b border-brand-border px-1 w-1/2">
-                                <input type="date" id="edit-ev-date-${eIdx}" value="${ev.date}" class="text-gray-400 bg-transparent border-b border-brand-border px-1 w-1/3">
-                                <button onclick="updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Name/Date"><i data-lucide="save" class="w-4 h-4"></i></button>
-                                <button onclick="removeSettingItem('events', ${eIdx})" class="text-red-500 text-xs flex items-center bg-brand-dark px-2 py-1 rounded"><i data-lucide="trash" class="w-3 h-3 mr-1"></i> Delete</button>
-                            </div>
-                            
-                            <div class="mb-3 mt-3">
-                                <p class="text-[10px] text-gray-500 mb-1">Active Zones for this event:</p>
-                                <div class="flex flex-wrap gap-1">
-                                    ${(s.zones || []).map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="toggleEventZone(${eIdx}, '${z}')" ${(ev.allowedZones || []).includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${z}</label>`).join('')}
-                                </div>
-                            </div>
-
-                            <div class="pl-4 border-l-2 border-brand-border space-y-2 mb-3">
-                                ${(ev.masses || []).map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${m.name} (${m.start} - ${m.end})</span><button onclick="removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
-                            </div>
-                            <div class="flex gap-2 text-xs">
-                                <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                                <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                                <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                                <button onclick="addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
-                            </div>
-                        </div>`).join('');
+            statusHeader.className = "p-6 text-center text-white font-black text-3xl sm:text-4xl uppercase tracking-wider shadow-inner";
+            alertBox.className = "mt-6 p-4 rounded-xl text-center font-bold text-lg border hidden";
+            
+            document.getElementById('pass-id-display').textContent = id;
+            document.getElementById('pass-name').textContent = pass ? pass.Name : 'UNKNOWN';
+            document.getElementById('pass-team').textContent = pass ? pass.Team : '-';
+            
+            if(pass) {
+                if(pass.Team === 'IT Team') {
+                    document.getElementById('pass-event').textContent = 'ALL ACCESS';
+                    document.getElementById('pass-location-text').textContent = 'ALL CHURCHES';
+                    document.getElementById('pass-zones').innerHTML = `<span class="bg-brand-yellow text-black text-xs font-black px-3 py-1.5 rounded shadow-sm">ALL ZONES</span>`;
+                } else {
+                    document.getElementById('pass-location-text').textContent = pass.Location || 'N/A';
+                    let evName = "N/A", mName = "";
+                    const ev = settings.events.find(e => e.id === pass.Event);
+                    if(ev) { evName = ev.name; if(pass.Mass && pass.Mass !== 'N/A') { const m = ev.masses.find(x => x.id === pass.Mass); if(m) mName = ` (${m.name})`; } }
+                    document.getElementById('pass-event').textContent = evName + mName;
+                    
+                    document.getElementById('pass-zones').innerHTML = pass.AllowedZones 
+                        ? pass.AllowedZones.split(', ').map(z => `<span class="bg-brand-dark border border-brand-border text-gray-300 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm">${z}</span>`).join('')
+                        : '-';
                 }
-                lucide.createIcons();
-            } catch(e) {
-                console.error("UI Render Exception:", e);
-            }
-        }
-
-        async function updateSettingsField(field, value) { 
-            GLOBAL_SETTINGS[field] = value; 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
-            alert("Password Setting Saved Successfully!"); 
-        }
-        
-        async function addItemToSettingArray(field, inputId) { 
-            const val = document.getElementById(inputId).value.trim(); 
-            if(val) { 
-                GLOBAL_SETTINGS[field] = GLOBAL_SETTINGS[field] || [];
-                GLOBAL_SETTINGS[field].push(val); 
-                document.getElementById(inputId).value = ''; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
-                alert("Added Successfully!");
-            } 
-        }
-        
-        async function removeSettingItem(field, idx) { 
-            if(confirm('Delete item?')) { 
-                GLOBAL_SETTINGS[field].splice(idx, 1); 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
-            } 
-        }
-        
-        async function updateArrayItem(field, idx, inputId) { 
-            GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim(); 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
-            alert('Item Updated Successfully!'); 
-        }
-        
-        async function updateContact(idx) { 
-            GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim(); 
-            GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim(); 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
-            alert('Contact Updated Successfully!');
-        }
-
-        async function updateTeam(oldName, idx) {
-            const newName = document.getElementById(`edit-team-name-${idx}`).value.trim();
-            const newColor = document.getElementById(`edit-team-color-${idx}`).value;
-            if(!newName) return alert("Team name cannot be empty.");
-            
-            let nameChanged = (oldName !== newName);
-            if(nameChanged) { delete GLOBAL_SETTINGS.teamColors[oldName]; }
-            GLOBAL_SETTINGS.teamColors[newName] = newColor; 
-            
-            await DB.updateSettings(GLOBAL_SETTINGS);
-            
-            if (nameChanged) {
-                const btn = document.querySelector(`#edit-team-name-${idx}`).nextElementSibling.nextElementSibling;
-                const origIcon = btn.innerHTML;
-                btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i>`;
-                lucide.createIcons();
-
-                let allServants = await DB.fetchAllServants();
-                for(let s of allServants) { if(s.Team === oldName) { s.Team = newName; await DB.saveServant(s); } }
                 
-                let allPasses = await DB.fetchAllPasses();
-                for(let p of allPasses) { if(p.Team === oldName) { p.Team = newName; await DB.savePass(p); } }
-                
-                btn.innerHTML = origIcon;
-                lucide.createIcons();
+                document.getElementById('pass-team').style.color = settings.teamColors[pass.Team] || '#FFFFFF';
+                photoCont.innerHTML = pass.PhotoURL ? `<img src="${pass.PhotoURL}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-12 h-12 text-gray-600"></i>`;
             }
-            alert("Team Updated Successfully!");
-        }
+            lucide.createIcons();
 
-        async function removeTeam(name) { 
-            if(confirm('Delete team? Warning: Passes mapped to this team will lose their styling.')) { 
-                delete GLOBAL_SETTINGS.teamColors[name]; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
-            } 
-        }
-        
-        async function updateEvent(idx) { 
-            GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim(); 
-            GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value; 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
-            alert('Event Saved Successfully!');
-        }
+            if (!pass || !pass.PassID || pass.PassID === 'undefined') { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await DB.logEntry(id, "INVALID"); return; }
+            if (pass.Status === 'REVOKED') { statusHeader.textContent = "PASS REVOKED"; statusHeader.classList.add('bg-gray-800'); await DB.logEntry(id, "REVOKED"); return; }
 
-        async function addContact() { 
-            const n = document.getElementById('new-contact-name').value.trim(); 
-            const p = document.getElementById('new-contact-phone').value.trim(); 
-            if(n && p) { 
-                GLOBAL_SETTINGS.contacts.push({name: n, phone: p}); 
-                document.getElementById('new-contact-name').value = ''; 
-                document.getElementById('new-contact-phone').value = ''; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
-                alert("Contact Added Successfully!");
-            } 
-        }
+            let isExpired = false;
+            if (pass.Team !== 'IT Team' && pass.Mass && pass.Mass !== 'N/A') {
+                const ev = settings.events.find(e => e.id === pass.Event);
+                const m = ev ? ev.masses.find(x => x.id === pass.Mass) : null;
+                if(m && m.end && ev.date) {
+                    const endDateTime = new Date(`${ev.date}T${m.end}:00`);
+                    if (new Date() > endDateTime) isExpired = true;
+                }
+            }
 
-        async function addTeam() { 
-            const n = document.getElementById('new-team-name').value.trim(); 
-            const c = document.getElementById('new-team-color').value; 
-            if(n) { 
-                GLOBAL_SETTINGS.teamColors[n] = c; 
-                document.getElementById('new-team-name').value = ''; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
-                alert("Team Added Successfully!");
-            } 
-        }
-        
-        async function addEvent() { 
-            const n = document.getElementById('new-event-name').value.trim();
-            const d = document.getElementById('new-event-date').value; 
-            if(n && d) { 
-                GLOBAL_SETTINGS.events.push({ id: 'ev_'+Date.now(), name: n, date: d, masses: [], allowedZones: GLOBAL_SETTINGS.zones }); 
-                document.getElementById('new-event-name').value = ''; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
-                alert("Event Created Successfully!");
+            if (isExpired) {
+                statusHeader.textContent = "PASS EXPIRED"; statusHeader.classList.add('bg-red-800');
+                await DB.logEntry(id, "EXPIRED"); return;
+            }
+
+            statusHeader.textContent = "ACCESS GRANTED"; statusHeader.classList.add('bg-green-600');
+            const allLogs = await DB.fetchLogs();
+            const passLogsToday = allLogs.filter(l => l.PassID === id && l.Result.includes('GRANTED') && l.Time.startsWith(new Date().toISOString().split('T')[0]));
+
+            alertBox.classList.remove('hidden');
+            const timeScanned = new Date().toLocaleTimeString();
+            if (passLogsToday.length === 0) {
+                alertBox.innerHTML = `First Entry Registered<br><span class="text-sm font-normal">Scanned at ${timeScanned}</span>`;
+                alertBox.classList.add('bg-green-900', 'text-green-300', 'border-green-700');
+                await DB.logEntry(id, "GRANTED - FIRST ENTRY");
             } else {
-                alert("Name and Date required.");
+                alertBox.innerHTML = `Already Entered Today<br><span class="text-sm font-normal">Last Scanned at ${timeScanned}</span>`;
+                alertBox.classList.add('bg-yellow-900', 'text-yellow-300', 'border-yellow-700');
+                await DB.logEntry(id, "GRANTED - RE-ENTRY");
             }
         }
 
-        async function toggleEventZone(eIdx, zone) {
-            const ev = GLOBAL_SETTINGS.events[eIdx];
-            if(ev.allowedZones.includes(zone)) ev.allowedZones = ev.allowedZones.filter(z => z !== zone);
-            else ev.allowedZones.push(zone);
-            await DB.updateSettings(GLOBAL_SETTINGS);
-        }
-
-        async function addMass(eIdx) { 
-            const n = document.getElementById(`m-name-${eIdx}`).value.trim();
-            const s = document.getElementById(`m-start-${eIdx}`).value;
-            const e = document.getElementById(`m-end-${eIdx}`).value; 
-            if(n && s && e) { 
-                GLOBAL_SETTINGS.events[eIdx].masses = GLOBAL_SETTINGS.events[eIdx].masses || [];
-                GLOBAL_SETTINGS.events[eIdx].masses.push({ id: 'm_'+Date.now(), name: n, start: s, end: e }); 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
-                alert("Mass Shift Added Successfully!");
-            } else {
-                alert('Fill all mass fields'); 
-            }
-        }
-
-        async function removeMass(eIdx, mIdx) { 
-            GLOBAL_SETTINGS.events[eIdx].masses.splice(mIdx, 1); 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
-        }
-
-        async function uploadLogo(type) {
-            const file = document.getElementById(`set-logo-${type}`).files[0];
-            if(file) {
-                GLOBAL_SETTINGS.logos[type] = await resizeImage(file, 300, true);
-                await DB.updateSettings(GLOBAL_SETTINGS);
-                alert('Logo Uploaded Successfully!');
-            }
-        }
-
-        // --- ADMIN UI ---
+        // --- ADMIN LOGIC ---
         async function loginAdmin() {
             const pwd = document.getElementById('admin-password').value;
             const s = GLOBAL_SETTINGS;
@@ -1669,69 +1494,64 @@
         }
 
         async function switchAdminTab(tab) {
-            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
-            
-            const targetSec = document.getElementById(`admin-tab-${tab}`);
-            const targetTab = document.getElementById(`tab-${tab}`);
-            if (targetSec) targetSec.classList.remove('hidden');
-            if (targetTab) {
-                targetTab.classList.add('bg-brand-yellow', 'text-black');
-                targetTab.classList.remove('text-gray-400', 'bg-transparent');
-            }
-            
-            if(tab === 'manage') loadManageTable(); 
-            if(tab === 'servants') loadServantsTable();
-            if(tab === 'stats') loadStats();
-            
-            if(tab === 'sync' || tab === 'settings' || tab === 'generate') {
-                await applyGlobalSettings(); 
-                if(tab === 'settings') renderSettingsUI();
+            try {
+                document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
+                
+                const targetSec = document.getElementById(`admin-tab-${tab}`);
+                const targetTab = document.getElementById(`tab-${tab}`);
+                if (targetSec) targetSec.classList.remove('hidden');
+                if (targetTab) {
+                    targetTab.classList.add('bg-brand-yellow', 'text-black');
+                    targetTab.classList.remove('text-gray-400', 'bg-transparent');
+                }
+                
+                if(tab === 'manage') loadManageTable(); 
+                if(tab === 'servants') loadServantsTable();
+                if(tab === 'stats') loadStats();
+                
+                if(tab === 'sync' || tab === 'settings' || tab === 'generate') {
+                    await applyGlobalSettings(); 
+                    if(tab === 'settings') renderSettingsUI();
+                }
+            } catch(e) {
+                console.error("Tab switch error", e);
             }
         }
 
         // --- BUILT-IN SYNC ENGINE ---
-        async function saveSyncSettings() {
-            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
-            GLOBAL_SETTINGS.liveMapping.events = document.getElementById('live-event-rng').value;
-            GLOBAL_SETTINGS.liveMapping.locations = document.getElementById('live-loc-rng').value;
-            GLOBAL_SETTINGS.liveMapping.names = document.getElementById('live-name-rng').value;
+        async function startBuiltInSync(targetTeam) {
+            if(!targetTeam) targetTeam = currentSyncTab; 
             
-            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
-            GLOBAL_SETTINGS.dataMapping.events = document.getElementById('data-event-rng').value;
-            GLOBAL_SETTINGS.dataMapping.locations = document.getElementById('data-loc-rng').value;
-            GLOBAL_SETTINGS.dataMapping.names = document.getElementById('data-name-rng').value;
+            const container = targetTeam === 'live' ? document.getElementById('sync-live-section') : document.getElementById('sync-projector-section');
+            const btn = container.querySelector('button');
+            const globalBtn = document.querySelector('#global-sync-btn');
             
-            GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
-            
-            await DB.updateSettings(GLOBAL_SETTINGS);
-            loadIframe();
-            alert("Mapping Settings Saved!");
-        }
-
-        async function startBuiltInSync() {
-            const btn = document.querySelector('#global-sync-btn');
             const originalHTML = btn.innerHTML;
+            const globalOriginalHTML = globalBtn.innerHTML;
             
             try {
-                btn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing in background...</span>`;
+                btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> <span>Syncing...</span>`;
+                globalBtn.innerHTML = `<i data-lucide="loader" class="w-6 h-6 mr-2 animate-spin"></i> <span>Syncing in background...</span>`;
                 
                 document.getElementById('sync-console-wrapper').classList.remove('hidden');
                 document.getElementById('sync-console').innerHTML = ''; 
                 lucide.createIcons();
 
-                await syncBuiltInSheets(currentSyncTab);
+                await syncBuiltInSheets(targetTeam);
             } catch (e) {
                 console.error(e);
                 logToConsole(`<span class="text-red-500">Critical Sync Error: ${e.message}</span>`);
             } finally {
                 btn.innerHTML = originalHTML;
+                globalBtn.innerHTML = globalOriginalHTML;
                 lucide.createIcons();
             }
         }
 
         async function syncBuiltInSheets(targetTeam) {
-            logToConsole(`Starting Precise Range Sync...`);
+            const teamName = targetTeam === 'live' ? "Live Team" : "Projector Team";
+            logToConsole(`Starting Range Sync for ${teamName}...`);
             let newCount = 0; let passesCount = 0;
             const s = GLOBAL_SETTINGS;
             let settingsModified = false;
@@ -1741,8 +1561,12 @@
             let existingPasses = await DB.fetchAllPasses();
             const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
 
-            const liveMap = { events: parseRange(s.liveMapping?.events), locs: parseRange(s.liveMapping?.locations), names: parseRange(s.liveMapping?.names) };
-            const dataMap = { events: parseRange(s.dataMapping?.events), locs: parseRange(s.dataMapping?.locations), names: parseRange(s.dataMapping?.names) };
+            const mappingObj = targetTeam === 'live' ? s.liveMapping : s.dataMapping;
+            const parsedMap = { 
+                events: parseRange(mappingObj?.events), 
+                locs: parseRange(mappingObj?.locations), 
+                names: parseRange(mappingObj?.names) 
+            };
             const skipWords = s.skipWords ? s.skipWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w) : [];
 
             async function processSheet(url, teamNameStr) {
@@ -1856,8 +1680,11 @@
                 }
             }
 
-            await processSheet(s.sheetUrlLive, "Live Team");
-            await processSheet(s.sheetUrlData, "Projector Team");
+            if(targetTeam === 'live') {
+                await processSheet(document.getElementById('set-sheet-live').value, "Live Team");
+            } else {
+                await processSheet(document.getElementById('set-sheet-data').value, "Projector Team");
+            }
 
             logToConsole(`<span class="text-green-400 font-bold">Sync Complete! Added ${newCount} servants & generated ${passesCount} passes.</span>`);
             
@@ -1866,11 +1693,6 @@
             } else {
                 await applyGlobalSettings();
             }
-            
-            await fetchServantsData();
-            if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) loadServantsTable();
-            if(!document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
-            loadStats();
         }
 
         // --- SERVANTS DIRECTORY LOGIC ---
@@ -1880,40 +1702,6 @@
             if(dl) {
                 dl.innerHTML = localServants.map(s => `<option value="${s.Name}">`).join('');
             }
-        }
-
-        async function manualSaveServant() {
-            const name = document.getElementById('s-name').value.trim();
-            const phone = document.getElementById('s-phone').value.trim() || 'N/A';
-            const team = document.getElementById('s-team').value;
-            const photoFile = document.getElementById('s-photo').files[0];
-            if(!name) return alert("Servant name is required.");
-
-            let photoB64 = "";
-            const internal = localServants.find(s => s.Name === name);
-            if (internal && internal.PhotoURL) photoB64 = internal.PhotoURL;
-            
-            if(photoFile) photoB64 = await resizeImage(photoFile, 300, false);
-
-            await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photoB64 });
-            
-            const allPasses = await DB.fetchAllPasses();
-            const servantPasses = allPasses.filter(p => p.Name.toLowerCase() === name.toLowerCase());
-            for(let p of servantPasses) {
-                p.Phone = phone;
-                p.Team = team;
-                if(photoB64) p.PhotoURL = photoB64;
-                await DB.savePass(p);
-            }
-
-            document.getElementById('s-name').value = '';
-            document.getElementById('s-phone').value = '';
-            document.getElementById('s-photo').value = '';
-            
-            alert(`Servant saved! ${servantPasses.length} of their existing passes were automatically updated.`);
-            await fetchServantsData();
-            loadServantsTable();
-            loadManageTable();
         }
 
         function toggleBulkServantImport() {
@@ -1950,7 +1738,7 @@
                 if (cols.length === 1 && row.includes('|')) cols = row.split('|');
 
                 const name = (cols[0] || '').trim();
-                if (!name || name.toLowerCase() === 'name') continue; // skip header or empty row
+                if (!name || name.toLowerCase() === 'name') continue; // skip header
 
                 const phone = (cols[1] || 'N/A').trim() || 'N/A';
                 const team = (cols[2] || 'Live Team').trim();
@@ -1973,11 +1761,45 @@
             
             await fetchServantsData();
             loadServantsTable();
-            loadManageTable();
+            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
 
             btn.innerHTML = originalHtml;
             btn.disabled = false;
             lucide.createIcons();
+        }
+
+        async function manualSaveServant() {
+            const name = document.getElementById('s-name').value.trim();
+            const phone = document.getElementById('s-phone').value.trim() || 'N/A';
+            const team = document.getElementById('s-team').value;
+            const photoFile = document.getElementById('s-photo').files[0];
+            if(!name) return alert("Servant name is required.");
+
+            let photoB64 = "";
+            const internal = localServants.find(s => s.Name === name);
+            if (internal && internal.PhotoURL) photoB64 = internal.PhotoURL;
+            
+            if(photoFile) photoB64 = await resizeImage(photoFile, 300, false);
+
+            await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photoB64 });
+            
+            const allPasses = await DB.fetchAllPasses();
+            const servantPasses = allPasses.filter(p => p.Name.toLowerCase() === name.toLowerCase());
+            for(let p of servantPasses) {
+                p.Phone = phone;
+                p.Team = team;
+                if(photoB64) p.PhotoURL = photoB64;
+                await DB.savePass(p);
+            }
+
+            document.getElementById('s-name').value = '';
+            document.getElementById('s-phone').value = '';
+            document.getElementById('s-photo').value = '';
+            
+            alert(`Servant saved! ${servantPasses.length} of their existing passes were automatically updated.`);
+            await fetchServantsData();
+            loadServantsTable();
+            if(!document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
         }
 
         async function loadServantsTable() {
@@ -2038,7 +1860,7 @@
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
             lucide.createIcons();
             
-            let passes = await DB.fetchAllPasses(); 
+            let passes = await DB.fetchAllPasses() || []; 
             passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
             
             if(currentAdminTeamFilterPasses !== 'all') {
@@ -2254,7 +2076,6 @@
             handleTeamLogic(); lucide.createIcons();
         }
 
-        // --- PDF ENGINE ---
         async function generatePerfectPDF(pass) {
             const s = GLOBAL_SETTINGS;
             
