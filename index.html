@@ -535,7 +535,7 @@
                                 <div class="mb-4">
                                     <label class="block text-xs font-bold text-gray-400 mb-1">First Time / Emergency Password</label>
                                     <div class="flex gap-2">
-                                        <input type="text" id="set-first-pwd" class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                        <input type="text" id="set-first-pwd" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
                                         <button onclick="updateSettingsField('firstTimePassword', document.getElementById('set-first-pwd').value)" class="px-4 py-2 bg-brand-border hover:bg-gray-700 rounded-lg text-sm font-bold text-white">Save</button>
                                     </div>
                                 </div>
@@ -543,7 +543,7 @@
                                     <label class="block text-xs font-bold text-gray-400 mb-2">Admin Passwords</label>
                                     <div id="set-pwd-list" class="space-y-2 mb-3"></div>
                                     <div class="flex gap-2">
-                                        <input type="text" id="new-pwd" placeholder="Add new password..." class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                        <input type="text" id="new-pwd" placeholder="Add new password..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
                                         <button onclick="addItemToSettingArray('adminPasswords', 'new-pwd')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                     </div>
                                 </div>
@@ -558,8 +558,8 @@
                                 <div class="p-4 bg-brand-panel border border-brand-border rounded-xl mt-4">
                                     <p class="text-xs font-bold text-white mb-2">Create New Event</p>
                                     <div class="flex flex-col sm:flex-row gap-3">
-                                        <input type="text" id="new-event-name" placeholder="Event Name (e.g. Palm Sunday)" class="flex-1 px-4 py-2 rounded-lg text-sm">
-                                        <input type="date" id="new-event-date" class="px-4 py-2 rounded-lg text-sm w-full sm:w-auto text-gray-300">
+                                        <input type="text" id="new-event-name" placeholder="Event Name (e.g. Palm Sunday)" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
+                                        <input type="date" id="new-event-date" class="px-4 py-2 rounded-lg text-sm w-full sm:w-auto text-gray-300 bg-[#1A1A1A]">
                                         <button onclick="addEvent()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold w-full sm:w-auto">Add Event</button>
                                     </div>
                                 </div>
@@ -571,8 +571,8 @@
                                 <p class="text-xs text-gray-400 mb-3">These numbers appear on the app footer and exported passes. Edit directly and save.</p>
                                 <div id="set-contacts-list" class="space-y-3 mb-4"></div>
                                 <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                    <input type="text" id="new-contact-name" placeholder="Name (e.g. Admin)" class="w-1/3 px-4 py-2 rounded-lg text-sm">
-                                    <input type="text" id="new-contact-phone" placeholder="Phone (+20...)" class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                    <input type="text" id="new-contact-name" placeholder="Name (e.g. Admin)" class="w-1/3 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
+                                    <input type="text" id="new-contact-phone" placeholder="Phone (+20...)" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
                                     <button onclick="addContact()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                 </div>
                             </div>
@@ -583,7 +583,7 @@
                                 <p class="text-xs text-gray-400 mb-3">Team field is always required when generating a pass. You can edit existing team names or colors directly.</p>
                                 <div id="set-teams-list" class="space-y-3 mb-4"></div>
                                 <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                    <input type="text" id="new-team-name" placeholder="New Team Name" class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                    <input type="text" id="new-team-name" placeholder="New Team Name" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
                                     <input type="color" id="new-team-color" class="h-10 w-14 rounded cursor-pointer border-0 p-0 bg-transparent">
                                     <button onclick="addTeam()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                 </div>
@@ -595,7 +595,7 @@
                                     <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Church Locations</h3>
                                     <div id="set-loc-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
                                     <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                        <input type="text" id="new-loc" placeholder="Add location..." class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                        <input type="text" id="new-loc" placeholder="Add location..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
                                         <button onclick="addItemToSettingArray('locations', 'new-loc')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                     </div>
                                 </div>
@@ -603,7 +603,7 @@
                                     <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Global Zones Catalog</h3>
                                     <div id="set-zone-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
                                     <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                        <input type="text" id="new-zone" placeholder="Add global zone..." class="flex-1 px-4 py-2 rounded-lg text-sm">
+                                        <input type="text" id="new-zone" placeholder="Add global zone..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
                                         <button onclick="addItemToSettingArray('zones', 'new-zone')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
                                     </div>
                                 </div>
@@ -1315,8 +1315,8 @@
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 
+                await applyGlobalSettings(); // Force fresh fetch before rendering
                 switchAdminTab('sync');
-                renderSettingsUI();
             } else {
                 document.getElementById('login-msg').textContent = "Incorrect password."; document.getElementById('login-msg').classList.add('text-red-500');
             }
@@ -1342,8 +1342,7 @@
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 
-                switchAdminTab('sync');
-                renderSettingsUI();
+                applyGlobalSettings().then(() => switchAdminTab('sync'));
             } else {
                 alert("Incorrect Emergency password.");
             }
@@ -1356,13 +1355,13 @@
                 firstTimePassword: "LTW@SGAA26", adminPasswords: [],
                 contacts: [{name: "Admin", phone: "+201234567890"}],
                 teamColors: {"Live Team": "#FACC15", "Projector Team": "#2563eb", "IT Team": "#9333ea"},
-                locations: ["St George Church", "St Anthony Church"],
+                locations: ["St George Church", "St Anthony Church", "Youssef Salama Hall"],
                 zones: ["Live Area", "Projector Area", "Sound Room", "Media Room", "Outside Cables", "St Mary Hall", "Green Hall"],
                 events: [{ id: "ev_"+Date.now(), name: "Holy Week", date: "2026-04-05", masses: [], allowedZones: [] }],
                 logos: { church: "", ltw: "", scout: "" }, sheetUrlLive: "", sheetUrlData: "",
                 liveMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
                 dataMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
-                skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات"
+                skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات, قديم, جديد, فقط"
             };
 
             if(type === 'passes') {
@@ -1390,7 +1389,7 @@
             }
         }
 
-        function switchAdminTab(tab) {
+        async function switchAdminTab(tab) {
             document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
             
@@ -1405,7 +1404,11 @@
             if(tab === 'manage') loadManageTable(); 
             if(tab === 'servants') loadServantsTable();
             if(tab === 'stats') loadStats();
-            if(tab === 'sync') loadIframePreview();
+            
+            if(tab === 'sync' || tab === 'settings' || tab === 'generate') {
+                await applyGlobalSettings(); // Deep sync UI before showing
+                if(tab === 'settings') renderSettingsUI();
+            }
         }
 
         // --- BUILT-IN SYNC ENGINE ---
@@ -1564,11 +1567,7 @@
 
             logToConsole(`<span class="text-green-400 font-bold">Sync Complete! Added ${newCount} servants & generated ${passesCount} passes.</span>`);
             
-            await applyGlobalSettings();
-            await fetchServantsData();
-            if(!document.getElementById('admin-tab-servants').classList.contains('hidden')) loadServantsTable();
-            if(!document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
-            loadStats();
+            await applyGlobalSettings(); // Cascade UI refresh
         }
 
         // --- SERVANTS DIRECTORY LOGIC ---
@@ -1627,7 +1626,7 @@
                 displayServants = displayServants.filter(s => s.Team === currentAdminTeamFilterServants);
             }
             
-            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored for this filter yet. Generate a pass or Sync to auto-save them!</td></tr>`;
+            if(displayServants.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-500 font-bold">No servants stored locally yet. Generate a pass or Sync to auto-save them!</td></tr>`;
 
             tbody.innerHTML = displayServants.map(s => {
                 const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
