@@ -301,7 +301,7 @@
                             </div>
                         </div>
 
-                        <button id="global-sync-btn" onclick="startBuiltInSync()" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
+                        <button id="global-sync-btn" onclick="startBuiltInSync('all')" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
                             <i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Sync & Generate Passes</span>
                         </button>
                         
@@ -341,8 +341,12 @@
                                     <select id="g-team" required class="w-full px-4 py-3 rounded-xl" onchange="handleTeamLogic()"></select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-bold text-gray-300 mb-2">Photo (Optional - Auto Compressed)</label>
+                                    <label class="block text-sm font-bold text-gray-300 mb-2">Photo (Optional)</label>
                                     <input type="file" id="g-photo" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand-border file:text-white hover:file:bg-gray-700 cursor-pointer p-1">
+                                    
+                                    <!-- Photo Preview Section -->
+                                    <img id="g-photo-preview" src="" class="hidden mt-3 w-20 h-20 object-cover rounded-xl border border-brand-border shadow-lg">
+                                    <p id="g-photo-status" class="hidden text-xs font-bold text-green-400 mt-2"><i data-lucide="check-circle" class="w-3 h-3 inline mr-1"></i> Loaded from directory</p>
                                 </div>
                             </div>
                         </div>
@@ -778,9 +782,9 @@
         function getTeamColor(team) {
             if (!team) return '#ffffff';
             const t = team.toLowerCase();
-            if (t.includes('it')) return '#3b82f6'; // Blue
-            if (t.includes('live')) return '#8b0000'; // Dark Red
-            if (t.includes('projector') || t.includes('data show')) return '#ffffff'; // White
+            if (t.includes('it')) return '#3b82f6'; 
+            if (t.includes('live')) return '#8b0000'; 
+            if (t.includes('projector') || t.includes('data show')) return '#ffffff'; 
             return '#ffffff';
         }
 
@@ -930,6 +934,17 @@
             }
         };
 
+        function logToConsole(msg) {
+            const consoleEl = document.getElementById('sync-console');
+            const wrapper = document.getElementById('sync-console-wrapper');
+            if(consoleEl && wrapper) {
+                wrapper.classList.remove('hidden');
+                const time = new Date().toLocaleTimeString();
+                consoleEl.innerHTML += `<div><span class="text-gray-500">[${time}]</span> ${msg}</div>`;
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+            }
+        }
+
         // --- RANGE MAPPING LOGIC ---
         function colToIdx(letter) {
             if (!letter) return 0;
@@ -999,6 +1014,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const gNameInput = document.getElementById('g-name');
+            const gPhotoPreview = document.getElementById('g-photo-preview');
+            const gPhotoStatus = document.getElementById('g-photo-status');
+            
             if(gNameInput) {
                 gNameInput.addEventListener('input', (e) => {
                     const val = e.target.value.trim();
@@ -1009,6 +1027,34 @@
                             document.getElementById('g-team').value = internal.Team;
                             handleTeamLogic();
                         }
+                        if(internal.PhotoURL && gPhotoPreview && gPhotoStatus) {
+                            gPhotoPreview.src = internal.PhotoURL;
+                            gPhotoPreview.classList.remove('hidden');
+                            gPhotoStatus.classList.remove('hidden');
+                        } else if(gPhotoPreview && gPhotoStatus) {
+                            gPhotoPreview.classList.add('hidden');
+                            gPhotoStatus.classList.add('hidden');
+                        }
+                    } else {
+                        if(gPhotoPreview) gPhotoPreview.classList.add('hidden');
+                        if(gPhotoStatus) gPhotoStatus.classList.add('hidden');
+                    }
+                });
+            }
+
+            const gPhotoInput = document.getElementById('g-photo');
+            if(gPhotoInput) {
+                gPhotoInput.addEventListener('change', function(e) {
+                    if(e.target.files && e.target.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            if(gPhotoPreview) {
+                                gPhotoPreview.src = ev.target.result;
+                                gPhotoPreview.classList.remove('hidden');
+                                if(gPhotoStatus) gPhotoStatus.classList.add('hidden');
+                            }
+                        }
+                        reader.readAsDataURL(e.target.files[0]);
                     }
                 });
             }
@@ -1863,17 +1909,8 @@
             if(settingsModified) {
                 await DB.updateSettings(GLOBAL_SETTINGS);
             } else {
-                await applyGlobalSettings();
+                await applyGlobalSettings(); 
             }
-            
-            await fetchServantsData();
-            if(document.getElementById('admin-tab-servants') && !document.getElementById('admin-tab-servants').classList.contains('hidden')) {
-                loadServantsTable();
-            }
-            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) {
-                loadManageTable();
-            }
-            loadStats();
         }
 
         // --- SERVANTS DIRECTORY LOGIC ---
@@ -2260,6 +2297,12 @@
             document.getElementById('generate-title').innerHTML = `<i data-lucide="badge-plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Create New Pass`;
             document.getElementById('create-buttons').classList.remove('hidden');
             document.getElementById('edit-buttons').classList.add('hidden');
+            
+            const gPhotoPreview = document.getElementById('g-photo-preview');
+            const gPhotoStatus = document.getElementById('g-photo-status');
+            if(gPhotoPreview) gPhotoPreview.classList.add('hidden');
+            if(gPhotoStatus) gPhotoStatus.classList.add('hidden');
+            
             handleTeamLogic(); lucide.createIcons();
         }
 
