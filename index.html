@@ -20,7 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-    <!-- Firebase SDKs (Compat Version for inline script compatibility) -->
+    <!-- Firebase SDKs (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 
@@ -115,7 +115,7 @@
             <div id="reader" class="bg-black relative"></div>
             <div class="mt-8 max-w-md mx-auto text-center bg-brand-panel p-5 rounded-xl border border-brand-border">
                 <p class="text-sm text-gray-400 mb-3">Camera not working or damaged code?</p>
-                <button onclick="simulateScanPrompt()" class="px-6 py-2.5 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white font-bold rounded-lg transition-colors text-sm">
+                <button onclick="window.simulateScanPrompt()" class="px-6 py-2.5 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white font-bold rounded-lg transition-colors text-sm">
                     Enter Pass ID Manually
                 </button>
             </div>
@@ -196,15 +196,15 @@
                 <h2 class="text-2xl font-black mb-2 text-white">Admin Access</h2>
                 <p class="text-sm text-gray-400 mb-6" id="login-msg">Enter system password to continue.</p>
                 
-                <input type="password" id="admin-password" placeholder="••••••••" class="w-full px-5 py-4 rounded-xl border border-brand-border focus:border-brand-yellow text-center text-xl tracking-widest bg-brand-dark text-white mb-4 outline-none transition font-bold" onkeypress="handleEnter(event, loginAdmin)">
-                <button onclick="loginAdmin()" class="w-full py-4 bg-brand-yellow text-black rounded-xl font-black hover:bg-yellow-500 transition-colors shadow-md">Authenticate</button>
+                <input type="password" id="admin-password" placeholder="••••••••" class="w-full px-5 py-4 rounded-xl border border-brand-border focus:border-brand-yellow text-center text-xl tracking-widest bg-brand-dark text-white mb-4 outline-none transition font-bold" onkeypress="window.handleEnter(event, window.loginAdmin)">
+                <button onclick="window.loginAdmin()" class="w-full py-4 bg-brand-yellow text-black rounded-xl font-black hover:bg-yellow-500 transition-colors shadow-md">Authenticate</button>
                 
-                <button onclick="toggleEmergencyLogin()" class="mt-6 text-xs text-gray-600 hover:text-gray-400 transition-colors">Emergency Login</button>
+                <button onclick="window.toggleEmergencyLogin()" class="mt-6 text-xs text-gray-600 hover:text-gray-400 transition-colors">Emergency Login</button>
 
                 <div id="emergency-panel" class="hidden mt-4 pt-4 border-t border-brand-border text-left">
                     <p class="text-xs text-brand-yellow mb-2 font-bold">Emergency Override</p>
                     <input type="password" id="emergency-password-input" placeholder="Enter Emergency Password" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-3">
-                    <button onclick="emergencyLogin()" class="w-full py-3 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors">Log In</button>
+                    <button onclick="window.emergencyLogin()" class="w-full py-3 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors">Log In</button>
                 </div>
             </div>
 
@@ -219,17 +219,17 @@
                     <div>
                         <div class="flex items-center space-x-3">
                             <h1 class="text-3xl font-black text-white tracking-tight">System Admin</h1>
-                            <button onclick="logoutAdmin()" class="bg-red-900/80 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors border border-red-800">Log Out</button>
+                            <button onclick="window.logoutAdmin()" class="bg-red-900/80 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors border border-red-800">Log Out</button>
                         </div>
                         <p class="text-gray-400 font-medium text-sm mt-1">Manage passes, servants, and system logs.</p>
                     </div>
                     <div class="flex flex-wrap gap-2 bg-brand-panel p-1.5 rounded-xl border border-brand-border">
-                        <button onclick="switchAdminTab('sync')" id="tab-sync" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i> Sync Hub</button>
-                        <button onclick="switchAdminTab('generate')" id="tab-generate" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-yellow text-black transition-colors flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Generate</button>
-                        <button onclick="switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="layout-grid" class="w-4 h-4 mr-1.5"></i> Passes</button>
-                        <button onclick="switchAdminTab('servants')" id="tab-servants" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Servants</button>
-                        <button onclick="switchAdminTab('stats')" id="tab-stats" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5"></i> Stats</button>
-                        <button onclick="switchAdminTab('settings')" id="tab-settings" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-1.5"></i> Settings</button>
+                        <button onclick="window.switchAdminTab('sync')" id="tab-sync" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i> Sync Hub</button>
+                        <button onclick="window.switchAdminTab('generate')" id="tab-generate" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-yellow text-black transition-colors flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Generate</button>
+                        <button onclick="window.switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="layout-grid" class="w-4 h-4 mr-1.5"></i> Passes</button>
+                        <button onclick="window.switchAdminTab('servants')" id="tab-servants" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Servants</button>
+                        <button onclick="window.switchAdminTab('stats')" id="tab-stats" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5"></i> Stats</button>
+                        <button onclick="window.switchAdminTab('settings')" id="tab-settings" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-1.5"></i> Settings</button>
                     </div>
                 </div>
 
@@ -245,8 +245,8 @@
 
                         <!-- Sync Team Tabs -->
                         <div class="flex space-x-2 bg-brand-dark p-1.5 rounded-xl w-full sm:w-max mb-6 border border-brand-border">
-                            <button onclick="switchSyncTeamTab('live')" id="sync-tab-live" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold bg-brand-panel text-white transition-all shadow">Live Team</button>
-                            <button onclick="switchSyncTeamTab('projector')" id="sync-tab-projector" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">Projector Team</button>
+                            <button onclick="window.switchSyncTeamTab('live')" id="sync-tab-live" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold bg-brand-panel text-white transition-all shadow">Live Team</button>
+                            <button onclick="window.switchSyncTeamTab('projector')" id="sync-tab-projector" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">Projector Team</button>
                         </div>
 
                         <!-- LIVE TEAM SECTION -->
@@ -269,7 +269,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button onclick="startBuiltInSync('live')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
+                            <button onclick="window.startBuiltInSync('live')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
                                 <i data-lucide="zap" class="w-4 h-4 mr-2"></i> <span>Execute Sync & Generate: Live Team</span>
                             </button>
                         </div>
@@ -294,7 +294,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button onclick="startBuiltInSync('projector')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
+                            <button onclick="window.startBuiltInSync('projector')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
                                 <i data-lucide="zap" class="w-4 h-4 mr-2"></i> <span>Execute Sync & Generate: Projector Team</span>
                             </button>
                         </div>
@@ -303,11 +303,11 @@
                         <div class="mt-8 pt-6 border-t border-brand-border">
                             <div class="flex justify-between items-center mb-3">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">Global Skip Words & Preview</h3>
-                                <button onclick="saveSyncSettings()" class="px-4 py-2 bg-brand-border hover:bg-gray-600 text-white rounded-lg text-xs font-bold transition-colors shadow">Save Settings</button>
+                                <button onclick="window.saveSyncSettings()" class="px-4 py-2 bg-brand-border hover:bg-gray-600 text-white rounded-lg text-xs font-bold transition-colors shadow">Save Settings</button>
                             </div>
                             <input type="text" id="global-skip-words" placeholder="e.g. no need, -, الاسم الاول, تسلسل" class="w-full px-4 py-3 rounded-lg text-sm border border-brand-border bg-[#1A1A1A] mb-6">
                             
-                            <button onclick="toggleSheetPreview()" class="w-full py-3 bg-[#111] border border-brand-border hover:border-brand-yellow text-white rounded-xl font-bold text-sm transition-colors shadow flex items-center justify-center whitespace-nowrap mb-4">
+                            <button onclick="window.toggleSheetPreview()" class="w-full py-3 bg-[#111] border border-brand-border hover:border-brand-yellow text-white rounded-xl font-bold text-sm transition-colors shadow flex items-center justify-center whitespace-nowrap mb-4">
                                 <i data-lucide="eye" class="w-4 h-4 mr-2"></i> Toggle Live Sheet Preview
                             </button>
 
@@ -316,13 +316,13 @@
                             </div>
                         </div>
 
-                        <button id="global-sync-btn" onclick="startBuiltInSync('all')" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
+                        <button id="global-sync-btn" onclick="window.startBuiltInSync('all')" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
                             <i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Global Sync & Generate All Passes</span>
                         </button>
                         
                         <div id="sync-console-wrapper" class="hidden mt-6">
                             <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase">Sync Terminal Log</h3>
-                            <div id="sync-console" class="bg-black border border-brand-border p-4 rounded-xl text-xs font-mono text-gray-300 h-48 overflow-y-auto space-y-1">
+                            <div id="sync-terminal" class="bg-black border border-brand-border p-4 rounded-xl text-xs font-mono text-gray-300 h-48 overflow-y-auto space-y-1">
                                 <!-- Logs injected here -->
                             </div>
                         </div>
@@ -332,27 +332,8 @@
                 <!-- Tab: Generate -->
                 <div id="admin-tab-generate" class="admin-section bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border hidden">
                     <h2 class="text-xl font-black mb-6 flex items-center text-white" id="generate-title"><i data-lucide="badge-plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Create / Manage Manual Pass</h2>
-                    <form id="generate-form" onsubmit="handleGeneratePass(event)" class="space-y-8">
+                    <form id="generate-form" onsubmit="window.handleGeneratePass(event)" class="space-y-8">
                         <input type="hidden" id="g-edit-id" value="">
-                        
-                        <!-- Event Bulk Generator -->
-                        <div class="bg-[#111] p-6 rounded-2xl border border-brand-yellow/30 shadow-lg relative overflow-hidden">
-                            <div class="absolute top-0 left-0 w-full h-1 bg-brand-yellow"></div>
-                            <h3 class="text-sm font-black text-brand-yellow uppercase tracking-wider mb-2 flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Auto-Generate By Event</h3>
-                            <p class="text-xs text-gray-400 mb-4">Select an event below. The system will automatically generate passes for EVERY servant assigned to this event in the Sync Hub.</p>
-                            <div class="flex flex-col sm:flex-row gap-4 items-center">
-                                <select id="g-bulk-event" class="w-full sm:w-2/3 px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white"></select>
-                                <button type="button" onclick="batchGenerateForEvent()" class="w-full sm:w-1/3 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-black text-sm transition-all flex justify-center items-center shadow-sm">
-                                    <i data-lucide="users" class="w-4 h-4 mr-2"></i> Bulk Generate
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center text-gray-500 text-xs uppercase font-black my-6">
-                            <div class="flex-grow border-t border-brand-border"></div>
-                            <span class="px-4">OR CREATE MANUAL PASS</span>
-                            <div class="flex-grow border-t border-brand-border"></div>
-                        </div>
 
                         <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
                             <div class="flex justify-between items-center mb-4">
@@ -371,7 +352,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Team *</label>
-                                    <select id="g-team" required class="w-full px-4 py-3 rounded-xl" onchange="handleTeamLogic()"></select>
+                                    <select id="g-team" required class="w-full px-4 py-3 rounded-xl" onchange="window.handleTeamLogic()"></select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Photo (Optional)</label>
@@ -392,7 +373,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-bold text-gray-300 mb-2">Event / Day *</label>
-                                        <select id="g-event" required class="w-full px-4 py-3 rounded-xl" onchange="updateMassDropdown()"></select>
+                                        <select id="g-event" required class="w-full px-4 py-3 rounded-xl" onchange="window.updateMassDropdown()"></select>
                                     </div>
                                     <div id="mass-container" class="hidden">
                                         <label class="block text-sm font-bold text-gray-300 mb-2">Specific Mass (Optional)</label>
@@ -400,7 +381,7 @@
                                     </div>
                                     <div class="md:col-span-3">
                                         <label class="block text-sm font-bold text-gray-300 mb-2">Church Location *</label>
-                                        <select id="g-location" required class="w-full px-4 py-3 rounded-xl" onchange="autoSelectZones()"></select>
+                                        <select id="g-location" required class="w-full px-4 py-3 rounded-xl" onchange="window.autoSelectZones()"></select>
                                     </div>
                                 </div>
                             </div>
@@ -416,17 +397,17 @@
 
                         <!-- Form Buttons -->
                         <div id="create-buttons" class="flex flex-col sm:flex-row gap-4">
-                            <button type="submit" id="btn-generate" onclick="setSubmitAction('generate')" class="w-full py-5 bg-brand-border hover:bg-gray-700 text-white rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
+                            <button type="submit" id="btn-generate" onclick="window.setSubmitAction('generate')" class="w-full py-5 bg-brand-border hover:bg-gray-700 text-white rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
                                 <i data-lucide="plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Save Manual Pass
                             </button>
                         </div>
                         
                         <div id="edit-buttons" class="hidden space-x-4">
-                            <button type="button" onclick="cancelEdit()" class="w-1/4 py-4 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold transition-all">Cancel</button>
-                            <button type="submit" onclick="setSubmitAction('update')" class="flex-1 py-4 bg-gray-200 hover:bg-white text-black rounded-xl font-bold transition-all flex justify-center items-center">
+                            <button type="button" onclick="window.cancelEdit()" class="w-1/4 py-4 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold transition-all">Cancel</button>
+                            <button type="submit" onclick="window.setSubmitAction('update')" class="flex-1 py-4 bg-gray-200 hover:bg-white text-black rounded-xl font-bold transition-all flex justify-center items-center">
                                 <i data-lucide="save" class="w-5 h-5 mr-2"></i> Update Only
                             </button>
-                            <button type="submit" onclick="setSubmitAction('update-download')" class="flex-1 py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-bold transition-all flex justify-center items-center">
+                            <button type="submit" onclick="window.setSubmitAction('update-download')" class="flex-1 py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-bold transition-all flex justify-center items-center">
                                 <i data-lucide="download" class="w-5 h-5 mr-2"></i> Update & Download
                             </button>
                         </div>
@@ -441,24 +422,24 @@
                         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                             <!-- Filter Group: Teams -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setPassFilter('team', 'all')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-team-all">All</button>
-                                <button onclick="setPassFilter('team', 'Live Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-liveteam">Live</button>
-                                <button onclick="setPassFilter('team', 'Projector Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-projectorteam">Projector</button>
-                                <button onclick="setPassFilter('team', 'IT Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-itteam">IT</button>
+                                <button onclick="window.setPassFilter('team', 'all')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-team-all">All</button>
+                                <button onclick="window.setPassFilter('team', 'Live Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-liveteam">Live</button>
+                                <button onclick="window.setPassFilter('team', 'Projector Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-projectorteam">Projector</button>
+                                <button onclick="window.setPassFilter('team', 'IT Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-itteam">IT</button>
                             </div>
                             
                             <!-- Filter Group: Status -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setPassFilter('status', 'all')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-status-all">All</button>
-                                <button onclick="setPassFilter('status', 'done')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap filter-status-done">Done</button>
-                                <button onclick="setPassFilter('status', 'pending')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap filter-status-pending">Pending</button>
+                                <button onclick="window.setPassFilter('status', 'all')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-status-all">All</button>
+                                <button onclick="window.setPassFilter('status', 'done')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap filter-status-done">Done</button>
+                                <button onclick="window.setPassFilter('status', 'pending')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap filter-status-pending">Pending</button>
                             </div>
                             
                             <div class="flex space-x-2">
-                                <button onclick="bulkDownloadZIP()" id="btn-bulk-zip" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
+                                <button onclick="window.bulkDownloadZIP()" id="btn-bulk-zip" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
                                     <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Bulk ZIP
                                 </button>
-                                <button onclick="loadManageTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
+                                <button onclick="window.loadManageTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
                                     <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh
                                 </button>
                             </div>
@@ -487,24 +468,24 @@
                         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                             <!-- Team Filter -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setServantFilter('team', 'all')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-filter-team-all">All</button>
-                                <button onclick="setServantFilter('team', 'Live Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-liveteam">Live</button>
-                                <button onclick="setServantFilter('team', 'Projector Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-projectorteam">Projector</button>
-                                <button onclick="setServantFilter('team', 'IT Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-itteam">IT</button>
+                                <button onclick="window.setServantFilter('team', 'all')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-filter-team-all">All</button>
+                                <button onclick="window.setServantFilter('team', 'Live Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-liveteam">Live</button>
+                                <button onclick="window.setServantFilter('team', 'Projector Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-projectorteam">Projector</button>
+                                <button onclick="window.setServantFilter('team', 'IT Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-itteam">IT</button>
                             </div>
                             
                             <!-- Status Filter -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setServantFilter('status', 'all')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-status-all">All</button>
-                                <button onclick="setServantFilter('status', 'done')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap s-status-done">Done</button>
-                                <button onclick="setServantFilter('status', 'pending')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap s-status-pending">Pending</button>
+                                <button onclick="window.setServantFilter('status', 'all')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-status-all">All</button>
+                                <button onclick="window.setServantFilter('status', 'done')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap s-status-done">Done</button>
+                                <button onclick="window.setServantFilter('status', 'pending')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap s-status-pending">Pending</button>
                             </div>
 
                             <div class="flex space-x-2">
-                                <button onclick="factoryReset('servants')" class="flex-1 px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-900 rounded-lg text-xs font-bold transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
+                                <button onclick="window.factoryReset('servants')" class="flex-1 px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-900 rounded-lg text-xs font-bold transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
                                     <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Clear
                                 </button>
-                                <button onclick="loadServantsTable()" class="flex-1 px-3 py-2 bg-brand-border rounded-lg text-xs font-bold text-white hover:bg-gray-700 transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
+                                <button onclick="window.loadServantsTable()" class="flex-1 px-3 py-2 bg-brand-border rounded-lg text-xs font-bold text-white hover:bg-gray-700 transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
                                     <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i> Refresh
                                 </button>
                             </div>
@@ -513,7 +494,7 @@
                     <div class="p-6 border-b border-brand-border bg-brand-dark">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">Add / Edit Servant</h3>
-                            <button onclick="toggleBulkServantImport()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm">
+                            <button onclick="window.toggleBulkServantImport()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm">
                                 <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 mr-1.5 text-brand-yellow"></i> Bulk Import
                             </button>
                         </div>
@@ -530,14 +511,14 @@
                                     Upload Photo to attach to all their generated passes:
                                     <input type="file" id="s-photo" accept="image/*" class="mt-1 w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer p-1">
                                 </div>
-                                <button onclick="manualSaveServant()" class="px-6 py-3 h-full bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm whitespace-nowrap"><i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Save Servant</button>
+                                <button onclick="window.manualSaveServant()" class="px-6 py-3 h-full bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm whitespace-nowrap"><i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Save Servant</button>
                             </div>
                         </div>
 
                         <div id="bulk-servant-form" class="hidden mt-3">
                             <p class="text-xs text-gray-400 mb-2">Paste rows directly from Excel. Expected columns: <b>Name | Phone | Team | Photo URL (Optional)</b></p>
                             <textarea id="bulk-servant-data" rows="5" class="w-full px-4 py-3 rounded-lg text-sm bg-[#111] border border-brand-border text-white focus:border-brand-yellow mb-3" placeholder="Mina Youssef&#9;+20123...&#9;Live Team&#9;https://...&#10;Kirollos&#9;N/A&#9;IT Team"></textarea>
-                            <button onclick="processBulkServantImport()" class="w-full px-6 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm flex justify-center items-center">
+                            <button onclick="window.processBulkServantImport()" class="w-full px-6 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm flex justify-center items-center">
                                 <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Import Servants
                             </button>
                         </div>
@@ -560,7 +541,7 @@
                 <!-- Tab: Stats -->
                 <div id="admin-tab-stats" class="admin-section hidden space-y-6">
                     <div class="flex justify-end mb-4">
-                        <select id="stats-filter" onchange="loadStats()" class="px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm font-bold text-white outline-none focus:border-brand-yellow cursor-pointer min-w-[200px]">
+                        <select id="stats-filter" onchange="window.loadStats()" class="px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm font-bold text-white outline-none focus:border-brand-yellow cursor-pointer min-w-[200px]">
                             <!-- Populated Dynamically -->
                         </select>
                     </div>
@@ -598,116 +579,6 @@
                                 </thead>
                                 <tbody id="logs-table-body" class="divide-y divide-brand-border"></tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab: Settings -->
-                <div id="admin-tab-settings" class="admin-section hidden space-y-6">
-                    <div class="bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border">
-                        <h2 class="text-xl font-black mb-6 flex items-center text-white"><i data-lucide="sliders" class="w-6 h-6 mr-2 text-brand-yellow"></i> System Settings</h2>
-                        
-                        <div class="space-y-8">
-                            <!-- Security -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="key" class="w-4 h-4 mr-2"></i> Security</h3>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-bold text-gray-400 mb-1">First Time / Emergency Password</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="set-first-pwd" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="updateSettingsField('firstTimePassword', document.getElementById('set-first-pwd').value)" class="px-4 py-2 bg-brand-border hover:bg-gray-700 rounded-lg text-sm font-bold text-white">Save</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2">Admin Passwords</label>
-                                    <div id="set-pwd-list" class="space-y-2 mb-3"></div>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="new-pwd" placeholder="Add new password..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="addItemToSettingArray('adminPasswords', 'new-pwd')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Events & Masses -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Events & Dates</h3>
-                                <p class="text-xs text-gray-400 mb-4">Add events with specific dates. Assign masses to handle auto-expiration.</p>
-                                <div id="set-events-list" class="space-y-6 mb-6"></div>
-                                
-                                <div class="p-4 bg-brand-panel border border-brand-border rounded-xl mt-4">
-                                    <p class="text-xs font-bold text-white mb-2">Create New Event</p>
-                                    <div class="flex flex-col sm:flex-row gap-3">
-                                        <input type="text" id="new-event-name" placeholder="Event Name (e.g. Palm Sunday)" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <input type="date" id="new-event-date" class="px-4 py-2 rounded-lg text-sm w-full sm:w-auto text-gray-300 bg-[#1A1A1A]">
-                                        <button onclick="addEvent()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold w-full sm:w-auto">Add Event</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Support Contacts -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="phone" class="w-4 h-4 mr-2"></i> Footer Contacts</h3>
-                                <p class="text-xs text-gray-400 mb-3">These numbers appear on the app footer and exported passes. Edit directly and save.</p>
-                                <div id="set-contacts-list" class="space-y-3 mb-4"></div>
-                                <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                    <input type="text" id="new-contact-name" placeholder="Name (e.g. Admin)" class="w-1/3 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                    <input type="text" id="new-contact-phone" placeholder="Phone (+20...)" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                    <button onclick="addContact()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                </div>
-                            </div>
-
-                            <!-- Locations & Global Zones -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                    <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Church Locations</h3>
-                                    <div id="set-loc-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
-                                    <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                        <input type="text" id="new-loc" placeholder="Add location..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="addItemToSettingArray('locations', 'new-loc')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                    </div>
-                                </div>
-                                <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                    <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Global Zones Catalog</h3>
-                                    <div id="set-zone-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
-                                    <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                        <input type="text" id="new-zone" placeholder="Add global zone..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="addItemToSettingArray('zones', 'new-zone')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Logos -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="image" class="w-4 h-4 mr-2"></i> System Logos</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-400 mb-2">Church Logo</label>
-                                        <input type="file" id="set-logo-church" accept="image/*" class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer" onchange="uploadLogo('church')">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-400 mb-2">LTW Logo</label>
-                                        <input type="file" id="set-logo-ltw" accept="image/*" class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer" onchange="uploadLogo('ltw')">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-400 mb-2">Scout Logo</label>
-                                        <input type="file" id="set-logo-scout" accept="image/*" class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer" onchange="uploadLogo('scout')">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Danger Zone -->
-                            <div class="bg-red-950/20 p-6 rounded-2xl border border-red-900/50 mt-10">
-                                <h3 class="text-sm font-black text-red-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Danger Zone (Factory Resets)</h3>
-                                <p class="text-xs text-gray-400 mb-4">Warning: These actions cannot be undone. They will permanently delete data from the database.</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                                    <button onclick="factoryReset('passes')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Delete All Passes</button>
-                                    <button onclick="factoryReset('servants')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="users-x" class="w-4 h-4 mr-2"></i> Delete All Servants</button>
-                                    <button onclick="factoryReset('logs')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="file-minus" class="w-4 h-4 mr-2"></i> Clear Stats & Logs</button>
-                                    <button onclick="factoryReset('settings')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Settings</button>
-                                </div>
-                                <button onclick="factoryReset('all')" class="w-full py-4 bg-black border-2 border-red-600 text-red-500 hover:bg-red-600 hover:text-white rounded-xl text-sm font-black transition-colors flex justify-center items-center"><i data-lucide="alert-octagon" class="w-5 h-5 mr-2"></i> COMPLETE FACTORY RESET (ALL DATA)</button>
-                            </div>
-
                         </div>
                     </div>
                 </div>
@@ -764,8 +635,8 @@
                 <input type="hidden" id="link-pending-id">
                 <select id="link-target-select" class="w-full mb-6 px-3 py-3 bg-brand-dark text-white rounded-xl border border-brand-border text-sm"></select>
                 <div class="flex justify-end space-x-3">
-                    <button onclick="closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
-                    <button onclick="confirmLinkServant()" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black font-black rounded-lg text-sm shadow transition-colors">Merge & Fix Pass</button>
+                    <button onclick="window.closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
+                    <button onclick="window.confirmLinkServant()" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black font-black rounded-lg text-sm shadow transition-colors">Merge & Fix Pass</button>
                 </div>
             </div>
         </div>
@@ -783,8 +654,14 @@
             <a onclick="window.location.hash='#/admin'; window.handleRoute();" class="text-[#1A1A1A] hover:text-gray-500 mt-2 block transition-colors w-max mx-auto font-black cursor-pointer">admin</a>
         </div>
     </footer>
-
+    
+    <!-- APPLICATION LOGIC -->
     <script>
+        // Global Error Catcher to prevent freezing
+        window.addEventListener('error', function(event) {
+            console.error("Caught Exception: ", event.error);
+        });
+        
         window.lucide.createIcons();
 
         // --- FIREBASE CONFIGURATION ---
@@ -827,7 +704,7 @@
             console.error("Firebase Initialization failed:", e);
         }
 
-        // --- UTILS ---
+        // --- UTILS EXPLICITLY BOUND TO WINDOW ---
         window.resizeImage = function(file, maxSize = 300, preserveTransparency = false) {
             return new Promise((resolve) => {
                 if(!file) return resolve("");
@@ -1353,10 +1230,10 @@
 
         window.setSubmitAction = function(action) { window.currentSubmitAction = action; };
 
-        window.populateDropdown = function(id, items) {
+        function populateDropdown(id, items) {
             const el = document.getElementById(id);
             if(el) el.innerHTML = items.map(i => `<option value="${i.val}">${i.lbl}</option>`).join('');
-        };
+        }
 
         // --- MAIN APP LOGIC ---
         window.applyGlobalSettings = async function() {
@@ -2201,7 +2078,7 @@
                 }
             }
 
-            window.printSyncMessage(`<span class="text-green-400 font-bold">Sync Complete! Analyzed ${newCount} servants and auto-generated passes directly!</span>`);
+            window.printSyncMessage(`<span class="text-green-400 font-bold">Sync Complete! Extracted ${newCount} servants and auto-generated passes directly!</span>`);
             
             if(settingsModified) {
                 await window.DB.updateSettings(window.GLOBAL_SETTINGS);
