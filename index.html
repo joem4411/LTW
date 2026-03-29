@@ -335,6 +335,7 @@
                     <form id="generate-form" onsubmit="window.handleGeneratePass(event)" class="space-y-8">
                         <input type="hidden" id="g-edit-id" value="">
                         
+                        <!-- Event Bulk Generator -->
                         <div class="bg-[#111] p-6 rounded-2xl border border-brand-yellow/30 shadow-lg relative overflow-hidden">
                             <div class="absolute top-0 left-0 w-full h-1 bg-brand-yellow"></div>
                             <h3 class="text-sm font-black text-brand-yellow uppercase tracking-wider mb-2 flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Auto-Generate By Event</h3>
@@ -376,6 +377,7 @@
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Photo (Optional)</label>
                                     <input type="file" id="g-photo" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-brand-border file:text-white hover:file:bg-gray-700 cursor-pointer p-1">
                                     
+                                    <!-- Live Photo Preview -->
                                     <div class="mt-3 flex items-center space-x-3">
                                         <img id="g-photo-preview" src="" class="hidden w-16 h-16 object-cover rounded-lg border border-brand-border shadow-md">
                                         <p id="g-photo-status" class="hidden text-xs font-bold text-green-500"><i data-lucide="check-circle" class="w-3 h-3 inline mr-1"></i> Loaded from directory</p>
@@ -755,14 +757,35 @@
 
         <!-- LINK SERVANT MODAL -->
         <div id="link-modal" class="fixed inset-0 z-[100] bg-black/80 hidden flex items-center justify-center p-4">
-            <div class="bg-brand-panel p-6 rounded-2xl max-w-sm w-full border border-brand-border shadow-2xl">
+            <div class="bg-brand-panel p-6 rounded-2xl max-w-md w-full border border-brand-border shadow-2xl">
                 <h3 class="text-white font-black mb-2 text-lg"><i data-lucide="link" class="w-5 h-5 inline mr-2 text-brand-yellow"></i>Link & Merge Servant</h3>
-                <p class="text-xs text-gray-400 mb-4">Select the correct spelled/done profile to merge this pending servant into.</p>
-                <input type="hidden" id="link-pending-id">
-                <select id="link-target-select" class="w-full mb-6 px-3 py-3 bg-brand-dark text-white rounded-xl border border-brand-border text-sm"></select>
-                <div class="flex justify-end space-x-3">
-                    <button onclick="window.closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
-                    <button onclick="window.confirmLinkServant()" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black font-black rounded-lg text-sm shadow transition-colors">Merge & Fix Pass</button>
+                <p class="text-xs text-gray-400 mb-4">Merge this profile into another existing profile. This will combine their teams and fix any misassigned passes.</p>
+                <input type="hidden" id="link-source-id">
+                
+                <!-- Step 1: Select Team -->
+                <div id="link-step-1">
+                    <p class="text-sm font-bold text-white mb-3">1. Select Target's Team:</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button onclick="window.selectLinkTeam('Live Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-lg text-sm font-bold transition-colors">Live Team</button>
+                        <button onclick="window.selectLinkTeam('Projector Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-lg text-sm font-bold transition-colors">Projector Team</button>
+                        <button onclick="window.selectLinkTeam('IT Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-blue-500 text-white rounded-lg text-sm font-bold transition-colors">IT Team</button>
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button onclick="window.closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Select Servant & Confirm -->
+                <div id="link-step-2" class="hidden">
+                    <p class="text-sm font-bold text-white mb-2 flex items-center justify-between">
+                        <span>2. Select Target Profile:</span>
+                        <button onclick="window.resetLinkModal()" class="text-xs text-brand-yellow hover:underline">Back</button>
+                    </p>
+                    <select id="link-target-select" class="w-full mb-6 px-3 py-3 bg-brand-dark text-white rounded-xl border border-brand-border text-sm"></select>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="window.closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
+                        <button onclick="window.confirmLinkServant()" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black font-black rounded-lg text-sm shadow transition-colors">Merge Profiles</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -783,26 +806,48 @@
     
     <!-- APPLICATION LOGIC -->
     <script>
-        // Global Error Catcher to prevent freezing
+        // Global Error Catcher
         window.addEventListener('error', function(event) {
             console.error("Caught Exception: ", event.error);
         });
-        
-        window.lucide.createIcons();
 
-        // --- FIREBASE CONFIGURATION ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyCkAvB-gdGq6IRHut1J77WfJvYUFTKW1lk",
-            authDomain: "ltw-pass-system.firebaseapp.com",
-            projectId: "ltw-pass-system",
-            storageBucket: "ltw-pass-system.firebasestorage.app",
-            messagingSenderId: "133608312380",
-            appId: "1:133608312380:web:830e094ce536dfc63cfd39"
+        // 1. SAFE ICON RENDERER
+        window.refreshIcons = function() {
+            try { if (window.lucide) window.lucide.createIcons(); } catch(e) {}
         };
-        
+
+        // 2. SAFE FIREBASE CALL WRAPPER (Prevents freezing)
+        window.safeDB = async function(promise) {
+            let timeoutId;
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error("Firebase Connection Timeout")), 15000);
+            });
+            try {
+                const result = await Promise.race([promise, timeoutPromise]);
+                clearTimeout(timeoutId);
+                return result;
+            } catch(e) {
+                clearTimeout(timeoutId);
+                throw e;
+            }
+        };
+
+        // 3. STATE & VARIABLES
+        window.STATIC_TEAMS = ['Live Team', 'Projector Team', 'IT Team'];
+        window.GLOBAL_SETTINGS = null;
         window.firestoreDB = null;
-        
-        // --- CONNECTION INDICATOR LOGIC ---
+        window.firebaseConnected = false;
+        window.currentAdminTeamFilterPasses = 'all';
+        window.currentAdminStatusFilterPasses = 'all';
+        window.currentAdminTeamFilterServants = 'all';
+        window.currentAdminStatusFilterServants = 'all';
+        window.currentSyncTab = 'live';
+        window.scanner = null;
+        window.isAdminLoggedIn = false;
+        window.localServants = [];
+        window.currentSubmitAction = 'generate';
+
+        // 4. DEFINE UTILITY FUNCTIONS FIRST
         window.updateConnectionStatus = function(state) {
             const dot = document.getElementById('connection-status-indicator');
             if(!dot) return;
@@ -813,24 +858,13 @@
                 dot.title = "Connected to Database";
             } else if(state === 'error' || state === 'disconnected') {
                 dot.classList.add('bg-red-500');
-                dot.title = "Connection Error - Check Internet or Adblocker";
+                dot.title = "Connection Error - Using Local Fallback";
             } else {
                 dot.classList.add('bg-yellow-500', 'animate-pulse');
                 dot.title = "Connecting...";
             }
         };
 
-        window.addEventListener('online', () => window.updateConnectionStatus('connected'));
-        window.addEventListener('offline', () => window.updateConnectionStatus('disconnected'));
-
-        try {
-            firebase.initializeApp(firebaseConfig);
-            window.firestoreDB = firebase.firestore();
-        } catch(e) {
-            console.error("Firebase Initialization failed:", e);
-        }
-
-        // --- UTILS EXPLICITLY BOUND TO WINDOW ---
         window.resizeImage = function(file, maxSize = 300, preserveTransparency = false) {
             return new Promise((resolve) => {
                 if(!file) return resolve("");
@@ -853,8 +887,6 @@
             });
         };
 
-        window.STATIC_TEAMS = ['Live Team', 'Projector Team', 'IT Team'];
-        
         window.getTeamColor = function(team) {
             if (!team) return '#ffffff';
             const t = team.toLowerCase();
@@ -981,8 +1013,23 @@
             return false;
         };
 
-        // --- DATABASE SERVICE ---
-        window.GLOBAL_SETTINGS = null;
+        // 5. DATABASE SERVICE & FIREBASE INIT
+        const firebaseConfig = {
+            apiKey: "AIzaSyCkAvB-gdGq6IRHut1J77WfJvYUFTKW1lk",
+            authDomain: "ltw-pass-system.firebaseapp.com",
+            projectId: "ltw-pass-system",
+            storageBucket: "ltw-pass-system.firebasestorage.app",
+            messagingSenderId: "133608312380",
+            appId: "1:133608312380:web:830e094ce536dfc63cfd39"
+        };
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            window.firestoreDB = firebase.firestore();
+            window.firestoreDB.settings({ experimentalForceLongPolling: true, ignoreUndefinedProperties: true });
+        } catch(e) {
+            console.error("Firebase Initialization failed:", e);
+        }
 
         window.DB = {
             async getSettings() {
@@ -998,43 +1045,47 @@
                     sheetUrlLive: "", sheetUrlData: "",
                     liveMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
                     dataMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
-                    skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات, قديم, جديد, فقط"
+                    skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات, قديم, جديد, فقط",
+                    aliases: {}
                 };
 
                 try {
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    const doc = await window.firestoreDB.collection('admin').doc('settings').get();
+                    const doc = await window.safeDB(window.firestoreDB.collection('admin').doc('settings').get());
+                    window.firebaseConnected = true;
                     if(doc.exists) {
                         const d = doc.data();
                         window.GLOBAL_SETTINGS = {
                             firstTimePassword: d.firstTimePassword || defaultSettings.firstTimePassword,
-                            adminPasswords: d.adminPasswords || defaultSettings.adminPasswords,
-                            contacts: d.contacts || defaultSettings.contacts,
-                            locations: d.locations || defaultSettings.locations,
-                            zones: d.zones || defaultSettings.zones,
-                            events: d.events || defaultSettings.events,
+                            adminPasswords: Array.isArray(d.adminPasswords) ? d.adminPasswords : defaultSettings.adminPasswords,
+                            contacts: Array.isArray(d.contacts) ? d.contacts : defaultSettings.contacts,
+                            locations: Array.isArray(d.locations) ? d.locations : defaultSettings.locations,
+                            zones: Array.isArray(d.zones) ? d.zones : defaultSettings.zones,
+                            events: Array.isArray(d.events) ? d.events : defaultSettings.events,
                             logos: d.logos || defaultSettings.logos,
                             sheetUrlLive: d.sheetUrlLive || "",
                             sheetUrlData: d.sheetUrlData || "",
                             liveMapping: d.liveMapping || defaultSettings.liveMapping,
                             dataMapping: d.dataMapping || defaultSettings.dataMapping,
-                            skipWords: d.skipWords || defaultSettings.skipWords
+                            skipWords: d.skipWords || defaultSettings.skipWords,
+                            aliases: d.aliases || defaultSettings.aliases
                         };
 
-                        window.GLOBAL_SETTINGS.events.forEach(e => { 
+                        (window.GLOBAL_SETTINGS.events || []).forEach(e => { 
                             if(!e.date) e.date = ""; 
                             if(!e.start) e.start = "";
                             if(!e.end) e.end = "";
-                            if(!e.allowedZones) e.allowedZones = window.GLOBAL_SETTINGS.zones || []; 
-                            if(!e.masses) e.masses = [];
-                            if(!e.assignments) e.assignments = [];
+                            if(!Array.isArray(e.allowedZones)) e.allowedZones = window.GLOBAL_SETTINGS.zones || []; 
+                            if(!Array.isArray(e.masses)) e.masses = [];
+                            if(!Array.isArray(e.assignments)) e.assignments = [];
                         });
                     } else {
                         window.GLOBAL_SETTINGS = defaultSettings;
-                        await window.firestoreDB.collection('admin').doc('settings').set(window.GLOBAL_SETTINGS);
+                        await window.safeDB(window.firestoreDB.collection('admin').doc('settings').set(window.GLOBAL_SETTINGS));
                     }
                 } catch(e) { 
                     console.error("Settings error:", e); 
+                    window.firebaseConnected = false;
                     window.GLOBAL_SETTINGS = defaultSettings;
                 }
                 return window.GLOBAL_SETTINGS;
@@ -1042,7 +1093,7 @@
             async updateSettings(newSettings) {
                 try { 
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    await window.firestoreDB.collection('admin').doc('settings').set(newSettings); 
+                    await window.safeDB(window.firestoreDB.collection('admin').doc('settings').set(newSettings)); 
                     window.GLOBAL_SETTINGS = newSettings; 
                     await window.applyGlobalSettings(); 
                     
@@ -1056,14 +1107,14 @@
             async fetchAllPasses() {
                 try { 
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await window.firestoreDB.collection('passes').get(); 
+                    const snapshot = await window.safeDB(window.firestoreDB.collection('passes').get()); 
                     return snapshot.docs.map(doc => doc.data()).filter(p => p && p.PassID && p.Name && p.PassID !== "undefined"); 
                 } catch(e) { return []; }
             },
             async fetchPass(id) {
                 try { 
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    const doc = await window.firestoreDB.collection('passes').doc(id).get(); 
+                    const doc = await window.safeDB(window.firestoreDB.collection('passes').doc(id).get()); 
                     return doc.exists ? doc.data() : undefined; 
                 } 
                 catch(e) { return undefined; }
@@ -1072,28 +1123,28 @@
                 try { 
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
                     pass.IsPending = window.isPending(pass, 'pass');
-                    await window.firestoreDB.collection('passes').doc(pass.PassID).set(pass); 
+                    await window.safeDB(window.firestoreDB.collection('passes').doc(pass.PassID).set(pass)); 
                     return true; 
                 } 
                 catch(e) { console.error(e); return false; }
             },
             async updatePassStatus(id, newStatus) { 
                 if(!window.firestoreDB) return;
-                await window.firestoreDB.collection('passes').doc(id).update({ Status: newStatus }); 
+                try { await window.safeDB(window.firestoreDB.collection('passes').doc(id).update({ Status: newStatus })); } catch(e){}
             },
             async updatePassPending(id, pendingStatus) { 
                 if(!window.firestoreDB) return;
-                await window.firestoreDB.collection('passes').doc(id).update({ IsPending: pendingStatus }); 
+                try { await window.safeDB(window.firestoreDB.collection('passes').doc(id).update({ IsPending: pendingStatus })); } catch(e){}
             },
             async deletePass(id) { 
                 if(!window.firestoreDB) return;
-                await window.firestoreDB.collection('passes').doc(id).delete(); 
+                try { await window.safeDB(window.firestoreDB.collection('passes').doc(id).delete()); } catch(e){}
             },
             
             async fetchAllServants() {
                 try { 
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await window.firestoreDB.collection('servants').get(); 
+                    const snapshot = await window.safeDB(window.firestoreDB.collection('servants').get()); 
                     return snapshot.docs.map(doc => doc.data()).filter(s => s && s.Name); 
                 } catch(e) { return []; }
             },
@@ -1103,20 +1154,20 @@
                     if(!servant || !servant.Name) return;
                     servant.IsPending = window.isPending(servant, 'servant');
                     const id = servant.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
-                    await window.firestoreDB.collection('servants').doc(id).set(servant);
+                    await window.safeDB(window.firestoreDB.collection('servants').doc(id).set(servant));
                 } catch(e) { console.error(e); }
             },
             async deleteServant(id) {
                 try { 
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    await window.firestoreDB.collection('servants').doc(id).delete(); 
+                    await window.safeDB(window.firestoreDB.collection('servants').doc(id).delete()); 
                 } catch(e) { console.error(e); }
             },
 
             async fetchLogs() {
                 try { 
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await window.firestoreDB.collection('logs').get(); 
+                    const snapshot = await window.safeDB(window.firestoreDB.collection('logs').get()); 
                     return snapshot.docs.map(doc => doc.data()); 
                 } 
                 catch(e) { return []; }
@@ -1124,32 +1175,22 @@
             async logEntry(passId, result) {
                 if(!window.firestoreDB) return null;
                 let log = { LogID: 'LOG-' + Date.now(), PassID: passId, Time: new Date().toISOString(), Result: result };
-                await window.firestoreDB.collection('logs').doc(log.LogID).set(log); return log;
+                try { await window.safeDB(window.firestoreDB.collection('logs').doc(log.LogID).set(log)); } catch(e){} 
+                return log;
             },
             async clearCollection(collectionName) {
                 try {
                     if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await window.firestoreDB.collection(collectionName).get();
+                    const snapshot = await window.safeDB(window.firestoreDB.collection(collectionName).get());
                     const batch = window.firestoreDB.batch();
                     snapshot.docs.forEach((doc) => { batch.delete(doc.ref); });
-                    await batch.commit();
+                    await window.safeDB(batch.commit());
                     return true;
                 } catch(e) { console.error(e); return false; }
             }
         };
 
-        // --- GLOBAL VARIABLES & STATE ---
-        window.currentAdminTeamFilterPasses = 'all';
-        window.currentAdminStatusFilterPasses = 'all';
-        window.currentAdminTeamFilterServants = 'all';
-        window.currentAdminStatusFilterServants = 'all';
-        window.currentSyncTab = 'live';
-        window.scanner = null;
-        window.isAdminLoggedIn = false;
-        window.localServants = [];
-        window.currentSubmitAction = 'generate';
-
-        // --- APP INIT & ROUTING ---
+        // --- APP INIT & EVENT LISTENERS ---
         window.addEventListener('hashchange', window.handleRoute);
         
         window.addEventListener('load', async () => { 
@@ -1157,7 +1198,11 @@
             try {
                 if(!window.firestoreDB) throw new Error("Firebase SDK missing/blocked");
                 await window.applyGlobalSettings(); 
-                window.updateConnectionStatus('connected');
+                if (window.firebaseConnected) {
+                    window.updateConnectionStatus('connected');
+                } else {
+                    window.updateConnectionStatus('error');
+                }
             } catch(e) {
                 console.error("Init Error", e);
                 window.updateConnectionStatus('error');
@@ -1215,6 +1260,7 @@
             }
         });
 
+        // --- ROUTING & UI SWITCHING ---
         window.handleRoute = function() {
             const hash = window.location.hash;
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
@@ -1230,8 +1276,12 @@
                 document.getElementById('nav-scan').classList.add('text-brand-yellow', 'bg-brand-panel');
                 if(adminNavBtn) adminNavBtn.style.display = 'none'; 
                 
-                window.scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-                window.scanner.render(window.onScanSuccess, ()=>{});
+                if (typeof Html5QrcodeScanner !== 'undefined') {
+                    window.scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+                    window.scanner.render(window.onScanSuccess, ()=>{});
+                } else {
+                    document.getElementById('reader').innerHTML = '<p class="text-red-500 p-4">Scanner library loading...</p>';
+                }
             } else if (hash.startsWith('#/admin')) {
                 if(adminNavBtn) adminNavBtn.style.display = 'flex'; 
                 document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
@@ -1291,8 +1341,8 @@
             
             const selectEl = document.getElementById('iframe-team-select');
             const team = selectEl ? selectEl.value : window.currentSyncTab;
-            if (team === 'live') iframe.src = window.GLOBAL_SETTINGS.sheetUrlLive || '';
-            else iframe.src = window.GLOBAL_SETTINGS.sheetUrlData || '';
+            if (team === 'live') iframe.src = (window.GLOBAL_SETTINGS.sheetUrlLive || '');
+            else iframe.src = (window.GLOBAL_SETTINGS.sheetUrlData || '');
         };
 
         // --- UI FILTERING LOGIC ---
@@ -1356,18 +1406,19 @@
 
         window.setSubmitAction = function(action) { window.currentSubmitAction = action; };
 
-        function populateDropdown(id, items) {
+        window.populateDropdown = function(id, items) {
             const el = document.getElementById(id);
             if(el) el.innerHTML = items.map(i => `<option value="${i.val}">${i.lbl}</option>`).join('');
-        }
+        };
 
-        // --- MAIN APP LOGIC ---
         window.applyGlobalSettings = async function() {
             const settings = await window.DB.getSettings();
             if(!settings) return;
             
             const fCont = document.getElementById('footer-contacts');
-            if(fCont && settings.contacts) fCont.innerHTML = settings.contacts.map(c => `<span class="bg-brand-panel px-3 py-1.5 rounded-lg border border-brand-border text-xs"><span class="text-brand-yellow font-bold">${c.name}:</span> <span class="text-white">${c.phone}</span></span>`).join('');
+            if(fCont && Array.isArray(settings.contacts)) {
+                fCont.innerHTML = settings.contacts.map(c => `<span class="bg-brand-panel px-3 py-1.5 rounded-lg border border-brand-border text-xs"><span class="text-brand-yellow font-bold">${(c.name||'').replace(/</g,'&lt;')}</span> <span class="text-white">${(c.phone||'').replace(/</g,'&lt;')}</span></span>`).join('');
+            }
 
             settings.logos = settings.logos || {};
             if(settings.logos.ltw) { 
@@ -1387,8 +1438,8 @@
                 document.getElementById('logo-scout-scan').src = settings.logos.scout; document.getElementById('logo-scout-scan').classList.remove('hidden'); 
             }
             
-            settings.locations = settings.locations || [];
-            settings.events = settings.events || [];
+            settings.locations = Array.isArray(settings.locations) ? settings.locations : [];
+            settings.events = Array.isArray(settings.events) ? settings.events : [];
 
             window.populateDropdown('g-team', window.STATIC_TEAMS.map(k=>({val:k, lbl:k})));
             window.populateDropdown('s-team', window.STATIC_TEAMS.map(k=>({val:k, lbl:k})));
@@ -1397,6 +1448,18 @@
             const activeEvents = settings.events;
             window.populateDropdown('g-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
             window.populateDropdown('g-bulk-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
+
+            if(document.getElementById('set-sheet-live')) document.getElementById('set-sheet-live').value = settings.sheetUrlLive || '';
+            if(document.getElementById('live-event-rng')) document.getElementById('live-event-rng').value = settings.liveMapping?.events || '';
+            if(document.getElementById('live-loc-rng')) document.getElementById('live-loc-rng').value = settings.liveMapping?.locations || '';
+            if(document.getElementById('live-name-rng')) document.getElementById('live-name-rng').value = settings.liveMapping?.names || '';
+
+            if(document.getElementById('set-sheet-data')) document.getElementById('set-sheet-data').value = settings.sheetUrlData || '';
+            if(document.getElementById('data-event-rng')) document.getElementById('data-event-rng').value = settings.dataMapping?.events || '';
+            if(document.getElementById('data-loc-rng')) document.getElementById('data-loc-rng').value = settings.dataMapping?.locations || '';
+            if(document.getElementById('data-name-rng')) document.getElementById('data-name-rng').value = settings.dataMapping?.names || '';
+
+            if(document.getElementById('global-skip-words')) document.getElementById('global-skip-words').value = settings.skipWords || '';
             
             window.handleTeamLogic();
             window.populateStatsDropdown();
@@ -1404,7 +1467,6 @@
             window.loadIframePreview();
         };
 
-        // DYNAMIC ZONE MATRIX LOGIC
         window.getMatrixZones = function(team, loc) {
             if(!team || !loc) return [];
             const t = team.toLowerCase();
@@ -1446,7 +1508,7 @@
             
             const evId = document.getElementById('g-event')?.value;
             const settings = window.GLOBAL_SETTINGS;
-            if(!settings) return;
+            if(!settings || !Array.isArray(settings.events)) return;
             const ev = settings.events.find(e => e.id === evId);
             const mCont = document.getElementById('mass-container');
             const mSel = document.getElementById('g-mass');
@@ -1455,17 +1517,17 @@
             if(!mCont || !mSel || !zCont) return;
 
             if(ev) {
-                const eventZones = ev.allowedZones || settings.zones || [];
+                const eventZones = Array.isArray(ev.allowedZones) ? ev.allowedZones : (Array.isArray(settings.zones) ? settings.zones : []);
                 zCont.innerHTML = eventZones.map(z => `
                     <label class="relative cursor-pointer">
-                        <input type="checkbox" name="zone" value="${z.replace(/"/g, '&quot;')}" class="peer sr-only zone-checkbox">
+                        <input type="checkbox" name="zone" value="${String(z||'').replace(/"/g, '&quot;')}" class="peer sr-only zone-checkbox">
                         <div class="p-3 rounded-xl border border-brand-border bg-brand-panel hover:border-gray-500 transition-all flex items-center justify-between text-gray-400">
-                            <span class="font-bold text-xs">${z.replace(/</g, '&lt;')}</span>
+                            <span class="font-bold text-xs">${String(z||'').replace(/</g, '&lt;')}</span>
                             <i data-lucide="check-circle-2" class="w-4 h-4 opacity-0 transform scale-50 transition-all duration-200 check-icon"></i>
                         </div>
                     </label>
                 `).join('');
-                window.lucide.createIcons();
+                window.refreshIcons();
                 window.autoSelectZones();
 
                 const now = new Date();
@@ -1477,7 +1539,7 @@
 
                 if(activeMasses.length > 0) {
                     mCont.classList.remove('hidden');
-                    mSel.innerHTML = `<option value="N/A">-- Select Mass --</option>` + activeMasses.map(m => `<option value="${m.id}">${m.name} (${m.start} - ${m.end})</option>`).join('');
+                    mSel.innerHTML = `<option value="N/A">-- Select Mass --</option>` + activeMasses.map(m => `<option value="${m.id}">${String(m.name||'').replace(/</g,'&lt;')} (${m.start} - ${m.end})</option>`).join('');
                     if(activeMasses.length === 1) mSel.value = activeMasses[0].id;
                 } else {
                     mCont.classList.add('hidden');
@@ -1505,7 +1567,7 @@
         window.populateStatsDropdown = function() {
             const sel = document.getElementById('stats-filter');
             if(!sel) return;
-            const events = window.GLOBAL_SETTINGS?.events || [];
+            const events = (window.GLOBAL_SETTINGS && Array.isArray(window.GLOBAL_SETTINGS.events)) ? window.GLOBAL_SETTINGS.events : [];
             sel.innerHTML = `<option value="all">All Time / All Events</option>` + events.map(e => `<option value="${e.id}">${e.name} (${e.date})</option>`).join('');
         };
 
@@ -1518,7 +1580,8 @@
             
             let passes = allPasses;
             if(filter !== 'all') {
-                const ev = window.GLOBAL_SETTINGS.events.find(e => e.id === filter);
+                const eventsArr = (window.GLOBAL_SETTINGS && Array.isArray(window.GLOBAL_SETTINGS.events)) ? window.GLOBAL_SETTINGS.events : [];
+                const ev = eventsArr.find(e => e.id === filter);
                 if(ev) {
                     passes = allPasses.filter(p => p.Event === filter || p.Team === 'IT Team');
                     logs = logs.filter(l => l.Time.startsWith(ev.date));
@@ -1546,12 +1609,11 @@
                     const d = new Date(l.Time);
                     const timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
                     const isGranted = l.Result.includes('GRANTED');
-                    return `<tr class="hover:bg-brand-panel transition border-b border-brand-border"><td class="px-6 py-4 text-xs font-bold text-gray-400">${d.toLocaleDateString()+' '+timeStr}</td><td class="px-6 py-4 font-mono font-bold text-white">${l.PassID}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-black ${isGranted ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${l.Result}</span></td></tr>`;
+                    return `<tr class="hover:bg-brand-panel transition border-b border-brand-border"><td class="px-6 py-4 text-xs font-bold text-gray-400">${d.toLocaleDateString()+' '+timeStr}</td><td class="px-6 py-4 font-mono font-bold text-white">${String(l.PassID||'').replace(/</g,'&lt;')}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-black ${isGranted ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${String(l.Result||'').replace(/</g,'&lt;')}</span></td></tr>`;
                 }).join('');
             }
         };
 
-        // --- SCANNER & VERIFICATION ---
         window.onScanSuccess = function(decodedText) {
             if(window.scanner) window.scanner.clear();
             let passId = decodedText.includes('#/pass/') ? decodedText.split('#/pass/')[1] : decodedText;
@@ -1587,8 +1649,9 @@
                 } else {
                     document.getElementById('pass-location-text').textContent = pass.Location || 'N/A';
                     let evName = "N/A", mName = "";
-                    const ev = settings.events.find(e => e.id === pass.Event);
-                    if(ev) { evName = ev.name; if(pass.Mass && pass.Mass !== 'N/A') { const m = ev.masses.find(x => x.id === pass.Mass); if(m) mName = ` (${m.name})`; } }
+                    const eventsArr = Array.isArray(settings.events) ? settings.events : [];
+                    const ev = eventsArr.find(e => e.id === pass.Event);
+                    if(ev) { evName = ev.name; if(pass.Mass && pass.Mass !== 'N/A') { const m = (ev.masses || []).find(x => x.id === pass.Mass); if(m) mName = ` (${m.name})`; } }
                     document.getElementById('pass-event').textContent = evName + mName;
                     
                     document.getElementById('pass-zones').innerHTML = pass.AllowedZones 
@@ -1602,7 +1665,7 @@
                 
                 photoCont.innerHTML = pass.PhotoURL ? `<img src="${pass.PhotoURL}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-12 h-12 text-gray-600"></i>`;
             }
-            window.lucide.createIcons();
+            window.refreshIcons();
 
             if (!pass || !pass.PassID || pass.PassID === 'undefined') { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await window.DB.logEntry(id, "INVALID"); return; }
             if (pass.Status === 'REVOKED') { statusHeader.textContent = "PASS REVOKED"; statusHeader.classList.add('bg-gray-800'); await window.DB.logEntry(id, "REVOKED"); return; }
@@ -1611,7 +1674,8 @@
             let isEarly = false;
             
             if (pass.Team !== 'IT Team') {
-                const ev = settings.events.find(e => e.id === pass.Event);
+                const eventsArr = Array.isArray(settings.events) ? settings.events : [];
+                const ev = eventsArr.find(e => e.id === pass.Event);
                 if(ev && ev.date) {
                     let checkStart = ev.start;
                     let checkEnd = ev.end;
@@ -1640,7 +1704,7 @@
             if (isExpired) {
                 statusHeader.textContent = "PASS EXPIRED"; 
                 statusHeader.classList.add('bg-red-800');
-                const contactStr = (settings.contacts || []).map(c => `${c.name}: <a href="tel:${c.phone}" class="underline font-bold text-white">${c.phone}</a>`).join('<br>');
+                const contactStr = (Array.isArray(settings.contacts) ? settings.contacts : []).map(c => `${c.name}: <a href="tel:${c.phone}" class="underline font-bold text-white">${c.phone}</a>`).join('<br>');
                 alertBox.innerHTML = `This pass is expired and no longer active.<br><br><span class="text-sm font-normal text-gray-300">Please contact admin:</span><br><span class="text-brand-yellow font-bold text-base mt-2 inline-block">${contactStr}</span>`;
                 alertBox.classList.remove('hidden');
                 alertBox.classList.add('bg-red-950', 'text-red-200', 'border-red-900');
@@ -1669,11 +1733,33 @@
             }
         };
 
-        // --- ADMIN LOGIN ---
         window.loginAdmin = async function() {
             const pwd = document.getElementById('admin-password').value;
-            const s = window.GLOBAL_SETTINGS;
-            if(s.adminPasswords.includes(pwd) || (s.adminPasswords.length === 0 && pwd === s.firstTimePassword)) {
+            const btn = document.querySelector('#admin-login button');
+            const origText = btn.innerHTML;
+            
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin inline"></i> Authenticating...`;
+            btn.disabled = true;
+            window.refreshIcons();
+
+            let s = window.GLOBAL_SETTINGS;
+            if (!s) {
+                s = await window.DB.getSettings();
+            }
+
+            btn.innerHTML = origText;
+            btn.disabled = false;
+            window.refreshIcons();
+
+            if(!s) {
+                document.getElementById('login-msg').textContent = "Database still connecting. Try again.";
+                document.getElementById('login-msg').classList.add('text-red-500');
+                return;
+            }
+
+            const adminPwds = Array.isArray(s.adminPasswords) ? s.adminPasswords : [];
+            
+            if(adminPwds.includes(pwd) || (adminPwds.length === 0 && pwd === s.firstTimePassword)) {
                 window.isAdminLoggedIn = true;
                 document.getElementById('admin-password').value = '';
                 document.getElementById('login-msg').textContent = "Enter system password to continue.";
@@ -1684,7 +1770,8 @@
                 await window.applyGlobalSettings();
                 window.switchAdminTab('sync');
             } else {
-                document.getElementById('login-msg').textContent = "Incorrect password."; document.getElementById('login-msg').classList.add('text-red-500');
+                document.getElementById('login-msg').textContent = "Incorrect password."; 
+                document.getElementById('login-msg').classList.add('text-red-500');
             }
         };
 
@@ -1695,9 +1782,12 @@
 
         window.toggleEmergencyLogin = function() { document.getElementById('emergency-panel').classList.toggle('hidden'); };
         
-        window.emergencyLogin = function() {
+        window.emergencyLogin = async function() {
             const emergencyPwd = document.getElementById('emergency-password-input').value;
-            if(emergencyPwd === window.GLOBAL_SETTINGS.firstTimePassword) {
+            let s = window.GLOBAL_SETTINGS;
+            if (!s) s = await window.DB.getSettings();
+            
+            if(s && emergencyPwd === s.firstTimePassword) {
                 document.getElementById('admin-password').value = '';
                 document.getElementById('emergency-password-input').value = '';
                 document.getElementById('emergency-panel').classList.add('hidden');
@@ -1726,7 +1816,8 @@
                 logos: { church: "", ltw: "", scout: "" }, sheetUrlLive: "", sheetUrlData: "",
                 liveMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
                 dataMapping: { events: "A3:A100", locations: "B3:B100", names: "C3:E100" },
-                skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات, قديم, جديد, فقط"
+                skipWords: "no need, -, الاسم, تسلسل, شريطة, ملاحظات, قديم, جديد, فقط",
+                aliases: {}
             };
 
             if(type === 'passes') {
@@ -1783,8 +1874,8 @@
         // --- SETTINGS UI RENDERING ---
         window.renderSettingsUI = function() {
             try {
-                const s = window.GLOBAL_SETTINGS;
-                if(!s) return;
+                let s = window.GLOBAL_SETTINGS;
+                if(!s) s = { events: [], locations: [], zones: [], contacts: [], adminPasswords: [] };
                 
                 s.locations = Array.isArray(s.locations) ? s.locations : [];
                 s.zones = Array.isArray(s.zones) ? s.zones : [];
@@ -1795,86 +1886,114 @@
                 const firstPwdInput = document.getElementById('set-first-pwd');
                 if (firstPwdInput) firstPwdInput.value = s.firstTimePassword || '';
                 
-                const pwdList = document.getElementById('set-pwd-list');
-                if (pwdList) {
-                    pwdList.innerHTML = s.adminPasswords.map((p, i) => `
-                        <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
-                            <span>${'*'.repeat(p.length)}</span>
-                            <button onclick="window.removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                        </div>
-                    `).join('');
-                }
-
-                const contactsList = document.getElementById('set-contacts-list');
-                if (contactsList) {
-                    contactsList.innerHTML = s.contacts.map((c, i) => `
-                        <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                            <input type="text" id="edit-contact-name-${i}" value="${(c.name||'').replace(/"/g, '&quot;')}" class="w-1/3 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                            <input type="text" id="edit-contact-phone-${i}" value="${(c.phone||'').replace(/"/g, '&quot;')}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                            <button onclick="window.updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                            <button onclick="window.removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                        </div>
-                    `).join('');
-                }
-
-                const renderEditableArr = (arr, id, field) => {
-                    const el = document.getElementById(id);
-                    if(el) {
-                        el.innerHTML = arr.map((item, i) => `
-                            <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
-                                <input type="text" id="edit-${field}-${i}" value="${(item||'').replace(/"/g, '&quot;')}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                                <button onclick="window.updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                                <button onclick="window.removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                            </div>
-                        `).join('');
+                try {
+                    const pwdList = document.getElementById('set-pwd-list');
+                    if (pwdList) {
+                        if (s.adminPasswords.length === 0) {
+                            pwdList.innerHTML = `<p class="text-xs text-gray-500 italic">No additional passwords added.</p>`;
+                        } else {
+                            pwdList.innerHTML = s.adminPasswords.map((p, i) => `
+                                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
+                                    <span>${'*'.repeat(String(p||'').length)}</span>
+                                    <button onclick="window.removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                </div>
+                            `).join('');
+                        }
                     }
-                };
-                
-                renderEditableArr(s.locations, 'set-loc-list', 'locations'); 
-                renderEditableArr(s.zones, 'set-zone-list', 'zones');
+                } catch(e) { console.error(e); }
 
-                const evListEl = document.getElementById('set-events-list');
-                if(evListEl) {
-                    evListEl.innerHTML = s.events.map((ev, eIdx) => `
-                        <div class="bg-brand-panel p-4 rounded-xl border border-brand-border mb-4">
-                            <div class="flex flex-col md:flex-row justify-between md:items-center mb-3 gap-2">
-                                <input type="text" id="edit-ev-name-${eIdx}" value="${(ev.name||'').replace(/"/g, '&quot;')}" class="font-bold text-brand-yellow bg-transparent border-b border-brand-border px-1 w-full md:w-1/3">
-                                <div class="flex flex-wrap gap-2 text-xs">
-                                    <input type="date" id="edit-ev-date-${eIdx}" value="${ev.date}" class="text-gray-400 bg-brand-dark border border-brand-border px-2 py-1 rounded">
-                                    <span class="text-gray-500 self-center">Start:</span>
-                                    <input type="time" id="edit-ev-start-${eIdx}" value="${ev.start || ''}" class="text-gray-400 bg-brand-dark border border-brand-border px-2 py-1 rounded">
-                                    <span class="text-gray-500 self-center">End:</span>
-                                    <input type="time" id="edit-ev-end-${eIdx}" value="${ev.end || ''}" class="text-gray-400 bg-brand-dark border border-brand-border px-2 py-1 rounded">
+                try {
+                    const contactsList = document.getElementById('set-contacts-list');
+                    if (contactsList) {
+                        if (s.contacts.length === 0) {
+                            contactsList.innerHTML = `<p class="text-xs text-gray-500 italic">No footer contacts added.</p>`;
+                        } else {
+                            contactsList.innerHTML = s.contacts.map((c, i) => `
+                                <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
+                                    <input type="text" id="edit-contact-name-${i}" value="${String(c.name||'').replace(/"/g, '&quot;')}" class="w-1/3 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                                    <input type="text" id="edit-contact-phone-${i}" value="${String(c.phone||'').replace(/"/g, '&quot;')}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                                    <button onclick="window.updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                    <button onclick="window.removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
                                 </div>
-                                <div class="flex gap-2">
-                                    <button onclick="window.updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Details"><i data-lucide="save" class="w-5 h-5"></i></button>
-                                    <button onclick="window.removeSettingItem('events', ${eIdx})" class="text-red-500" title="Delete Event"><i data-lucide="trash" class="w-5 h-5"></i></button>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3 mt-3 p-3 bg-[#111] rounded border border-brand-border">
-                                <p class="text-[10px] text-gray-500 mb-2">Active Zones for this event:</p>
-                                <div class="flex flex-wrap gap-1">
-                                    ${s.zones.map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="window.toggleEventZone(${eIdx}, '${z.replace(/'/g, "\\'")}')" ${(ev.allowedZones || []).includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${z}</label>`).join('')}
-                                </div>
-                            </div>
+                            `).join('');
+                        }
+                    }
+                } catch(e) { console.error(e); }
 
-                            <div class="pl-4 border-l-2 border-brand-border space-y-2 mb-3">
-                                ${(ev.masses || []).map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${(m.name||'').replace(/"/g, '&quot;')} (${m.start} - ${m.end})</span><button onclick="window.removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
-                            </div>
-                            <div class="flex gap-2 text-xs">
-                                <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border bg-brand-dark min-w-[120px]">
-                                <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                                <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                                <button onclick="window.addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
-                            </div>
-                        </div>`).join('');
-                }
+                try {
+                    const renderEditableArr = (arr, id, field) => {
+                        const el = document.getElementById(id);
+                        if(el) {
+                            if (arr.length === 0) {
+                                el.innerHTML = `<p class="text-xs text-gray-500 italic">No ${field} added yet.</p>`;
+                            } else {
+                                el.innerHTML = arr.map((item, i) => `
+                                    <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
+                                        <input type="text" id="edit-${field}-${i}" value="${String(item||'').replace(/"/g, '&quot;')}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
+                                        <button onclick="window.updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                        <button onclick="window.removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                    </div>
+                                `).join('');
+                            }
+                        }
+                    };
+                    renderEditableArr(s.locations, 'set-loc-list', 'locations'); 
+                    renderEditableArr(s.zones, 'set-zone-list', 'zones');
+                } catch(e) { console.error(e); }
+
+                try {
+                    const evListEl = document.getElementById('set-events-list');
+                    if(evListEl) {
+                        if (s.events.length === 0) {
+                            evListEl.innerHTML = `<p class="text-xs text-gray-500 italic">No events generated yet.</p>`;
+                        } else {
+                            evListEl.innerHTML = s.events.map((ev, eIdx) => {
+                                const evZones = Array.isArray(ev.allowedZones) ? ev.allowedZones : [];
+                                const evMasses = Array.isArray(ev.masses) ? ev.masses : [];
+                                
+                                return `
+                                <div class="bg-brand-panel p-4 rounded-xl border border-brand-border mb-4">
+                                    <div class="flex flex-col md:flex-row justify-between md:items-center mb-3 gap-2">
+                                        <input type="text" id="edit-ev-name-${eIdx}" value="${String(ev.name||'').replace(/"/g, '&quot;')}" class="font-bold text-brand-yellow bg-transparent border-b border-brand-border px-1 w-full md:w-1/3">
+                                        <div class="flex flex-wrap gap-2 text-xs">
+                                            <input type="date" id="edit-ev-date-${eIdx}" value="${ev.date || ''}" class="text-gray-400 bg-brand-dark border border-brand-border px-2 py-1 rounded">
+                                            <span class="text-gray-500 self-center">Start:</span>
+                                            <input type="time" id="edit-ev-start-${eIdx}" value="${ev.start || ''}" class="text-gray-400 bg-brand-dark border border-brand-border px-2 py-1 rounded">
+                                            <span class="text-gray-500 self-center">End:</span>
+                                            <input type="time" id="edit-ev-end-${eIdx}" value="${ev.end || ''}" class="text-gray-400 bg-brand-dark border border-brand-border px-2 py-1 rounded">
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="window.updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Details"><i data-lucide="save" class="w-5 h-5"></i></button>
+                                            <button onclick="window.removeSettingItem('events', ${eIdx})" class="text-red-500" title="Delete Event"><i data-lucide="trash" class="w-5 h-5"></i></button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3 mt-3 p-3 bg-[#111] rounded border border-brand-border">
+                                        <p class="text-[10px] text-gray-500 mb-2">Active Zones for this event:</p>
+                                        <div class="flex flex-wrap gap-1">
+                                            ${s.zones.map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="window.toggleEventZone(${eIdx}, '${String(z||'').replace(/'/g, "\\'")}')" ${evZones.includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${String(z||'').replace(/</g, '&lt;')}</label>`).join('')}
+                                        </div>
+                                    </div>
+
+                                    <div class="pl-4 border-l-2 border-brand-border space-y-2 mb-3">
+                                        ${evMasses.map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${String(m.name||'').replace(/</g, '&lt;')} (${m.start} - ${m.end})</span><button onclick="window.removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
+                                    </div>
+                                    <div class="flex gap-2 text-xs">
+                                        <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border bg-brand-dark min-w-[120px]">
+                                        <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
+                                        <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
+                                        <button onclick="window.addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
+                                    </div>
+                                </div>`
+                            }).join('');
+                        }
+                    }
+                } catch(e) { console.error(e); }
                 
-                try { window.lucide.createIcons(); } catch(err) { console.error("Lucide Error:", err); }
+                window.refreshIcons();
             } catch(e) {
                 console.error("UI Render Exception:", e);
-                alert("Settings Rendering Error: " + e.message);
+                alert("Settings Rendering Error. Please check your internet connection.");
             }
         };
 
@@ -2019,7 +2138,7 @@
                 
                 document.getElementById('sync-console-wrapper').classList.remove('hidden');
                 document.getElementById('sync-terminal').innerHTML = ''; 
-                window.lucide.createIcons();
+                window.refreshIcons();
 
                 await window.syncBuiltInSheets(targetTeam);
             } catch (e) {
@@ -2028,7 +2147,7 @@
             } finally {
                 if (btn && originalHTML) btn.innerHTML = originalHTML;
                 if (globalBtn && globalOriginalHTML) globalBtn.innerHTML = globalOriginalHTML;
-                window.lucide.createIcons();
+                window.refreshIcons();
             }
         };
 
@@ -2041,14 +2160,14 @@
             await window.fetchServantsData();
             let servantMap = {};
             window.localServants.forEach(srv => {
-                servantMap[srv.Name.toLowerCase()] = {
+                servantMap[srv.Name.toLowerCase().trim()] = {
                     Name: srv.Name, Phone: srv.Phone, PhotoURL: srv.PhotoURL,
                     Teams: new Set(srv.Team ? srv.Team.split(' & ') : [])
                 };
             });
 
             let existingPasses = await window.DB.fetchAllPasses() || [];
-            const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase()}_${p.Event}`));
+            const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase().trim()}_${p.Event}`));
 
             const liveMap = { events: window.parseRange(s.liveMapping?.events), locs: window.parseRange(s.liveMapping?.locations), names: window.parseRange(s.liveMapping?.names) };
             const dataMap = { events: window.parseRange(s.dataMapping?.events), locs: window.parseRange(s.dataMapping?.locations), names: window.parseRange(s.dataMapping?.names) };
@@ -2138,20 +2257,25 @@
                             for(let name of subNames) {
                                 let originalName = name;
                                 let transName = window.translateArabicToEnglish(name);
-                                let lowerName = transName.toLowerCase();
-                                let shouldSkip = skipWords.some(w => lowerName.includes(w) || originalName.includes(w));
+                                let lowerName = transName.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_');
                                 
+                                if (s.aliases && s.aliases[lowerName]) {
+                                    transName = s.aliases[lowerName];
+                                    lowerName = transName.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_');
+                                }
+
+                                let shouldSkip = skipWords.some(w => lowerName.includes(w) || originalName.toLowerCase().includes(w));
                                 if(shouldSkip || transName.length <= 2 || transName.match(/^[\d\s\W]+$/)) continue;
 
                                 if (!servantMap[lowerName]) {
-                                    let existingSrv = window.localServants.find(s => s.Name.toLowerCase() === lowerName);
+                                    let existingSrv = window.localServants.find(s => s.Name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_') === lowerName);
                                     servantMap[lowerName] = { 
                                         Name: transName, 
                                         Phone: existingSrv ? existingSrv.Phone : 'N/A', 
                                         PhotoURL: existingSrv ? existingSrv.PhotoURL : "", 
                                         Teams: new Set(existingSrv && existingSrv.Team ? existingSrv.Team.split(' & ') : [])
                                     };
-                                    newCount++;
+                                    if(!existingSrv) newCount++;
                                 }
                                 servantMap[lowerName].Teams.add(teamNameStr);
                                 
@@ -2159,10 +2283,10 @@
                                     servantMap[lowerName].Teams = new Set(['IT Team']);
                                 }
 
-                                if (!existingEv.assignments.some(a => a.name.toLowerCase() === lowerName)) {
-                                    existingEv.assignments.push({ name: transName, team: teamNameStr, location: currentLocation });
+                                if (!existingEv.assignments.some(a => a.name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_') === lowerName)) {
+                                    existingEv.assignments.push({ name: servantMap[lowerName].Name, team: teamNameStr, location: currentLocation });
                                     settingsModified = true;
-                                    window.printSyncMessage(`Assigned: ${transName} to ${currentEvent}`);
+                                    window.printSyncMessage(`Assigned: ${servantMap[lowerName].Name} to ${currentEvent}`);
                                 }
 
                                 if (!servantMap[lowerName].Teams.has('IT Team')) {
@@ -2175,7 +2299,7 @@
                                         let zones = existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES';
                                         
                                         await window.DB.savePass({
-                                            PassID: passId, Name: transName, Phone: servantMap[lowerName].Phone || 'N/A', Team: teamNameStr,
+                                            PassID: passId, Name: servantMap[lowerName].Name, Phone: servantMap[lowerName].Phone || 'N/A', Team: teamNameStr,
                                             Event: existingEv.id, Mass: 'N/A', Location: currentLocation,
                                             AllowedZones: zones, PhotoURL: servantMap[lowerName].PhotoURL || "", Status: 'VALID', EntryTime: new Date().toISOString()
                                         });
@@ -2206,13 +2330,13 @@
                 
                 if (teamStr === 'IT Team') {
                     let passes = await window.DB.fetchAllPasses() || [];
-                    const existingSrvPasses = passes.filter(p => p.Name.toLowerCase() === srv.Name.toLowerCase() && p.Event !== 'ALL ACCESS');
+                    const existingSrvPasses = passes.filter(p => p.Name.toLowerCase().trim() === srv.Name.toLowerCase().trim() && p.Event !== 'ALL ACCESS');
                     for (let p of existingSrvPasses) { await window.DB.deletePass(p.PassID); }
                     await window.autoGenerateITPass(srv.Name, srv.Phone, srv.PhotoURL);
                 }
             }
 
-            window.printSyncMessage(`<span class="text-green-400 font-bold">Sync Complete! Analyzed ${newCount} servants and auto-generated passes directly!</span>`);
+            window.printSyncMessage(`<span class="text-green-400 font-bold">Sync Complete! Discovered ${newCount} new servants and auto-generated ${passesCount} new passes directly!</span>`);
             
             if(settingsModified) {
                 await window.DB.updateSettings(window.GLOBAL_SETTINGS);
@@ -2250,12 +2374,7 @@
             window.localServants = await window.DB.fetchAllServants() || [];
             const dl = document.getElementById('servants-list');
             if(dl) {
-                dl.innerHTML = window.localServants.filter(s=>!window.isPending(s, 'servant')).map(s => `<option value="${s.Name}">`).join('');
-            }
-            
-            const linkSelect = document.getElementById('link-target-select');
-            if(linkSelect) {
-                linkSelect.innerHTML = window.localServants.filter(s=>!window.isPending(s, 'servant')).map(s => `<option value="${s.Name.toLowerCase()}">${s.Name} (${s.Team})</option>`).join('');
+                dl.innerHTML = window.localServants.map(s => `<option value="${s.Name}">`).join('');
             }
         };
 
@@ -2279,7 +2398,7 @@
             const originalHtml = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Importing...`;
             btn.disabled = true;
-            window.lucide.createIcons();
+            window.refreshIcons();
 
             const rows = text.split('\n');
             let importedCount = 0;
@@ -2326,7 +2445,7 @@
 
             btn.innerHTML = originalHtml;
             btn.disabled = false;
-            window.lucide.createIcons();
+            window.refreshIcons();
         };
 
         window.manualSaveServant = async function() {
@@ -2374,7 +2493,7 @@
             const tbody = document.getElementById('servants-table-body');
             if (!tbody) return;
             tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
-            window.lucide.createIcons();
+            window.refreshIcons();
             
             await window.fetchServantsData(); 
             
@@ -2406,14 +2525,14 @@
                     </td>
                     <td class="px-6 py-4 text-gray-300">${s.Phone}</td>
                     <td class="px-6 py-4 text-gray-300 text-xs font-bold text-brand-yellow">${s.Team}</td>
-                    <td class="px-6 py-4 text-right">
-                        ${isPend ? `<button onclick="window.openLinkModal('${id}')" class="text-brand-yellow hover:text-white font-bold text-xs px-2 py-1.5 inline-flex" title="Link to correct profile"><i data-lucide="link" class="w-3 h-3"></i></button>` : ''}
-                        <button onclick="window.editServant('${id}')" class="text-blue-400 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
-                        <button onclick="window.deleteServant('${id}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
+                    <td class="px-6 py-4 text-right space-x-1">
+                        <button onclick="window.openLinkModal('${id}')" class="text-brand-yellow hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Link & Merge"><i data-lucide="link" class="w-3 h-3 md:mr-1"></i><span class="hidden md:inline">Merge</span></button>
+                        <button onclick="window.editServant('${id}')" class="text-blue-400 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Edit"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
+                        <button onclick="window.deleteServant('${id}')" class="text-red-500 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Delete"><i data-lucide="trash" class="w-3 h-3"></i></button>
                     </td>
                 </tr>`
             }).join('');
-            window.lucide.createIcons();
+            window.refreshIcons();
         };
 
         window.editServant = function(id) {
@@ -2433,8 +2552,11 @@
             }
         };
 
-        window.openLinkModal = function(pendingId) {
-            document.getElementById('link-pending-id').value = pendingId;
+        // LINK MODAL LOGIC
+        window.openLinkModal = function(sourceId) {
+            const inputEl = document.getElementById('link-source-id');
+            if (inputEl) inputEl.value = sourceId;
+            window.resetLinkModal();
             document.getElementById('link-modal').classList.remove('hidden');
         };
 
@@ -2442,38 +2564,95 @@
             document.getElementById('link-modal').classList.add('hidden');
         };
 
-        window.confirmLinkServant = async function() {
-            const pendingId = document.getElementById('link-pending-id').value;
-            const targetId = document.getElementById('link-target-select').value;
-            if(!pendingId || !targetId) return alert("Select a target servant to merge into.");
+        window.resetLinkModal = function() {
+            document.getElementById('link-step-1').classList.remove('hidden');
+            document.getElementById('link-step-2').classList.add('hidden');
+        };
 
-            const pendingSrv = window.localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === pendingId);
-            const targetSrv = window.localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === targetId);
-
-            if(!pendingSrv || !targetSrv) return alert("Error finding profiles.");
-
-            const allPasses = await window.DB.fetchAllPasses() || [];
-            const passesToUpdate = allPasses.filter(p => p.Name.toLowerCase() === pendingSrv.Name.toLowerCase());
+        window.selectLinkTeam = function(teamName) {
+            const sourceId = document.getElementById('link-source-id').value;
+            const select = document.getElementById('link-target-select');
             
-            for(let p of passesToUpdate) {
-                p.Name = targetSrv.Name;
-                p.Phone = targetSrv.Phone;
-                p.PhotoURL = targetSrv.PhotoURL;
-                await window.DB.savePass(p);
+            const filtered = window.localServants.filter(s => 
+                s.Team && s.Team.includes(teamName) && 
+                s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() !== sourceId
+            );
+
+            if(filtered.length === 0) {
+                alert(`No other servants found in ${teamName}.`);
+                return;
             }
 
-            let mergedTeams = new Set([...(targetSrv.Team ? targetSrv.Team.split(' & ') : []), ...(pendingSrv.Team ? pendingSrv.Team.split(' & ') : [])]);
-            if(mergedTeams.has('IT Team')) mergedTeams = new Set(['IT Team']);
-            targetSrv.Team = Array.from(mergedTeams).join(' & ');
-            
-            await window.DB.saveServant(targetSrv);
-            await window.DB.deleteServant(pendingId);
+            select.innerHTML = filtered.map(s => {
+                const status = window.isPending(s, 'servant') ? '(Pending)' : '(Done)';
+                return `<option value="${s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase()}">${s.Name} ${status}</option>`;
+            }).join('');
 
-            alert(`Successfully merged ${pendingSrv.Name} into ${targetSrv.Name} and updated ${passesToUpdate.length} passes!`);
-            window.closeLinkModal();
-            await window.fetchServantsData();
-            window.loadServantsTable();
-            window.loadManageTable();
+            document.getElementById('link-step-1').classList.add('hidden');
+            document.getElementById('link-step-2').classList.remove('hidden');
+        };
+
+        window.confirmLinkServant = async function() {
+            const sourceId = document.getElementById('link-source-id').value;
+            const targetId = document.getElementById('link-target-select').value;
+            if(!sourceId || !targetId) return alert("Select a target servant to merge into.");
+
+            const sourceSrv = window.localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === sourceId);
+            const targetSrv = window.localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === targetId);
+
+            if(!sourceSrv || !targetSrv) return alert("Error finding profiles.");
+
+            if(!confirm(`Are you sure you want to merge "${sourceSrv.Name}" into "${targetSrv.Name}"?\n\nAll passes belonging to "${sourceSrv.Name}" will be updated to "${targetSrv.Name}".`)) return;
+
+            const btn = document.querySelector('#link-step-2 button.bg-brand-yellow');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin inline"></i> Merging...`;
+            btn.disabled = true;
+
+            try {
+                if(!window.GLOBAL_SETTINGS.aliases) window.GLOBAL_SETTINGS.aliases = {};
+                window.GLOBAL_SETTINGS.aliases[sourceId] = targetSrv.Name;
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS);
+
+                const allPasses = await window.DB.fetchAllPasses() || [];
+                const passesToUpdate = allPasses.filter(p => p.Name.toLowerCase() === sourceSrv.Name.toLowerCase());
+                
+                for(let p of passesToUpdate) {
+                    p.Name = targetSrv.Name;
+                    if(targetSrv.Phone && targetSrv.Phone !== 'N/A') p.Phone = targetSrv.Phone;
+                    if(targetSrv.PhotoURL) p.PhotoURL = targetSrv.PhotoURL;
+                    await window.DB.savePass(p);
+                }
+
+                let mergedTeams = new Set([...(targetSrv.Team ? targetSrv.Team.split(' & ') : []), ...(sourceSrv.Team ? sourceSrv.Team.split(' & ') : [])]);
+                if(mergedTeams.has('IT Team')) mergedTeams = new Set(['IT Team']);
+                targetSrv.Team = Array.from(mergedTeams).join(' & ');
+                
+                if((!targetSrv.Phone || targetSrv.Phone === 'N/A') && sourceSrv.Phone !== 'N/A') targetSrv.Phone = sourceSrv.Phone;
+                if(!targetSrv.PhotoURL && sourceSrv.PhotoURL) targetSrv.PhotoURL = sourceSrv.PhotoURL;
+
+                await window.DB.saveServant(targetSrv);
+                await window.DB.deleteServant(sourceId);
+
+                if (mergedTeams.has('IT Team')) {
+                    const postMergePasses = await window.DB.fetchAllPasses() || [];
+                    const nonITPasses = postMergePasses.filter(p => p.Name.toLowerCase() === targetSrv.Name.toLowerCase() && p.Event !== 'ALL ACCESS');
+                    for (let p of nonITPasses) { await window.DB.deletePass(p.PassID); }
+                    await window.autoGenerateITPass(targetSrv.Name, targetSrv.Phone, targetSrv.PhotoURL);
+                }
+
+                alert(`Successfully merged ${sourceSrv.Name} into ${targetSrv.Name} and taught the sync engine to fix it automatically next time!`);
+                window.closeLinkModal();
+                await window.fetchServantsData();
+                window.loadServantsTable();
+                if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) window.loadManageTable();
+            } catch(e) {
+                console.error(e);
+                alert("Error during merge.");
+            } finally {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
         };
 
         // --- MANAGE PASSES LOGIC ---
@@ -2481,7 +2660,7 @@
             const tbody = document.getElementById('manage-table-body');
             if(!tbody) return;
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
-            window.lucide.createIcons();
+            window.refreshIcons();
             
             let passes = await window.DB.fetchAllPasses() || []; 
             passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
@@ -2504,7 +2683,7 @@
 
             tbody.innerHTML = passes.map(p => {
                 const tColor = window.getTeamColor(p.Team);
-                const ev = s.events.find(e => e.id === p.Event);
+                const ev = (s.events || []).find(e => e.id === p.Event);
                 const evName = p.Team === 'IT Team' ? 'ALL ACCESS' : (ev ? ev.name : p.Event);
                 const isPend = window.isPending(p, 'pass');
                 const pendingBadge = isPend ? `<span class="bg-yellow-900 text-yellow-300 text-[10px] px-2 py-0.5 rounded ml-2">PENDING</span>` : `<span class="bg-green-900 text-green-300 text-[10px] px-2 py-0.5 rounded ml-2">DONE</span>`;
@@ -2525,7 +2704,7 @@
                         <button onclick="window.deletePass('${p.PassID}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
                     </td>
                 </tr>`}).join('');
-            window.lucide.createIcons();
+            window.refreshIcons();
         };
 
         window.manualEntry = async function(id) { 
@@ -2552,7 +2731,7 @@
             const originalHTML = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Loading...`;
             btn.disabled = true;
-            window.lucide.createIcons();
+            window.refreshIcons();
 
             try {
                 let passes = await window.DB.fetchAllPasses() || [];
@@ -2578,12 +2757,12 @@
                     const blob = await window.generatePerfectPDFBlob(pass, s);
                     
                     let evName = pass.Event;
-                    const ev = s.events.find(e => e.id === pass.Event); 
+                    const ev = (s.events||[]).find(e => e.id === pass.Event); 
                     if(ev) evName = ev.name;
                     
                     const safeEv = evName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
                     const safeName = pass.Name.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
-                    zip.folder(safeEv).file(`${pass.Team}_${safeName}_${pass.PassID}.pdf`, blob);
+                    zip.folder(safeEv).file(`${safeName}_${pass.PassID}.pdf`, blob);
                 }
 
                 btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Zipping...`;
@@ -2596,7 +2775,7 @@
             } finally {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
-                window.lucide.createIcons();
+                window.refreshIcons();
             }
         };
 
@@ -2615,7 +2794,7 @@
             const originalText = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Generating...`;
-            window.lucide.createIcons();
+            window.refreshIcons();
 
             let count = 0;
             const existingPasses = await window.DB.fetchAllPasses() || [];
@@ -2664,7 +2843,7 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
-                window.lucide.createIcons();
+                window.refreshIcons();
             }
         };
 
@@ -2772,7 +2951,7 @@
             document.getElementById('create-buttons').classList.add('hidden');
             document.getElementById('edit-buttons').classList.remove('hidden');
             
-            window.switchAdminTab('generate'); window.lucide.createIcons();
+            window.switchAdminTab('generate'); window.refreshIcons();
             window.scrollTo({top:0, behavior:'smooth'});
         };
 
@@ -2788,7 +2967,7 @@
             if(gPhotoPreview) gPhotoPreview.classList.add('hidden');
             if(gPhotoStatus) gPhotoStatus.classList.add('hidden');
             
-            window.handleTeamLogic(); window.lucide.createIcons();
+            window.handleTeamLogic(); window.refreshIcons();
         };
 
         // --- PDF ENGINE ---
@@ -2812,11 +2991,11 @@
             
             let evName = pass.Event;
             if(pass.Team !== 'IT Team') {
-                const ev = s.events.find(e => e.id === pass.Event); 
+                const ev = (s.events||[]).find(e => e.id === pass.Event); 
                 if(ev) {
                     evName = ev.name;
                     if (pass.Mass && pass.Mass !== 'N/A') {
-                        const m = ev.masses.find(x => x.id === pass.Mass);
+                        const m = (ev.masses || []).find(x => x.id === pass.Mass);
                         if (m) evName += ` - ${m.name}`;
                     }
                 }
@@ -2832,7 +3011,7 @@
             await new Promise(r => setTimeout(r, 150));
             document.getElementById('pdf-qr').src = document.getElementById('qrcode-container').querySelector('canvas').toDataURL("image/png");
 
-            document.getElementById('pdf-footer-contacts').innerHTML = s.contacts.map(c => `${c.name}: ${c.phone}`).join(' | ');
+            document.getElementById('pdf-footer-contacts').innerHTML = (s.contacts||[]).map(c => `${c.name}: ${c.phone}`).join(' | ');
             await new Promise(r => setTimeout(r, 100)); 
         };
 
@@ -2857,7 +3036,9 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
             doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
-            doc.save(`LWT-Pass-${pass.PassID}.pdf`);
+            
+            const safeName = pass.Name.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
+            doc.save(`${safeName}_${pass.PassID}.pdf`);
         };
         
         window.downloadPass = async function(id) {
