@@ -75,7 +75,7 @@
     <!-- Navigation -->
     <nav class="bg-brand-dark shadow-2xl sticky top-0 z-50 border-b border-brand-border">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-            <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.location.hash='#/scan'; handleRoute();">
+            <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.location.hash='#/scan'; window.handleRoute();">
                 <img id="nav-logo-ltw" src="" alt="LTW Logo" class="h-8 w-8 object-contain hidden">
                 <i id="nav-icon-fallback" data-lucide="sun" class="w-7 h-7 text-brand-yellow group-hover:rotate-45 transition-transform duration-300"></i>
                 <div class="flex items-baseline space-x-2">
@@ -89,10 +89,10 @@
             </div>
 
             <div id="main-nav-links" class="flex items-center space-x-2">
-                <a onclick="window.location.hash='#/scan'; handleRoute();" class="nav-link px-3 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400 cursor-pointer" id="nav-scan">
+                <a onclick="window.location.hash='#/scan'; window.handleRoute();" class="nav-link px-3 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400 cursor-pointer" id="nav-scan">
                     <i data-lucide="scan" class="w-4 h-4 md:mr-1.5"></i> <span class="hidden md:inline">Scanner</span>
                 </a>
-                <a onclick="window.location.hash='#/admin'; handleRoute();" class="nav-link px-3 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400 cursor-pointer" id="nav-admin" style="display: none;">
+                <a onclick="window.location.hash='#/admin'; window.handleRoute();" class="nav-link px-3 py-2 rounded-lg text-sm font-bold hover:bg-brand-panel transition-colors flex items-center text-gray-400 cursor-pointer" id="nav-admin" style="display: none;">
                     <i data-lucide="shield" class="w-4 h-4 md:mr-1.5"></i> <span class="hidden md:inline">Admin</span>
                 </a>
             </div>
@@ -115,7 +115,7 @@
             <div id="reader" class="bg-black relative"></div>
             <div class="mt-8 max-w-md mx-auto text-center bg-brand-panel p-5 rounded-xl border border-brand-border">
                 <p class="text-sm text-gray-400 mb-3">Camera not working or damaged code?</p>
-                <button onclick="simulateScanPrompt()" class="px-6 py-2.5 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white font-bold rounded-lg transition-colors text-sm">
+                <button onclick="window.simulateScanPrompt()" class="px-6 py-2.5 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white font-bold rounded-lg transition-colors text-sm">
                     Enter Pass ID Manually
                 </button>
             </div>
@@ -172,7 +172,7 @@
                     
                     <div id="entry-status-alert" class="mt-6 p-4 rounded-xl text-center font-bold text-lg border hidden"></div>
 
-                    <button onclick="window.location.hash='#/scan'; handleRoute();" class="mt-8 w-full py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-black text-lg shadow-lg transition-all flex items-center justify-center">
+                    <button onclick="window.location.hash='#/scan'; window.handleRoute();" class="mt-8 w-full py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-black text-lg shadow-lg transition-all flex items-center justify-center">
                         <i data-lucide="scan" class="w-5 h-5 mr-2"></i> Scan Next Pass
                     </button>
                 </div>
@@ -196,15 +196,15 @@
                 <h2 class="text-2xl font-black mb-2 text-white">Admin Access</h2>
                 <p class="text-sm text-gray-400 mb-6" id="login-msg">Enter system password to continue.</p>
                 
-                <input type="password" id="admin-password" placeholder="••••••••" class="w-full px-5 py-4 rounded-xl border border-brand-border focus:border-brand-yellow text-center text-xl tracking-widest bg-brand-dark text-white mb-4 outline-none transition font-bold" onkeypress="handleEnter(event, loginAdmin)">
-                <button onclick="loginAdmin()" class="w-full py-4 bg-brand-yellow text-black rounded-xl font-black hover:bg-yellow-500 transition-colors shadow-md">Authenticate</button>
+                <input type="password" id="admin-password" placeholder="••••••••" class="w-full px-5 py-4 rounded-xl border border-brand-border focus:border-brand-yellow text-center text-xl tracking-widest bg-brand-dark text-white mb-4 outline-none transition font-bold" onkeypress="window.handleEnter(event, window.loginAdmin)">
+                <button onclick="window.loginAdmin()" class="w-full py-4 bg-brand-yellow text-black rounded-xl font-black hover:bg-yellow-500 transition-colors shadow-md">Authenticate</button>
                 
-                <button onclick="toggleEmergencyLogin()" class="mt-6 text-xs text-gray-600 hover:text-gray-400 transition-colors">Emergency Login</button>
+                <button onclick="window.toggleEmergencyLogin()" class="mt-6 text-xs text-gray-600 hover:text-gray-400 transition-colors">Emergency Login</button>
 
                 <div id="emergency-panel" class="hidden mt-4 pt-4 border-t border-brand-border text-left">
                     <p class="text-xs text-brand-yellow mb-2 font-bold">Emergency Override</p>
                     <input type="password" id="emergency-password-input" placeholder="Enter Emergency Password" class="w-full px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white text-sm mb-3">
-                    <button onclick="emergencyLogin()" class="w-full py-3 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors">Log In</button>
+                    <button onclick="window.emergencyLogin()" class="w-full py-3 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold text-sm transition-colors">Log In</button>
                 </div>
             </div>
 
@@ -219,17 +219,17 @@
                     <div>
                         <div class="flex items-center space-x-3">
                             <h1 class="text-3xl font-black text-white tracking-tight">System Admin</h1>
-                            <button onclick="logoutAdmin()" class="bg-red-900/80 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors border border-red-800">Log Out</button>
+                            <button onclick="window.logoutAdmin()" class="bg-red-900/80 hover:bg-red-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors border border-red-800">Log Out</button>
                         </div>
                         <p class="text-gray-400 font-medium text-sm mt-1">Manage passes, servants, and system logs.</p>
                     </div>
                     <div class="flex flex-wrap gap-2 bg-brand-panel p-1.5 rounded-xl border border-brand-border">
-                        <button onclick="switchAdminTab('sync')" id="tab-sync" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i> Sync Hub</button>
-                        <button onclick="switchAdminTab('generate')" id="tab-generate" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-yellow text-black transition-colors flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Generate</button>
-                        <button onclick="switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="layout-grid" class="w-4 h-4 mr-1.5"></i> Passes</button>
-                        <button onclick="switchAdminTab('servants')" id="tab-servants" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Servants</button>
-                        <button onclick="switchAdminTab('stats')" id="tab-stats" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5"></i> Stats</button>
-                        <button onclick="switchAdminTab('settings')" id="tab-settings" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-1.5"></i> Settings</button>
+                        <button onclick="window.switchAdminTab('sync')" id="tab-sync" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i> Sync Hub</button>
+                        <button onclick="window.switchAdminTab('generate')" id="tab-generate" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold bg-brand-yellow text-black transition-colors flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Generate</button>
+                        <button onclick="window.switchAdminTab('manage')" id="tab-manage" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="layout-grid" class="w-4 h-4 mr-1.5"></i> Passes</button>
+                        <button onclick="window.switchAdminTab('servants')" id="tab-servants" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="users" class="w-4 h-4 mr-1.5"></i> Servants</button>
+                        <button onclick="window.switchAdminTab('stats')" id="tab-stats" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5"></i> Stats</button>
+                        <button onclick="window.switchAdminTab('settings')" id="tab-settings" class="admin-tab px-4 py-2.5 rounded-lg text-sm font-bold text-gray-400 hover:text-white hover:bg-brand-border transition-colors flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-1.5"></i> Settings</button>
                     </div>
                 </div>
 
@@ -245,8 +245,8 @@
 
                         <!-- Sync Team Tabs -->
                         <div class="flex space-x-2 bg-brand-dark p-1.5 rounded-xl w-full sm:w-max mb-6 border border-brand-border">
-                            <button onclick="switchSyncTeamTab('live')" id="sync-tab-live" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold bg-brand-panel text-white transition-all shadow">Live Team</button>
-                            <button onclick="switchSyncTeamTab('projector')" id="sync-tab-projector" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">Projector Team</button>
+                            <button onclick="window.switchSyncTeamTab('live')" id="sync-tab-live" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold bg-brand-panel text-white transition-all shadow">Live Team</button>
+                            <button onclick="window.switchSyncTeamTab('projector')" id="sync-tab-projector" class="flex-1 sm:flex-none px-6 py-2 rounded-lg text-sm font-bold text-gray-400 hover:text-white transition-all">Projector Team</button>
                         </div>
 
                         <!-- LIVE TEAM SECTION -->
@@ -269,7 +269,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button onclick="startBuiltInSync('live')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
+                            <button onclick="window.startBuiltInSync('live')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
                                 <i data-lucide="zap" class="w-4 h-4 mr-2"></i> <span>Execute Sync & Generate: Live Team</span>
                             </button>
                         </div>
@@ -294,7 +294,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button onclick="startBuiltInSync('projector')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
+                            <button onclick="window.startBuiltInSync('projector')" class="w-full py-4 bg-brand-dark hover:bg-gray-800 border border-brand-yellow text-white rounded-2xl font-bold text-sm transition-all flex justify-center items-center shadow-lg">
                                 <i data-lucide="zap" class="w-4 h-4 mr-2"></i> <span>Execute Sync & Generate: Projector Team</span>
                             </button>
                         </div>
@@ -303,11 +303,11 @@
                         <div class="mt-8 pt-6 border-t border-brand-border">
                             <div class="flex justify-between items-center mb-3">
                                 <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">Global Skip Words & Preview</h3>
-                                <button onclick="saveSyncSettings()" class="px-4 py-2 bg-brand-border hover:bg-gray-600 text-white rounded-lg text-xs font-bold transition-colors shadow">Save Settings</button>
+                                <button onclick="window.saveSyncSettings()" class="px-4 py-2 bg-brand-border hover:bg-gray-600 text-white rounded-lg text-xs font-bold transition-colors shadow">Save Settings</button>
                             </div>
                             <input type="text" id="global-skip-words" placeholder="e.g. no need, -, الاسم الاول, تسلسل" class="w-full px-4 py-3 rounded-lg text-sm border border-brand-border bg-[#1A1A1A] mb-6">
                             
-                            <button onclick="toggleSheetPreview()" class="w-full py-3 bg-[#111] border border-brand-border hover:border-brand-yellow text-white rounded-xl font-bold text-sm transition-colors shadow flex items-center justify-center whitespace-nowrap mb-4">
+                            <button onclick="window.toggleSheetPreview()" class="w-full py-3 bg-[#111] border border-brand-border hover:border-brand-yellow text-white rounded-xl font-bold text-sm transition-colors shadow flex items-center justify-center whitespace-nowrap mb-4">
                                 <i data-lucide="eye" class="w-4 h-4 mr-2"></i> Toggle Live Sheet Preview
                             </button>
 
@@ -316,7 +316,7 @@
                             </div>
                         </div>
 
-                        <button id="global-sync-btn" onclick="startBuiltInSync('all')" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
+                        <button id="global-sync-btn" onclick="window.startBuiltInSync('all')" class="w-full py-5 bg-brand-yellow hover:bg-yellow-500 text-black rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
                             <i data-lucide="zap" class="w-6 h-6 mr-2"></i> <span>Execute Global Sync & Generate All Passes</span>
                         </button>
                         
@@ -332,7 +332,7 @@
                 <!-- Tab: Generate -->
                 <div id="admin-tab-generate" class="admin-section bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border hidden">
                     <h2 class="text-xl font-black mb-6 flex items-center text-white" id="generate-title"><i data-lucide="badge-plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Create / Manage Manual Pass</h2>
-                    <form id="generate-form" onsubmit="handleGeneratePass(event)" class="space-y-8">
+                    <form id="generate-form" onsubmit="window.handleGeneratePass(event)" class="space-y-8">
                         <input type="hidden" id="g-edit-id" value="">
                         
                         <!-- Event Bulk Generator -->
@@ -342,7 +342,7 @@
                             <p class="text-xs text-gray-400 mb-4">Select an event below. The system will automatically generate passes for EVERY servant assigned to this event in the Sync Hub.</p>
                             <div class="flex flex-col sm:flex-row gap-4 items-center">
                                 <select id="g-bulk-event" class="w-full sm:w-2/3 px-4 py-3 rounded-xl border border-brand-border bg-brand-dark text-white"></select>
-                                <button type="button" onclick="batchGenerateForEvent()" class="w-full sm:w-1/3 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-black text-sm transition-all flex justify-center items-center shadow-sm">
+                                <button type="button" onclick="window.batchGenerateForEvent()" class="w-full sm:w-1/3 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-black text-sm transition-all flex justify-center items-center shadow-sm">
                                     <i data-lucide="users" class="w-4 h-4 mr-2"></i> Bulk Generate
                                 </button>
                             </div>
@@ -371,7 +371,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Team *</label>
-                                    <select id="g-team" required class="w-full px-4 py-3 rounded-xl" onchange="handleTeamLogic()"></select>
+                                    <select id="g-team" required class="w-full px-4 py-3 rounded-xl" onchange="window.handleTeamLogic()"></select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-bold text-gray-300 mb-2">Photo (Optional)</label>
@@ -392,7 +392,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-bold text-gray-300 mb-2">Event / Day *</label>
-                                        <select id="g-event" required class="w-full px-4 py-3 rounded-xl" onchange="updateMassDropdown()"></select>
+                                        <select id="g-event" required class="w-full px-4 py-3 rounded-xl" onchange="window.updateMassDropdown()"></select>
                                     </div>
                                     <div id="mass-container" class="hidden">
                                         <label class="block text-sm font-bold text-gray-300 mb-2">Specific Mass (Optional)</label>
@@ -400,7 +400,7 @@
                                     </div>
                                     <div class="md:col-span-3">
                                         <label class="block text-sm font-bold text-gray-300 mb-2">Church Location *</label>
-                                        <select id="g-location" required class="w-full px-4 py-3 rounded-xl" onchange="autoSelectZones()"></select>
+                                        <select id="g-location" required class="w-full px-4 py-3 rounded-xl" onchange="window.autoSelectZones()"></select>
                                     </div>
                                 </div>
                             </div>
@@ -415,17 +415,17 @@
 
                         <!-- Form Buttons -->
                         <div id="create-buttons" class="flex flex-col sm:flex-row gap-4">
-                            <button type="submit" id="btn-generate" onclick="setSubmitAction('generate')" class="w-full py-5 bg-brand-border hover:bg-gray-700 text-white rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
+                            <button type="submit" id="btn-generate" onclick="window.setSubmitAction('generate')" class="w-full py-5 bg-brand-border hover:bg-gray-700 text-white rounded-2xl font-black text-lg transition-all flex justify-center items-center shadow-lg">
                                 <i data-lucide="plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Save Manual Pass
                             </button>
                         </div>
                         
                         <div id="edit-buttons" class="hidden space-x-4">
-                            <button type="button" onclick="cancelEdit()" class="w-1/4 py-4 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold transition-all">Cancel</button>
-                            <button type="submit" onclick="setSubmitAction('update')" class="flex-1 py-4 bg-gray-200 hover:bg-white text-black rounded-xl font-bold transition-all flex justify-center items-center">
+                            <button type="button" onclick="window.cancelEdit()" class="w-1/4 py-4 bg-brand-border hover:bg-gray-700 text-white rounded-xl font-bold transition-all">Cancel</button>
+                            <button type="submit" onclick="window.setSubmitAction('update')" class="flex-1 py-4 bg-gray-200 hover:bg-white text-black rounded-xl font-bold transition-all flex justify-center items-center">
                                 <i data-lucide="save" class="w-5 h-5 mr-2"></i> Update Only
                             </button>
-                            <button type="submit" onclick="setSubmitAction('update-download')" class="flex-1 py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-bold transition-all flex justify-center items-center">
+                            <button type="submit" onclick="window.setSubmitAction('update-download')" class="flex-1 py-4 bg-brand-yellow hover:bg-yellow-500 text-black rounded-xl font-bold transition-all flex justify-center items-center">
                                 <i data-lucide="download" class="w-5 h-5 mr-2"></i> Update & Download
                             </button>
                         </div>
@@ -440,24 +440,24 @@
                         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                             <!-- Filter Group: Teams -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setPassFilter('team', 'all')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-team-all">All</button>
-                                <button onclick="setPassFilter('team', 'Live Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-liveteam">Live</button>
-                                <button onclick="setPassFilter('team', 'Projector Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-projectorteam">Projector</button>
-                                <button onclick="setPassFilter('team', 'IT Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-itteam">IT</button>
+                                <button onclick="window.setPassFilter('team', 'all')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-team-all">All</button>
+                                <button onclick="window.setPassFilter('team', 'Live Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-liveteam">Live</button>
+                                <button onclick="window.setPassFilter('team', 'Projector Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-projectorteam">Projector</button>
+                                <button onclick="window.setPassFilter('team', 'IT Team')" class="pass-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap filter-team-itteam">IT</button>
                             </div>
                             
                             <!-- Filter Group: Status -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setPassFilter('status', 'all')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-status-all">All</button>
-                                <button onclick="setPassFilter('status', 'done')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap filter-status-done">Done</button>
-                                <button onclick="setPassFilter('status', 'pending')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap filter-status-pending">Pending</button>
+                                <button onclick="window.setPassFilter('status', 'all')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap filter-status-all">All</button>
+                                <button onclick="window.setPassFilter('status', 'done')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap filter-status-done">Done</button>
+                                <button onclick="window.setPassFilter('status', 'pending')" class="pass-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap filter-status-pending">Pending</button>
                             </div>
                             
                             <div class="flex space-x-2">
-                                <button onclick="bulkDownloadZIP()" id="btn-bulk-zip" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
+                                <button onclick="window.bulkDownloadZIP()" id="btn-bulk-zip" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
                                     <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Bulk ZIP
                                 </button>
-                                <button onclick="loadManageTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
+                                <button onclick="window.loadManageTable()" class="px-4 py-2 bg-brand-border rounded-lg text-sm font-bold text-white hover:bg-gray-700 transition-colors flex items-center shadow-sm whitespace-nowrap justify-center">
                                     <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Refresh
                                 </button>
                             </div>
@@ -486,24 +486,24 @@
                         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                             <!-- Team Filter -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setServantFilter('team', 'all')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-filter-team-all">All</button>
-                                <button onclick="setServantFilter('team', 'Live Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-liveteam">Live</button>
-                                <button onclick="setServantFilter('team', 'Projector Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-projectorteam">Projector</button>
-                                <button onclick="setServantFilter('team', 'IT Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-itteam">IT</button>
+                                <button onclick="window.setServantFilter('team', 'all')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-filter-team-all">All</button>
+                                <button onclick="window.setServantFilter('team', 'Live Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-liveteam">Live</button>
+                                <button onclick="window.setServantFilter('team', 'Projector Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-projectorteam">Projector</button>
+                                <button onclick="window.setServantFilter('team', 'IT Team')" class="servant-filter-btn px-3 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white whitespace-nowrap s-filter-team-itteam">IT</button>
                             </div>
                             
                             <!-- Status Filter -->
                             <div class="flex space-x-1 bg-[#111] p-1 rounded-lg border border-brand-border w-full sm:w-auto overflow-x-auto">
-                                <button onclick="setServantFilter('status', 'all')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-status-all">All</button>
-                                <button onclick="setServantFilter('status', 'done')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap s-status-done">Done</button>
-                                <button onclick="setServantFilter('status', 'pending')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap s-status-pending">Pending</button>
+                                <button onclick="window.setServantFilter('status', 'all')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold bg-brand-panel text-white whitespace-nowrap s-status-all">All</button>
+                                <button onclick="window.setServantFilter('status', 'done')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-green-500 hover:text-green-400 whitespace-nowrap s-status-done">Done</button>
+                                <button onclick="window.setServantFilter('status', 'pending')" class="servant-status-btn px-3 py-1.5 rounded text-xs font-bold text-brand-yellow hover:text-yellow-400 whitespace-nowrap s-status-pending">Pending</button>
                             </div>
 
                             <div class="flex space-x-2">
-                                <button onclick="factoryReset('servants')" class="flex-1 px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-900 rounded-lg text-xs font-bold transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
+                                <button onclick="window.factoryReset('servants')" class="flex-1 px-3 py-2 bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-900 rounded-lg text-xs font-bold transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
                                     <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Clear
                                 </button>
-                                <button onclick="loadServantsTable()" class="flex-1 px-3 py-2 bg-brand-border rounded-lg text-xs font-bold text-white hover:bg-gray-700 transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
+                                <button onclick="window.loadServantsTable()" class="flex-1 px-3 py-2 bg-brand-border rounded-lg text-xs font-bold text-white hover:bg-gray-700 transition-colors flex justify-center items-center shadow-sm whitespace-nowrap">
                                     <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i> Refresh
                                 </button>
                             </div>
@@ -512,7 +512,7 @@
                     <div class="p-6 border-b border-brand-border bg-brand-dark">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider">Add / Edit Servant</h3>
-                            <button onclick="toggleBulkServantImport()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm">
+                            <button onclick="window.toggleBulkServantImport()" class="text-[11px] bg-brand-border hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg font-bold transition-colors flex items-center shadow-sm">
                                 <i data-lucide="clipboard-paste" class="w-3.5 h-3.5 mr-1.5 text-brand-yellow"></i> Bulk Import
                             </button>
                         </div>
@@ -529,14 +529,14 @@
                                     Upload Photo to attach to all their generated passes:
                                     <input type="file" id="s-photo" accept="image/*" class="mt-1 w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer p-1">
                                 </div>
-                                <button onclick="manualSaveServant()" class="px-6 py-3 h-full bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm whitespace-nowrap"><i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Save Servant</button>
+                                <button onclick="window.manualSaveServant()" class="px-6 py-3 h-full bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm whitespace-nowrap"><i data-lucide="save" class="w-4 h-4 inline mr-1"></i> Save Servant</button>
                             </div>
                         </div>
 
                         <div id="bulk-servant-form" class="hidden mt-3">
                             <p class="text-xs text-gray-400 mb-2">Paste rows directly from Excel. Expected columns: <b>Name | Phone | Team | Photo URL (Optional)</b></p>
                             <textarea id="bulk-servant-data" rows="5" class="w-full px-4 py-3 rounded-lg text-sm bg-[#111] border border-brand-border text-white focus:border-brand-yellow mb-3" placeholder="Mina Youssef&#9;+20123...&#9;Live Team&#9;https://...&#10;Kirollos&#9;N/A&#9;IT Team"></textarea>
-                            <button onclick="processBulkServantImport()" class="w-full px-6 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm flex justify-center items-center">
+                            <button onclick="window.processBulkServantImport()" class="w-full px-6 py-3 bg-brand-yellow hover:bg-yellow-500 text-black rounded-lg text-sm font-bold transition-all shadow-sm flex justify-center items-center">
                                 <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Import Servants
                             </button>
                         </div>
@@ -559,7 +559,7 @@
                 <!-- Tab: Stats -->
                 <div id="admin-tab-stats" class="admin-section hidden space-y-6">
                     <div class="flex justify-end mb-4">
-                        <select id="stats-filter" onchange="loadStats()" class="px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm font-bold text-white outline-none focus:border-brand-yellow cursor-pointer min-w-[200px]">
+                        <select id="stats-filter" onchange="window.loadStats()" class="px-4 py-3 bg-brand-dark border border-brand-border rounded-xl text-sm font-bold text-white outline-none focus:border-brand-yellow cursor-pointer min-w-[200px]">
                             <!-- Populated Dynamically -->
                         </select>
                     </div>
@@ -597,116 +597,6 @@
                                 </thead>
                                 <tbody id="logs-table-body" class="divide-y divide-brand-border"></tbody>
                             </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tab: Settings -->
-                <div id="admin-tab-settings" class="admin-section hidden space-y-6">
-                    <div class="bg-brand-panel p-6 sm:p-8 rounded-3xl border border-brand-border">
-                        <h2 class="text-xl font-black mb-6 flex items-center text-white"><i data-lucide="sliders" class="w-6 h-6 mr-2 text-brand-yellow"></i> System Settings</h2>
-                        
-                        <div class="space-y-8">
-                            <!-- Security -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="key" class="w-4 h-4 mr-2"></i> Security</h3>
-                                <div class="mb-4">
-                                    <label class="block text-xs font-bold text-gray-400 mb-1">First Time / Emergency Password</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="set-first-pwd" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="updateSettingsField('firstTimePassword', document.getElementById('set-first-pwd').value)" class="px-4 py-2 bg-brand-border hover:bg-gray-700 rounded-lg text-sm font-bold text-white">Save</button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 mb-2">Admin Passwords</label>
-                                    <div id="set-pwd-list" class="space-y-2 mb-3"></div>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="new-pwd" placeholder="Add new password..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="addItemToSettingArray('adminPasswords', 'new-pwd')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Events & Masses -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-2"></i> Events & Dates</h3>
-                                <p class="text-xs text-gray-400 mb-4">Add events with specific dates. Assign masses to handle auto-expiration.</p>
-                                <div id="set-events-list" class="space-y-6 mb-6"></div>
-                                
-                                <div class="p-4 bg-brand-panel border border-brand-border rounded-xl mt-4">
-                                    <p class="text-xs font-bold text-white mb-2">Create New Event</p>
-                                    <div class="flex flex-col sm:flex-row gap-3">
-                                        <input type="text" id="new-event-name" placeholder="Event Name (e.g. Palm Sunday)" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <input type="date" id="new-event-date" class="px-4 py-2 rounded-lg text-sm w-full sm:w-auto text-gray-300 bg-[#1A1A1A]">
-                                        <button onclick="addEvent()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold w-full sm:w-auto">Add Event</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Support Contacts -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="phone" class="w-4 h-4 mr-2"></i> Footer Contacts</h3>
-                                <p class="text-xs text-gray-400 mb-3">These numbers appear on the app footer and exported passes. Edit directly and save.</p>
-                                <div id="set-contacts-list" class="space-y-3 mb-4"></div>
-                                <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                    <input type="text" id="new-contact-name" placeholder="Name (e.g. Admin)" class="w-1/3 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                    <input type="text" id="new-contact-phone" placeholder="Phone (+20...)" class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                    <button onclick="addContact()" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                </div>
-                            </div>
-
-                            <!-- Locations & Global Zones -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                    <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Church Locations</h3>
-                                    <div id="set-loc-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
-                                    <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                        <input type="text" id="new-loc" placeholder="Add location..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="addItemToSettingArray('locations', 'new-loc')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                    </div>
-                                </div>
-                                <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                    <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4">Global Zones Catalog</h3>
-                                    <div id="set-zone-list" class="space-y-2 mb-3 max-h-60 overflow-y-auto pr-2"></div>
-                                    <div class="flex gap-2 mt-4 pt-4 border-t border-brand-border">
-                                        <input type="text" id="new-zone" placeholder="Add global zone..." class="flex-1 px-4 py-2 rounded-lg text-sm bg-[#1A1A1A]">
-                                        <button onclick="addItemToSettingArray('zones', 'new-zone')" class="px-4 py-2 bg-brand-yellow text-black rounded-lg text-sm font-bold">Add</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Logos -->
-                            <div class="bg-brand-dark p-6 rounded-2xl border border-brand-border">
-                                <h3 class="text-sm font-black text-gray-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="image" class="w-4 h-4 mr-2"></i> System Logos</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-400 mb-2">Church Logo</label>
-                                        <input type="file" id="set-logo-church" accept="image/*" class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer" onchange="uploadLogo('church')">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-400 mb-2">LTW Logo</label>
-                                        <input type="file" id="set-logo-ltw" accept="image/*" class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer" onchange="uploadLogo('ltw')">
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-bold text-gray-400 mb-2">Scout Logo</label>
-                                        <input type="file" id="set-logo-scout" accept="image/*" class="w-full text-xs text-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-brand-border file:text-white cursor-pointer" onchange="uploadLogo('scout')">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Danger Zone -->
-                            <div class="bg-red-950/20 p-6 rounded-2xl border border-red-900/50 mt-10">
-                                <h3 class="text-sm font-black text-red-500 uppercase tracking-wider mb-4 flex items-center"><i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Danger Zone (Factory Resets)</h3>
-                                <p class="text-xs text-gray-400 mb-4">Warning: These actions cannot be undone. They will permanently delete data from the database.</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                                    <button onclick="factoryReset('passes')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Delete All Passes</button>
-                                    <button onclick="factoryReset('servants')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="users-x" class="w-4 h-4 mr-2"></i> Delete All Servants</button>
-                                    <button onclick="factoryReset('logs')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="file-minus" class="w-4 h-4 mr-2"></i> Clear Stats & Logs</button>
-                                    <button onclick="factoryReset('settings')" class="w-full py-3 bg-red-900 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-colors flex justify-center items-center"><i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Settings</button>
-                                </div>
-                                <button onclick="factoryReset('all')" class="w-full py-4 bg-black border-2 border-red-600 text-red-500 hover:bg-red-600 hover:text-white rounded-xl text-sm font-black transition-colors flex justify-center items-center"><i data-lucide="alert-octagon" class="w-5 h-5 mr-2"></i> COMPLETE FACTORY RESET (ALL DATA)</button>
-                            </div>
-
                         </div>
                     </div>
                 </div>
@@ -760,18 +650,18 @@
             <div class="bg-brand-panel p-6 rounded-2xl max-w-md w-full border border-brand-border shadow-2xl">
                 <h3 class="text-white font-black mb-2 text-lg"><i data-lucide="link" class="w-5 h-5 inline mr-2 text-brand-yellow"></i>Link & Merge Servant</h3>
                 <p class="text-xs text-gray-400 mb-4">Merge this profile into another existing profile. This will combine their teams and fix any misassigned passes.</p>
-                <input type="hidden" id="link-pending-id">
+                <input type="hidden" id="link-source-id">
                 
                 <!-- Step 1: Select Team -->
                 <div id="link-step-1">
                     <p class="text-sm font-bold text-white mb-3">1. Select Target's Team:</p>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <button onclick="selectLinkTeam('Live Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-lg text-sm font-bold transition-colors">Live Team</button>
-                        <button onclick="selectLinkTeam('Projector Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-lg text-sm font-bold transition-colors">Projector Team</button>
-                        <button onclick="selectLinkTeam('IT Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-blue-500 text-white rounded-lg text-sm font-bold transition-colors">IT Team</button>
+                        <button onclick="window.selectLinkTeam('Live Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-lg text-sm font-bold transition-colors">Live Team</button>
+                        <button onclick="window.selectLinkTeam('Projector Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-brand-yellow text-white rounded-lg text-sm font-bold transition-colors">Projector Team</button>
+                        <button onclick="window.selectLinkTeam('IT Team')" class="py-2 bg-brand-dark border border-brand-border hover:border-blue-500 text-white rounded-lg text-sm font-bold transition-colors">IT Team</button>
                     </div>
                     <div class="flex justify-end mt-6">
-                        <button onclick="closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
+                        <button onclick="window.closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
                     </div>
                 </div>
 
@@ -779,12 +669,12 @@
                 <div id="link-step-2" class="hidden">
                     <p class="text-sm font-bold text-white mb-2 flex items-center justify-between">
                         <span>2. Select Target Profile:</span>
-                        <button onclick="resetLinkModal()" class="text-xs text-brand-yellow hover:underline">Back</button>
+                        <button onclick="window.resetLinkModal()" class="text-xs text-brand-yellow hover:underline">Back</button>
                     </p>
                     <select id="link-target-select" class="w-full mb-6 px-3 py-3 bg-brand-dark text-white rounded-xl border border-brand-border text-sm"></select>
                     <div class="flex justify-end space-x-3">
-                        <button onclick="closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
-                        <button onclick="confirmLinkServant()" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black font-black rounded-lg text-sm shadow transition-colors">Merge Profiles</button>
+                        <button onclick="window.closeLinkModal()" class="px-4 py-2 bg-brand-dark border border-brand-border rounded-lg text-white text-sm font-bold hover:bg-gray-800 transition-colors">Cancel</button>
+                        <button onclick="window.confirmLinkServant()" class="px-4 py-2 bg-brand-yellow hover:bg-yellow-500 text-black font-black rounded-lg text-sm shadow transition-colors">Merge Profiles</button>
                     </div>
                 </div>
             </div>
@@ -800,7 +690,7 @@
                 <!-- Injected via JS -->
             </div>
             <p class="mt-8 font-bold tracking-wider text-[10px] text-gray-600 uppercase">&copy; 2026 SGAA Church - Light The World</p>
-            <a onclick="window.location.hash='#/admin'; handleRoute();" class="text-[#1A1A1A] hover:text-gray-500 mt-2 block transition-colors w-max mx-auto font-black cursor-pointer">admin</a>
+            <a onclick="window.location.hash='#/admin'; window.handleRoute();" class="text-[#1A1A1A] hover:text-gray-500 mt-2 block transition-colors w-max mx-auto font-black cursor-pointer">admin</a>
         </div>
     </footer>
     
@@ -812,12 +702,12 @@
         });
 
         // 1. SAFE ICON RENDERER
-        function refreshIcons() {
+        window.refreshIcons = function() {
             try { if (window.lucide) window.lucide.createIcons(); } catch(e) {}
-        }
+        };
 
         // 2. SAFE FIREBASE CALL WRAPPER (Prevents freezing)
-        async function safeDB(promise) {
+        window.safeDB = async function(promise) {
             let timeoutId;
             const timeoutPromise = new Promise((_, reject) => {
                 timeoutId = setTimeout(() => reject(new Error("Firebase Connection Timeout")), 15000);
@@ -830,25 +720,25 @@
                 clearTimeout(timeoutId);
                 throw e;
             }
-        }
+        };
 
         // 3. STATE & VARIABLES
-        const STATIC_TEAMS = ['Live Team', 'Projector Team', 'IT Team'];
-        let GLOBAL_SETTINGS = null;
-        let firestoreDB = null;
-        let firebaseConnected = false;
-        let currentAdminTeamFilterPasses = 'all';
-        let currentAdminStatusFilterPasses = 'all';
-        let currentAdminTeamFilterServants = 'all';
-        let currentAdminStatusFilterServants = 'all';
-        let currentSyncTab = 'live';
-        let scanner = null;
-        let isAdminLoggedIn = false;
-        let localServants = [];
-        let currentSubmitAction = 'generate';
+        window.STATIC_TEAMS = ['Live Team', 'Projector Team', 'IT Team'];
+        window.GLOBAL_SETTINGS = null;
+        window.firestoreDB = null;
+        window.firebaseConnected = false;
+        window.currentAdminTeamFilterPasses = 'all';
+        window.currentAdminStatusFilterPasses = 'all';
+        window.currentAdminTeamFilterServants = 'all';
+        window.currentAdminStatusFilterServants = 'all';
+        window.currentSyncTab = 'live';
+        window.scanner = null;
+        window.isAdminLoggedIn = false;
+        window.localServants = [];
+        window.currentSubmitAction = 'generate';
 
         // 4. DEFINE UTILITY FUNCTIONS FIRST
-        function updateConnectionStatus(state) {
+        window.updateConnectionStatus = function(state) {
             const dot = document.getElementById('connection-status-indicator');
             if(!dot) return;
             dot.classList.remove('bg-yellow-500', 'bg-green-500', 'bg-red-500', 'animate-pulse');
@@ -863,9 +753,9 @@
                 dot.classList.add('bg-yellow-500', 'animate-pulse');
                 dot.title = "Connecting...";
             }
-        }
+        };
 
-        function resizeImage(file, maxSize = 300, preserveTransparency = false) {
+        window.resizeImage = function(file, maxSize = 300, preserveTransparency = false) {
             return new Promise((resolve) => {
                 if(!file) return resolve("");
                 const reader = new FileReader();
@@ -885,27 +775,27 @@
                 };
                 reader.readAsDataURL(file);
             });
-        }
+        };
 
-        function getTeamColor(team) {
+        window.getTeamColor = function(team) {
             if (!team) return '#ffffff';
             const t = team.toLowerCase();
             if (t.includes('it')) return '#3b82f6'; 
             if (t.includes('live')) return '#8b0000'; 
             if (t.includes('projector') || t.includes('data show')) return '#ffffff'; 
             return '#ffffff';
-        }
+        };
         
-        function normalizeTeamName(rawTeam) {
+        window.normalizeTeamName = function(rawTeam) {
             if (!rawTeam) return 'Live Team';
             let t = rawTeam.toLowerCase().trim();
             if (t.includes('it')) return 'IT Team';
             if (t.includes('live')) return 'Live Team';
             if (t.includes('project') || t.includes('data')) return 'Projector Team';
             return 'Live Team'; 
-        }
+        };
 
-        function translateArabicToEnglish(name) {
+        window.translateArabicToEnglish = function(name) {
             if (!name) return "";
             const dict = {
                 'مينا': 'Mina', 'ماريا': 'Maria', 'مجدي': 'Magdy', 'كيرلس': 'Kirollos',
@@ -933,9 +823,9 @@
                 return engW;
             });
             return translated.join(' ');
-        }
+        };
 
-        function extractTimesFromArabic(eventStr) {
+        window.extractTimesFromArabic = function(eventStr) {
             let start = '', end = '';
             const timeRegex = /(\d{1,2})(?::(\d{2}))?\s*([صمظ])/g;
             let matches = [...eventStr.matchAll(timeRegex)];
@@ -953,32 +843,32 @@
                 start = to24(matches[0][1], matches[0][2], matches[0][3]);
             }
             return { start, end };
-        }
+        };
 
-        function colToIdx(letter) {
+        window.colToIdx = function(letter) {
             if (!letter) return 0;
             let col = 0;
             for(let i=0; i<letter.length; i++) col = col * 26 + (letter.toUpperCase().charCodeAt(i) - 64);
             return col - 1;
-        }
+        };
 
-        function parseRange(rangeStr) {
+        window.parseRange = function(rangeStr) {
             if (!rangeStr) return [];
             return rangeStr.split(',').map(s => s.trim()).filter(s=>s).map(part => {
                 const match = part.match(/([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?/i);
                 if (!match) return null;
-                const c1 = colToIdx(match[1]);
+                const c1 = window.colToIdx(match[1]);
                 const r1 = parseInt(match[2]) - 1;
-                const c2 = match[3] ? colToIdx(match[3]) : c1;
+                const c2 = match[3] ? window.colToIdx(match[3]) : c1;
                 const r2 = match[4] ? parseInt(match[4]) - 1 : r1;
                 return {
                     minCol: Math.min(c1, c2), maxCol: Math.max(c1, c2),
                     minRow: Math.min(r1, r2), maxRow: Math.max(r1, r2)
                 };
             }).filter(r => r !== null);
-        }
+        };
 
-        function extractFromRanges(rowArr, rowIndex, ranges) {
+        window.extractFromRanges = function(rowArr, rowIndex, ranges) {
             let texts = [];
             if (!ranges) return texts;
             for (let rng of ranges) {
@@ -991,9 +881,9 @@
                 }
             }
             return texts;
-        }
+        };
 
-        function printSyncMessage(msg) {
+        window.printSyncMessage = function(msg) {
             const terminalEl = document.getElementById('sync-terminal');
             const wrapper = document.getElementById('sync-console-wrapper');
             if(terminalEl && wrapper) {
@@ -1002,16 +892,16 @@
                 terminalEl.innerHTML += `<div><span class="text-gray-500">[${time}]</span> ${msg}</div>`;
                 terminalEl.scrollTop = terminalEl.scrollHeight;
             }
-        }
+        };
 
-        function isPending(obj, type) {
+        window.isPending = function(obj, type) {
             if (type === 'servant') {
                 return (!obj.Name || !obj.PhotoURL || obj.PhotoURL === "" || !obj.Phone || obj.Phone === 'N/A' || obj.Phone === '' || !obj.Team || obj.Team === '' || /[\u0600-\u06FF]/.test(obj.Name));
             } else if (type === 'pass') {
                 return (!obj.Name || !obj.PhotoURL || obj.PhotoURL === "" || !obj.Phone || obj.Phone === 'N/A' || obj.Phone === '' || !obj.Team || obj.Team === '' || !obj.Location || obj.Location === '' || !obj.AllowedZones || obj.AllowedZones === '' || /[\u0600-\u06FF]/.test(obj.Name));
             }
             return false;
-        }
+        };
 
         // 5. DATABASE SERVICE & FIREBASE INIT
         const firebaseConfig = {
@@ -1025,15 +915,15 @@
 
         try {
             firebase.initializeApp(firebaseConfig);
-            firestoreDB = firebase.firestore();
-            firestoreDB.settings({ experimentalForceLongPolling: true, ignoreUndefinedProperties: true });
+            window.firestoreDB = firebase.firestore();
+            window.firestoreDB.settings({ experimentalForceLongPolling: true, ignoreUndefinedProperties: true });
         } catch(e) {
             console.error("Firebase Initialization failed:", e);
         }
 
-        const DB = {
+        window.DB = {
             async getSettings() {
-                if(GLOBAL_SETTINGS) return GLOBAL_SETTINGS;
+                if(window.GLOBAL_SETTINGS) return window.GLOBAL_SETTINGS;
                 
                 const defaultSettings = {
                     firstTimePassword: "LTW@SGAA26", adminPasswords: [],
@@ -1050,12 +940,12 @@
                 };
 
                 try {
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    const doc = await safeDB(firestoreDB.collection('admin').doc('settings').get());
-                    firebaseConnected = true;
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    const doc = await window.safeDB(window.firestoreDB.collection('admin').doc('settings').get());
+                    window.firebaseConnected = true;
                     if(doc.exists) {
                         const d = doc.data();
-                        GLOBAL_SETTINGS = {
+                        window.GLOBAL_SETTINGS = {
                             firstTimePassword: d.firstTimePassword || defaultSettings.firstTimePassword,
                             adminPasswords: Array.isArray(d.adminPasswords) ? d.adminPasswords : defaultSettings.adminPasswords,
                             contacts: Array.isArray(d.contacts) ? d.contacts : defaultSettings.contacts,
@@ -1071,142 +961,144 @@
                             aliases: d.aliases || defaultSettings.aliases
                         };
 
-                        GLOBAL_SETTINGS.events.forEach(e => { 
+                        (window.GLOBAL_SETTINGS.events || []).forEach(e => { 
                             if(!e.date) e.date = ""; 
                             if(!e.start) e.start = "";
                             if(!e.end) e.end = "";
-                            if(!Array.isArray(e.allowedZones)) e.allowedZones = GLOBAL_SETTINGS.zones || []; 
+                            if(!Array.isArray(e.allowedZones)) e.allowedZones = window.GLOBAL_SETTINGS.zones || []; 
                             if(!Array.isArray(e.masses)) e.masses = [];
                             if(!Array.isArray(e.assignments)) e.assignments = [];
                         });
                     } else {
-                        GLOBAL_SETTINGS = defaultSettings;
-                        await safeDB(firestoreDB.collection('admin').doc('settings').set(GLOBAL_SETTINGS));
+                        window.GLOBAL_SETTINGS = defaultSettings;
+                        await window.safeDB(window.firestoreDB.collection('admin').doc('settings').set(window.GLOBAL_SETTINGS));
                     }
                 } catch(e) { 
                     console.error("Settings error:", e); 
-                    firebaseConnected = false;
-                    GLOBAL_SETTINGS = defaultSettings;
+                    window.firebaseConnected = false;
+                    window.GLOBAL_SETTINGS = defaultSettings;
                 }
-                return GLOBAL_SETTINGS;
+                return window.GLOBAL_SETTINGS;
             },
             async updateSettings(newSettings) {
                 try { 
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    await safeDB(firestoreDB.collection('admin').doc('settings').set(newSettings)); 
-                    GLOBAL_SETTINGS = newSettings; 
-                    await applyGlobalSettings(); 
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    await window.safeDB(window.firestoreDB.collection('admin').doc('settings').set(newSettings)); 
+                    window.GLOBAL_SETTINGS = newSettings; 
+                    await window.applyGlobalSettings(); 
                     
-                    if(document.getElementById('admin-tab-settings') && !document.getElementById('admin-tab-settings').classList.contains('hidden')) renderSettingsUI(); 
-                    if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
-                    if(document.getElementById('admin-tab-servants') && !document.getElementById('admin-tab-servants').classList.contains('hidden')) loadServantsTable();
-                    if(document.getElementById('admin-tab-stats') && !document.getElementById('admin-tab-stats').classList.contains('hidden')) loadStats();
+                    if(document.getElementById('admin-tab-settings') && !document.getElementById('admin-tab-settings').classList.contains('hidden')) window.renderSettingsUI(); 
+                    if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) window.loadManageTable();
+                    if(document.getElementById('admin-tab-servants') && !document.getElementById('admin-tab-servants').classList.contains('hidden')) window.loadServantsTable();
+                    if(document.getElementById('admin-tab-stats') && !document.getElementById('admin-tab-stats').classList.contains('hidden')) window.loadStats();
                 } 
                 catch(e) { alert("Failed to save settings to database."); console.error(e); }
             },
             async fetchAllPasses() {
                 try { 
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await safeDB(firestoreDB.collection('passes').get()); 
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    const snapshot = await window.safeDB(window.firestoreDB.collection('passes').get()); 
                     return snapshot.docs.map(doc => doc.data()).filter(p => p && p.PassID && p.Name && p.PassID !== "undefined"); 
                 } catch(e) { return []; }
             },
             async fetchPass(id) {
                 try { 
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    const doc = await safeDB(firestoreDB.collection('passes').doc(id).get()); 
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    const doc = await window.safeDB(window.firestoreDB.collection('passes').doc(id).get()); 
                     return doc.exists ? doc.data() : undefined; 
                 } 
                 catch(e) { return undefined; }
             },
             async savePass(pass) {
                 try { 
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    pass.IsPending = isPending(pass, 'pass');
-                    await safeDB(firestoreDB.collection('passes').doc(pass.PassID).set(pass)); 
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    pass.IsPending = window.isPending(pass, 'pass');
+                    await window.safeDB(window.firestoreDB.collection('passes').doc(pass.PassID).set(pass)); 
                     return true; 
                 } 
                 catch(e) { console.error(e); return false; }
             },
             async updatePassStatus(id, newStatus) { 
-                if(!firestoreDB) return;
-                try { await safeDB(firestoreDB.collection('passes').doc(id).update({ Status: newStatus })); } catch(e){}
+                if(!window.firestoreDB) return;
+                try { await window.safeDB(window.firestoreDB.collection('passes').doc(id).update({ Status: newStatus })); } catch(e){}
             },
             async updatePassPending(id, pendingStatus) { 
-                if(!firestoreDB) return;
-                try { await safeDB(firestoreDB.collection('passes').doc(id).update({ IsPending: pendingStatus })); } catch(e){}
+                if(!window.firestoreDB) return;
+                try { await window.safeDB(window.firestoreDB.collection('passes').doc(id).update({ IsPending: pendingStatus })); } catch(e){}
             },
             async deletePass(id) { 
-                if(!firestoreDB) return;
-                try { await safeDB(firestoreDB.collection('passes').doc(id).delete()); } catch(e){}
+                if(!window.firestoreDB) return;
+                try { await window.safeDB(window.firestoreDB.collection('passes').doc(id).delete()); } catch(e){}
             },
+            
             async fetchAllServants() {
                 try { 
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await safeDB(firestoreDB.collection('servants').get()); 
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    const snapshot = await window.safeDB(window.firestoreDB.collection('servants').get()); 
                     return snapshot.docs.map(doc => doc.data()).filter(s => s && s.Name); 
                 } catch(e) { return []; }
             },
             async saveServant(servant) {
                 try {
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
                     if(!servant || !servant.Name) return;
-                    servant.IsPending = isPending(servant, 'servant');
+                    servant.IsPending = window.isPending(servant, 'servant');
                     const id = servant.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
-                    await safeDB(firestoreDB.collection('servants').doc(id).set(servant));
+                    await window.safeDB(window.firestoreDB.collection('servants').doc(id).set(servant));
                 } catch(e) { console.error(e); }
             },
             async deleteServant(id) {
                 try { 
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    await safeDB(firestoreDB.collection('servants').doc(id).delete()); 
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    await window.safeDB(window.firestoreDB.collection('servants').doc(id).delete()); 
                 } catch(e) { console.error(e); }
             },
+
             async fetchLogs() {
                 try { 
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await safeDB(firestoreDB.collection('logs').get()); 
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    const snapshot = await window.safeDB(window.firestoreDB.collection('logs').get()); 
                     return snapshot.docs.map(doc => doc.data()); 
                 } 
                 catch(e) { return []; }
             },
             async logEntry(passId, result) {
-                if(!firestoreDB) return null;
+                if(!window.firestoreDB) return null;
                 let log = { LogID: 'LOG-' + Date.now(), PassID: passId, Time: new Date().toISOString(), Result: result };
-                try { await safeDB(firestoreDB.collection('logs').doc(log.LogID).set(log)); } catch(e){} 
+                try { await window.safeDB(window.firestoreDB.collection('logs').doc(log.LogID).set(log)); } catch(e){} 
                 return log;
             },
             async clearCollection(collectionName) {
                 try {
-                    if(!firestoreDB) throw new Error("Firebase DB not initialized");
-                    const snapshot = await safeDB(firestoreDB.collection(collectionName).get());
-                    const batch = firestoreDB.batch();
+                    if(!window.firestoreDB) throw new Error("Firebase DB not initialized");
+                    const snapshot = await window.safeDB(window.firestoreDB.collection(collectionName).get());
+                    const batch = window.firestoreDB.batch();
                     snapshot.docs.forEach((doc) => { batch.delete(doc.ref); });
-                    await safeDB(batch.commit());
+                    await window.safeDB(batch.commit());
                     return true;
                 } catch(e) { console.error(e); return false; }
             }
         };
 
         // --- APP INIT & EVENT LISTENERS ---
-        window.addEventListener('hashchange', handleRoute);
+        window.addEventListener('hashchange', window.handleRoute);
         
         window.addEventListener('load', async () => { 
-            updateConnectionStatus('connecting');
+            window.updateConnectionStatus('connecting');
             try {
-                if(!firestoreDB) throw new Error("Firebase SDK missing/blocked");
-                await applyGlobalSettings(); 
-                if (firebaseConnected) {
-                    updateConnectionStatus('connected');
+                if(!window.firestoreDB) throw new Error("Firebase SDK missing/blocked");
+                await window.applyGlobalSettings(); 
+                if (window.firebaseConnected) {
+                    window.updateConnectionStatus('connected');
                 } else {
-                    updateConnectionStatus('error');
+                    window.updateConnectionStatus('error');
                 }
             } catch(e) {
                 console.error("Init Error", e);
-                updateConnectionStatus('error');
+                window.updateConnectionStatus('error');
             } finally {
                 if(!window.location.hash) window.location.hash = '#/scan'; 
-                handleRoute(); 
+                window.handleRoute(); 
             }
         });
 
@@ -1218,12 +1110,12 @@
             if(gNameInput) {
                 gNameInput.addEventListener('input', (e) => {
                     const val = e.target.value.trim();
-                    const internal = localServants.find(s => s.Name === val);
+                    const internal = window.localServants.find(s => s.Name === val);
                     if(internal) {
                         document.getElementById('g-phone').value = internal.Phone !== 'N/A' ? internal.Phone : '';
                         if(internal.Team) {
                             document.getElementById('g-team').value = internal.Team.includes('&') ? internal.Team.split(' & ')[0] : internal.Team;
-                            handleTeamLogic();
+                            window.handleTeamLogic();
                         }
                         if(internal.PhotoURL && gPhotoPreview && gPhotoStatus) {
                             gPhotoPreview.src = internal.PhotoURL;
@@ -1259,13 +1151,13 @@
         });
 
         // --- ROUTING & UI SWITCHING ---
-        function handleRoute() {
+        window.handleRoute = function() {
             const hash = window.location.hash;
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-link').forEach(el => { el.classList.remove('text-brand-yellow', 'bg-brand-panel'); el.classList.add('text-gray-400'); });
             
-            if(scanner) { scanner.clear(); scanner = null; }
-            if (!hash.startsWith('#/admin')) isAdminLoggedIn = false;
+            if(window.scanner) { window.scanner.clear(); window.scanner = null; }
+            if (!hash.startsWith('#/admin')) window.isAdminLoggedIn = false;
 
             const adminNavBtn = document.getElementById('nav-admin');
 
@@ -1275,8 +1167,8 @@
                 if(adminNavBtn) adminNavBtn.style.display = 'none'; 
                 
                 if (typeof Html5QrcodeScanner !== 'undefined') {
-                    scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-                    scanner.render(onScanSuccess, ()=>{});
+                    window.scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+                    window.scanner.render(window.onScanSuccess, ()=>{});
                 } else {
                     document.getElementById('reader').innerHTML = '<p class="text-red-500 p-4">Scanner library loading...</p>';
                 }
@@ -1284,11 +1176,11 @@
                 if(adminNavBtn) adminNavBtn.style.display = 'flex'; 
                 document.getElementById('nav-admin').classList.add('text-brand-yellow', 'bg-brand-panel');
                 
-                if(isAdminLoggedIn) {
+                if(window.isAdminLoggedIn) {
                     document.getElementById('admin-login').classList.add('hidden');
                     document.getElementById('admin-dashboard').classList.remove('hidden');
                     document.getElementById('view-admin').classList.add('active');
-                    if(!document.querySelector('.admin-tab.bg-brand-yellow')) switchAdminTab('sync');
+                    if(!document.querySelector('.admin-tab.bg-brand-yellow')) window.switchAdminTab('sync');
                 } else {
                     document.getElementById('admin-login').classList.remove('hidden');
                     document.getElementById('admin-dashboard').classList.add('hidden');
@@ -1297,12 +1189,13 @@
             } else if (hash.startsWith('#/pass/')) {
                 if(adminNavBtn) adminNavBtn.style.display = 'flex';
                 document.getElementById('view-pass').classList.add('active');
-                verifyPass(hash.split('#/pass/')[1]);
+                window.verifyPass(hash.split('#/pass/')[1]);
             } else { window.location.hash = '#/scan'; }
-        }
+        };
 
-        function switchSyncTeamTab(tab) {
-            currentSyncTab = tab;
+        // --- Iframe & Sync Tabs Logic ---
+        window.switchSyncTeamTab = function(tab) {
+            window.currentSyncTab = tab;
             document.getElementById('sync-live-section').classList.add('hidden');
             document.getElementById('sync-projector-section').classList.add('hidden');
             
@@ -1317,34 +1210,35 @@
             
             const selectEl = document.getElementById('iframe-team-select');
             if(selectEl) selectEl.value = tab;
-            loadIframePreview();
-        }
+            window.loadIframePreview();
+        };
 
-        function toggleSheetPreview() {
+        window.toggleSheetPreview = function() {
             const container = document.getElementById('sheet-preview-container');
             if(container) {
                 container.classList.toggle('hidden');
                 if(!container.classList.contains('hidden')) {
-                    loadIframePreview();
+                    window.loadIframePreview();
                 }
             }
-        }
+        };
 
-        function loadIframePreview() {
+        window.loadIframePreview = function() {
             const iframe = document.getElementById('live-google-sheet-iframe');
             if(!iframe) return;
             const container = document.getElementById('sheet-preview-container');
             if(!container || container.classList.contains('hidden')) return; 
             
             const selectEl = document.getElementById('iframe-team-select');
-            const team = selectEl ? selectEl.value : currentSyncTab;
-            if (team === 'live') iframe.src = (GLOBAL_SETTINGS.sheetUrlLive || '');
-            else iframe.src = (GLOBAL_SETTINGS.sheetUrlData || '');
-        }
+            const team = selectEl ? selectEl.value : window.currentSyncTab;
+            if (team === 'live') iframe.src = (window.GLOBAL_SETTINGS.sheetUrlLive || '');
+            else iframe.src = (window.GLOBAL_SETTINGS.sheetUrlData || '');
+        };
 
-        function setPassFilter(type, val) {
+        // --- UI FILTERING LOGIC ---
+        window.setPassFilter = function(type, val) {
             if (type === 'team') {
-                currentAdminTeamFilterPasses = val;
+                window.currentAdminTeamFilterPasses = val;
                 document.querySelectorAll('.filter-team-all, .filter-team-liveteam, .filter-team-projectorteam, .filter-team-itteam').forEach(btn => {
                     btn.classList.remove('bg-brand-panel', 'text-white');
                     btn.classList.add('text-gray-400', 'hover:text-white');
@@ -1355,7 +1249,7 @@
                     targetBtn.classList.add('bg-brand-panel', 'text-white');
                 }
             } else if (type === 'status') {
-                currentAdminStatusFilterPasses = val;
+                window.currentAdminStatusFilterPasses = val;
                 document.querySelectorAll('.filter-status-all, .filter-status-done, .filter-status-pending').forEach(btn => {
                     btn.classList.remove('bg-brand-panel', 'text-white', 'text-green-500', 'text-brand-yellow');
                     btn.classList.add('text-gray-400');
@@ -1368,12 +1262,12 @@
                     if(val === 'pending') targetBtn.classList.add('bg-brand-panel', 'text-brand-yellow');
                 }
             }
-            loadManageTable();
-        }
+            window.loadManageTable();
+        };
 
-        function setServantFilter(type, val) {
+        window.setServantFilter = function(type, val) {
             if (type === 'team') {
-                currentAdminTeamFilterServants = val;
+                window.currentAdminTeamFilterServants = val;
                 document.querySelectorAll('.s-filter-team-all, .s-filter-team-liveteam, .s-filter-team-projectorteam, .s-filter-team-itteam').forEach(btn => {
                     btn.classList.remove('bg-brand-panel', 'text-white');
                     btn.classList.add('text-gray-400', 'hover:text-white');
@@ -1384,7 +1278,7 @@
                     targetBtn.classList.add('bg-brand-panel', 'text-white');
                 }
             } else if (type === 'status') {
-                currentAdminStatusFilterServants = val;
+                window.currentAdminStatusFilterServants = val;
                 document.querySelectorAll('.s-status-all, .s-status-done, .s-status-pending').forEach(btn => {
                     btn.classList.remove('bg-brand-panel', 'text-white', 'text-green-500', 'text-brand-yellow');
                     btn.classList.add('text-gray-400');
@@ -1397,45 +1291,18 @@
                     if(val === 'pending') targetBtn.classList.add('bg-brand-panel', 'text-brand-yellow');
                 }
             }
-            loadServantsTable();
-        }
+            window.loadServantsTable();
+        };
 
-        function setSubmitAction(action) { currentSubmitAction = action; }
+        window.setSubmitAction = function(action) { window.currentSubmitAction = action; };
 
-        function populateDropdown(id, items) {
+        window.populateDropdown = function(id, items) {
             const el = document.getElementById(id);
             if(el) el.innerHTML = items.map(i => `<option value="${i.val}">${i.lbl}</option>`).join('');
-        }
+        };
 
-        async function switchAdminTab(tab) {
-            try {
-                document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
-                document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
-                
-                const targetSec = document.getElementById(`admin-tab-${tab}`);
-                const targetTab = document.getElementById(`tab-${tab}`);
-                if (targetSec) targetSec.classList.remove('hidden');
-                if (targetTab) {
-                    targetTab.classList.add('bg-brand-yellow', 'text-black');
-                    targetTab.classList.remove('text-gray-400', 'bg-transparent');
-                }
-                
-                if(tab === 'manage') loadManageTable(); 
-                if(tab === 'servants') loadServantsTable();
-                if(tab === 'stats') loadStats();
-                
-                if(tab === 'sync' || tab === 'settings' || tab === 'generate') {
-                    await applyGlobalSettings(); 
-                    if(tab === 'settings') renderSettingsUI();
-                }
-            } catch(e) {
-                console.error("Tab switch error", e);
-            }
-        }
-
-        // --- CORE LOGIC ---
-        async function applyGlobalSettings() {
-            const settings = await DB.getSettings();
+        window.applyGlobalSettings = async function() {
+            const settings = await window.DB.getSettings();
             if(!settings) return;
             
             const fCont = document.getElementById('footer-contacts');
@@ -1464,13 +1331,13 @@
             settings.locations = Array.isArray(settings.locations) ? settings.locations : [];
             settings.events = Array.isArray(settings.events) ? settings.events : [];
 
-            populateDropdown('g-team', STATIC_TEAMS.map(k=>({val:k, lbl:k})));
-            populateDropdown('s-team', STATIC_TEAMS.map(k=>({val:k, lbl:k})));
-            populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
+            window.populateDropdown('g-team', window.STATIC_TEAMS.map(k=>({val:k, lbl:k})));
+            window.populateDropdown('s-team', window.STATIC_TEAMS.map(k=>({val:k, lbl:k})));
+            window.populateDropdown('g-location', settings.locations.map(k=>({val:k, lbl:k})));
             
             const activeEvents = settings.events;
-            populateDropdown('g-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
-            populateDropdown('g-bulk-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
+            window.populateDropdown('g-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
+            window.populateDropdown('g-bulk-event', activeEvents.map(k=>({val:k.id, lbl:`${k.name} (${k.date})`})));
 
             if(document.getElementById('set-sheet-live')) document.getElementById('set-sheet-live').value = settings.sheetUrlLive || '';
             if(document.getElementById('live-event-rng')) document.getElementById('live-event-rng').value = settings.liveMapping?.events || '';
@@ -1484,13 +1351,13 @@
 
             if(document.getElementById('global-skip-words')) document.getElementById('global-skip-words').value = settings.skipWords || '';
             
-            handleTeamLogic();
-            populateStatsDropdown();
-            await fetchServantsData();
-            loadIframePreview();
-        }
+            window.handleTeamLogic();
+            window.populateStatsDropdown();
+            await window.fetchServantsData();
+            window.loadIframePreview();
+        };
 
-        function getMatrixZones(team, loc) {
+        window.getMatrixZones = function(team, loc) {
             if(!team || !loc) return [];
             const t = team.toLowerCase();
             const l = loc.toLowerCase();
@@ -1509,9 +1376,9 @@
                 else z = ['Projector area'];
             }
             return z;
-        }
+        };
 
-        function handleTeamLogic() {
+        window.handleTeamLogic = function() {
             const teamInput = document.getElementById('g-team');
             if(!teamInput) return;
             const team = teamInput.value;
@@ -1521,16 +1388,16 @@
                 assignSec.classList.add('hidden');
             } else {
                 assignSec.classList.remove('hidden');
-                updateMassDropdown();
-                autoSelectZones();
+                window.updateMassDropdown();
+                window.autoSelectZones();
             }
-        }
+        };
 
-        function updateMassDropdown() {
+        window.updateMassDropdown = function() {
             if(document.getElementById('g-team')?.value === 'IT Team') return;
             
             const evId = document.getElementById('g-event')?.value;
-            const settings = GLOBAL_SETTINGS;
+            const settings = window.GLOBAL_SETTINGS;
             if(!settings || !Array.isArray(settings.events)) return;
             const ev = settings.events.find(e => e.id === evId);
             const mCont = document.getElementById('mass-container');
@@ -1550,8 +1417,8 @@
                         </div>
                     </label>
                 `).join('');
-                refreshIcons();
-                autoSelectZones();
+                window.refreshIcons();
+                window.autoSelectZones();
 
                 const now = new Date();
                 const activeMasses = (ev.masses || []).filter(m => {
@@ -1573,37 +1440,37 @@
                 mCont.classList.add('hidden');
                 mSel.innerHTML = `<option value="N/A">N/A</option>`;
             }
-        }
+        };
 
-        function autoSelectZones() {
+        window.autoSelectZones = function() {
             const teamInput = document.getElementById('g-team');
             const locInput = document.getElementById('g-location');
             if(!teamInput || !locInput) return;
             
-            const defaultZ = getMatrixZones(teamInput.value, locInput.value);
+            const defaultZ = window.getMatrixZones(teamInput.value, locInput.value);
             const checkboxes = document.querySelectorAll('input[name="zone"]');
             checkboxes.forEach(cb => {
                 cb.checked = defaultZ.includes(cb.value) || defaultZ.includes('ALL ZONES');
             });
-        }
+        };
 
-        function populateStatsDropdown() {
+        window.populateStatsDropdown = function() {
             const sel = document.getElementById('stats-filter');
             if(!sel) return;
-            const events = (GLOBAL_SETTINGS && Array.isArray(GLOBAL_SETTINGS.events)) ? GLOBAL_SETTINGS.events : [];
+            const events = (window.GLOBAL_SETTINGS && Array.isArray(window.GLOBAL_SETTINGS.events)) ? window.GLOBAL_SETTINGS.events : [];
             sel.innerHTML = `<option value="all">All Time / All Events</option>` + events.map(e => `<option value="${e.id}">${e.name} (${e.date})</option>`).join('');
-        }
+        };
 
-        async function loadStats() {
+        window.loadStats = async function() {
             const filterEl = document.getElementById('stats-filter');
             const filter = filterEl ? filterEl.value : 'all';
             
-            let allPasses = await DB.fetchAllPasses() || [];
-            let logs = await DB.fetchLogs() || [];
+            let allPasses = await window.DB.fetchAllPasses() || [];
+            let logs = await window.DB.fetchLogs() || [];
             
             let passes = allPasses;
             if(filter !== 'all') {
-                const eventsArr = (GLOBAL_SETTINGS && Array.isArray(GLOBAL_SETTINGS.events)) ? GLOBAL_SETTINGS.events : [];
+                const eventsArr = (window.GLOBAL_SETTINGS && Array.isArray(window.GLOBAL_SETTINGS.events)) ? window.GLOBAL_SETTINGS.events : [];
                 const ev = eventsArr.find(e => e.id === filter);
                 if(ev) {
                     passes = allPasses.filter(p => p.Event === filter || p.Team === 'IT Team');
@@ -1635,21 +1502,20 @@
                     return `<tr class="hover:bg-brand-panel transition border-b border-brand-border"><td class="px-6 py-4 text-xs font-bold text-gray-400">${d.toLocaleDateString()+' '+timeStr}</td><td class="px-6 py-4 font-mono font-bold text-white">${String(l.PassID||'').replace(/</g,'&lt;')}</td><td class="px-6 py-4"><span class="px-2 py-1 rounded text-[10px] font-black ${isGranted ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${String(l.Result||'').replace(/</g,'&lt;')}</span></td></tr>`;
                 }).join('');
             }
-        }
+        };
 
-        // 8. SCANNER & VERIFICATION
-        function onScanSuccess(decodedText) {
-            if(scanner) scanner.clear();
+        window.onScanSuccess = function(decodedText) {
+            if(window.scanner) window.scanner.clear();
             let passId = decodedText.includes('#/pass/') ? decodedText.split('#/pass/')[1] : decodedText;
             window.location.hash = `#/pass/${passId}`;
-        }
+        };
         
-        function simulateScanPrompt() { const id = prompt("Enter Pass ID:"); if(id) window.location.hash = `#/pass/${id}`; }
-        function handleEnter(e, func) { if(e.key === 'Enter') func(); }
+        window.simulateScanPrompt = function() { const id = prompt("Enter Pass ID:"); if(id) window.location.hash = `#/pass/${id}`; };
+        window.handleEnter = function(e, func) { if(e.key === 'Enter') func(); };
 
-        async function verifyPass(id) {
-            const pass = await DB.fetchPass(id);
-            const settings = GLOBAL_SETTINGS;
+        window.verifyPass = async function(id) {
+            const pass = await window.DB.fetchPass(id);
+            const settings = window.GLOBAL_SETTINGS;
             const statusHeader = document.getElementById('pass-status-header');
             const alertBox = document.getElementById('entry-status-alert');
             const photoCont = document.getElementById('pass-photo-container');
@@ -1683,16 +1549,16 @@
                         : '-';
                 }
                 
-                const tColor = getTeamColor(pass.Team);
+                const tColor = window.getTeamColor(pass.Team);
                 document.getElementById('pass-team').style.color = tColor;
                 passResultContainer.style.borderColor = tColor;
                 
                 photoCont.innerHTML = pass.PhotoURL ? `<img src="${pass.PhotoURL}" class="w-full h-full object-cover">` : `<i data-lucide="user" class="w-12 h-12 text-gray-600"></i>`;
             }
-            refreshIcons();
+            window.refreshIcons();
 
-            if (!pass || !pass.PassID || pass.PassID === 'undefined') { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await DB.logEntry(id, "INVALID"); return; }
-            if (pass.Status === 'REVOKED') { statusHeader.textContent = "PASS REVOKED"; statusHeader.classList.add('bg-gray-800'); await DB.logEntry(id, "REVOKED"); return; }
+            if (!pass || !pass.PassID || pass.PassID === 'undefined') { statusHeader.textContent = "PASS INVALID"; statusHeader.classList.add('bg-red-600'); await window.DB.logEntry(id, "INVALID"); return; }
+            if (pass.Status === 'REVOKED') { statusHeader.textContent = "PASS REVOKED"; statusHeader.classList.add('bg-gray-800'); await window.DB.logEntry(id, "REVOKED"); return; }
 
             let isExpired = false;
             let isEarly = false;
@@ -1732,16 +1598,16 @@
                 alertBox.innerHTML = `This pass is expired and no longer active.<br><br><span class="text-sm font-normal text-gray-300">Please contact admin:</span><br><span class="text-brand-yellow font-bold text-base mt-2 inline-block">${contactStr}</span>`;
                 alertBox.classList.remove('hidden');
                 alertBox.classList.add('bg-red-950', 'text-red-200', 'border-red-900');
-                await DB.logEntry(id, "EXPIRED"); return;
+                await window.DB.logEntry(id, "EXPIRED"); return;
             }
             
             if (isEarly) {
                 statusHeader.textContent = "NOT ACTIVE YET"; statusHeader.classList.add('bg-yellow-600', 'text-black');
-                await DB.logEntry(id, "TOO EARLY"); return;
+                await window.DB.logEntry(id, "TOO EARLY"); return;
             }
 
             statusHeader.textContent = "ACCESS GRANTED"; statusHeader.classList.add('bg-green-600');
-            const allLogs = await DB.fetchLogs();
+            const allLogs = await window.DB.fetchLogs();
             const passLogsToday = allLogs.filter(l => l.PassID === id && l.Result.includes('GRANTED') && l.Time.startsWith(new Date().toISOString().split('T')[0]));
 
             alertBox.classList.remove('hidden');
@@ -1749,32 +1615,31 @@
             if (passLogsToday.length === 0) {
                 alertBox.innerHTML = `First Entry Registered<br><span class="text-sm font-normal">Scanned at ${timeScanned}</span>`;
                 alertBox.classList.add('bg-green-900', 'text-green-300', 'border-green-700');
-                await DB.logEntry(id, "GRANTED - FIRST ENTRY");
+                await window.DB.logEntry(id, "GRANTED - FIRST ENTRY");
             } else {
                 alertBox.innerHTML = `Already Entered Today<br><span class="text-sm font-normal">Last Scanned at ${timeScanned}</span>`;
                 alertBox.classList.add('bg-yellow-900', 'text-yellow-300', 'border-yellow-700');
-                await DB.logEntry(id, "GRANTED - RE-ENTRY");
+                await window.DB.logEntry(id, "GRANTED - RE-ENTRY");
             }
-        }
+        };
 
-        // 9. ADMIN LOGIN
-        async function loginAdmin() {
+        window.loginAdmin = async function() {
             const pwd = document.getElementById('admin-password').value;
             const btn = document.querySelector('#admin-login button');
             const origText = btn.innerHTML;
             
             btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin inline"></i> Authenticating...`;
             btn.disabled = true;
-            refreshIcons();
+            window.refreshIcons();
 
-            let s = GLOBAL_SETTINGS;
+            let s = window.GLOBAL_SETTINGS;
             if (!s) {
-                s = await DB.getSettings();
+                s = await window.DB.getSettings();
             }
 
             btn.innerHTML = origText;
             btn.disabled = false;
-            refreshIcons();
+            window.refreshIcons();
 
             if(!s) {
                 document.getElementById('login-msg').textContent = "Database still connecting. Try again.";
@@ -1785,51 +1650,51 @@
             const adminPwds = Array.isArray(s.adminPasswords) ? s.adminPasswords : [];
             
             if(adminPwds.includes(pwd) || (adminPwds.length === 0 && pwd === s.firstTimePassword)) {
-                isAdminLoggedIn = true;
+                window.isAdminLoggedIn = true;
                 document.getElementById('admin-password').value = '';
                 document.getElementById('login-msg').textContent = "Enter system password to continue.";
                 document.getElementById('login-msg').classList.remove('text-red-500');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 
-                await applyGlobalSettings();
-                switchAdminTab('sync');
+                await window.applyGlobalSettings();
+                window.switchAdminTab('sync');
             } else {
                 document.getElementById('login-msg').textContent = "Incorrect password."; 
                 document.getElementById('login-msg').classList.add('text-red-500');
             }
-        }
+        };
 
-        function logoutAdmin() {
-            isAdminLoggedIn = false;
-            handleRoute();
-        }
+        window.logoutAdmin = function() {
+            window.isAdminLoggedIn = false;
+            window.handleRoute();
+        };
 
-        function toggleEmergencyLogin() { document.getElementById('emergency-panel').classList.toggle('hidden'); }
+        window.toggleEmergencyLogin = function() { document.getElementById('emergency-panel').classList.toggle('hidden'); };
         
-        async function emergencyLogin() {
+        window.emergencyLogin = async function() {
             const emergencyPwd = document.getElementById('emergency-password-input').value;
-            let s = GLOBAL_SETTINGS;
-            if (!s) s = await DB.getSettings();
+            let s = window.GLOBAL_SETTINGS;
+            if (!s) s = await window.DB.getSettings();
             
             if(s && emergencyPwd === s.firstTimePassword) {
                 document.getElementById('admin-password').value = '';
                 document.getElementById('emergency-password-input').value = '';
                 document.getElementById('emergency-panel').classList.add('hidden');
                 
-                isAdminLoggedIn = true;
+                window.isAdminLoggedIn = true;
                 document.getElementById('login-msg').textContent = "Enter system password to continue.";
                 document.getElementById('login-msg').classList.remove('text-red-500');
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
                 
-                applyGlobalSettings().then(() => switchAdminTab('sync'));
+                window.applyGlobalSettings().then(() => window.switchAdminTab('sync'));
             } else {
                 alert("Incorrect Emergency password.");
             }
-        }
+        };
 
-        async function factoryReset(type) {
+        window.factoryReset = async function(type) {
             if(!confirm(`WARNING: Are you absolutely sure you want to reset/delete ${type.toUpperCase()}? This CANNOT be undone.`)) return;
             
             const defaultSettings = {
@@ -1846,35 +1711,61 @@
             };
 
             if(type === 'passes') {
-                await DB.clearCollection('passes');
+                await window.DB.clearCollection('passes');
                 alert("All passes have been deleted.");
-                loadManageTable(); loadStats();
+                window.loadManageTable(); window.loadStats();
             } else if(type === 'servants') {
-                await DB.clearCollection('servants');
+                await window.DB.clearCollection('servants');
                 alert("All servants have been deleted from the directory.");
-                loadServantsTable();
+                window.loadServantsTable();
             } else if(type === 'logs') {
-                await DB.clearCollection('logs');
+                await window.DB.clearCollection('logs');
                 alert("All activity logs and stats have been cleared.");
-                loadStats();
+                window.loadStats();
             } else if(type === 'settings') {
-                await DB.updateSettings(defaultSettings);
+                await window.DB.updateSettings(defaultSettings);
                 alert("Settings have been factory reset.");
             } else if(type === 'all') {
-                await DB.clearCollection('passes');
-                await DB.clearCollection('logs');
-                await DB.clearCollection('servants');
-                await DB.updateSettings(defaultSettings);
+                await window.DB.clearCollection('passes');
+                await window.DB.clearCollection('logs');
+                await window.DB.clearCollection('servants');
+                await window.DB.updateSettings(defaultSettings);
                 alert("Complete factory reset successful. All data cleared.");
-                loadManageTable(); loadStats(); fetchServantsData();
+                window.loadManageTable(); window.loadStats(); window.fetchServantsData();
             }
-        }
+        };
 
-        // 10. SETTINGS UI
-        function renderSettingsUI() {
+        window.switchAdminTab = async function(tab) {
             try {
-                const s = GLOBAL_SETTINGS;
-                if(!s) return;
+                document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('.admin-tab').forEach(el => { el.classList.remove('bg-brand-yellow', 'text-black'); el.classList.add('text-gray-400', 'bg-transparent'); });
+                
+                const targetSec = document.getElementById(`admin-tab-${tab}`);
+                const targetTab = document.getElementById(`tab-${tab}`);
+                if (targetSec) targetSec.classList.remove('hidden');
+                if (targetTab) {
+                    targetTab.classList.add('bg-brand-yellow', 'text-black');
+                    targetTab.classList.remove('text-gray-400', 'bg-transparent');
+                }
+                
+                if(tab === 'manage') window.loadManageTable(); 
+                if(tab === 'servants') window.loadServantsTable();
+                if(tab === 'stats') window.loadStats();
+                
+                if(tab === 'sync' || tab === 'settings' || tab === 'generate') {
+                    await window.applyGlobalSettings(); 
+                    if(tab === 'settings') window.renderSettingsUI();
+                }
+            } catch(e) {
+                console.error("Tab switch error", e);
+            }
+        };
+
+        // --- SETTINGS UI RENDERING ---
+        window.renderSettingsUI = function() {
+            try {
+                let s = window.GLOBAL_SETTINGS;
+                if(!s) s = { events: [], locations: [], zones: [], contacts: [], adminPasswords: [] };
                 
                 s.locations = Array.isArray(s.locations) ? s.locations : [];
                 s.zones = Array.isArray(s.zones) ? s.zones : [];
@@ -1894,7 +1785,7 @@
                             pwdList.innerHTML = s.adminPasswords.map((p, i) => `
                                 <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300">
                                     <span>${'*'.repeat(String(p||'').length)}</span>
-                                    <button onclick="removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                    <button onclick="window.removeSettingItem('adminPasswords', ${i})" class="text-red-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
                                 </div>
                             `).join('');
                         }
@@ -1911,8 +1802,8 @@
                                 <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
                                     <input type="text" id="edit-contact-name-${i}" value="${String(c.name||'').replace(/"/g, '&quot;')}" class="w-1/3 px-2 py-1 rounded bg-brand-dark border border-brand-border">
                                     <input type="text" id="edit-contact-phone-${i}" value="${String(c.phone||'').replace(/"/g, '&quot;')}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                                    <button onclick="updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                                    <button onclick="removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                    <button onclick="window.updateContact(${i})" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                    <button onclick="window.removeSettingItem('contacts', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
                                 </div>
                             `).join('');
                         }
@@ -1929,8 +1820,8 @@
                                 el.innerHTML = arr.map((item, i) => `
                                     <div class="flex justify-between items-center bg-brand-panel p-2 rounded border border-brand-border text-sm text-gray-300 gap-2">
                                         <input type="text" id="edit-${field}-${i}" value="${String(item||'').replace(/"/g, '&quot;')}" class="flex-1 px-2 py-1 rounded bg-brand-dark border border-brand-border">
-                                        <button onclick="updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
-                                        <button onclick="removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                        <button onclick="window.updateArrayItem('${field}', ${i}, 'edit-${field}-${i}')" class="text-blue-400 hover:text-blue-300" title="Save Changes"><i data-lucide="save" class="w-4 h-4"></i></button>
+                                        <button onclick="window.removeSettingItem('${field}', ${i})" class="text-red-500" title="Delete"><i data-lucide="trash" class="w-4 h-4"></i></button>
                                     </div>
                                 `).join('');
                             }
@@ -1946,7 +1837,11 @@
                         if (s.events.length === 0) {
                             evListEl.innerHTML = `<p class="text-xs text-gray-500 italic">No events generated yet.</p>`;
                         } else {
-                            evListEl.innerHTML = s.events.map((ev, eIdx) => `
+                            evListEl.innerHTML = s.events.map((ev, eIdx) => {
+                                const evZones = Array.isArray(ev.allowedZones) ? ev.allowedZones : [];
+                                const evMasses = Array.isArray(ev.masses) ? ev.masses : [];
+                                
+                                return `
                                 <div class="bg-brand-panel p-4 rounded-xl border border-brand-border mb-4">
                                     <div class="flex flex-col md:flex-row justify-between md:items-center mb-3 gap-2">
                                         <input type="text" id="edit-ev-name-${eIdx}" value="${String(ev.name||'').replace(/"/g, '&quot;')}" class="font-bold text-brand-yellow bg-transparent border-b border-brand-border px-1 w-full md:w-1/3">
@@ -1958,165 +1853,167 @@
                                             <input type="time" id="edit-ev-end-${eIdx}" value="${ev.end || ''}" class="text-gray-400 bg-brand-dark border border-brand-border px-2 py-1 rounded">
                                         </div>
                                         <div class="flex gap-2">
-                                            <button onclick="updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Details"><i data-lucide="save" class="w-5 h-5"></i></button>
-                                            <button onclick="removeSettingItem('events', ${eIdx})" class="text-red-500" title="Delete Event"><i data-lucide="trash" class="w-5 h-5"></i></button>
+                                            <button onclick="window.updateEvent(${eIdx})" class="text-blue-400 hover:text-blue-300" title="Save Event Details"><i data-lucide="save" class="w-5 h-5"></i></button>
+                                            <button onclick="window.removeSettingItem('events', ${eIdx})" class="text-red-500" title="Delete Event"><i data-lucide="trash" class="w-5 h-5"></i></button>
                                         </div>
                                     </div>
                                     
                                     <div class="mb-3 mt-3 p-3 bg-[#111] rounded border border-brand-border">
                                         <p class="text-[10px] text-gray-500 mb-2">Active Zones for this event:</p>
                                         <div class="flex flex-wrap gap-1">
-                                            ${s.zones.map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="toggleEventZone(${eIdx}, '${String(z||'').replace(/'/g, "\\'")}')" ${(ev.allowedZones || []).includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${String(z||'').replace(/</g, '&lt;')}</label>`).join('')}
+                                            ${s.zones.map(z => `<label class="text-[10px] bg-brand-dark px-2 py-1 rounded border border-brand-border cursor-pointer"><input type="checkbox" onchange="window.toggleEventZone(${eIdx}, '${String(z||'').replace(/'/g, "\\'")}')" ${evZones.includes(z)?'checked':''} class="mr-1 accent-brand-yellow"> ${String(z||'').replace(/</g, '&lt;')}</label>`).join('')}
                                         </div>
                                     </div>
 
                                     <div class="pl-4 border-l-2 border-brand-border space-y-2 mb-3">
-                                        ${(ev.masses || []).map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${String(m.name||'').replace(/</g, '&lt;')} (${m.start} - ${m.end})</span><button onclick="removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
+                                        ${evMasses.map((m, mIdx) => `<div class="flex justify-between items-center text-xs text-gray-400 bg-brand-dark p-2 rounded border border-brand-border"><span>${String(m.name||'').replace(/</g, '&lt;')} (${m.start} - ${m.end})</span><button onclick="window.removeMass(${eIdx}, ${mIdx})" class="text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button></div>`).join('')}
                                     </div>
                                     <div class="flex gap-2 text-xs">
                                         <input type="text" id="m-name-${eIdx}" placeholder="Mass Name" class="flex-1 px-2 py-1 rounded border border-brand-border bg-brand-dark min-w-[120px]">
                                         <input type="time" id="m-start-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
                                         <input type="time" id="m-end-${eIdx}" class="w-24 px-2 py-1 rounded border border-brand-border bg-brand-dark">
-                                        <button onclick="addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
+                                        <button onclick="window.addMass(${eIdx})" class="px-3 bg-brand-border text-white rounded font-bold hover:bg-gray-600">Add Mass</button>
                                     </div>
-                                </div>`).join('');
+                                </div>`
+                            }).join('');
                         }
                     }
                 } catch(e) { console.error(e); }
                 
-                refreshIcons();
+                window.refreshIcons();
             } catch(e) {
                 console.error("UI Render Exception:", e);
+                alert("Settings Rendering Error. Please check your internet connection.");
             }
-        }
+        };
 
-        async function updateSettingsField(field, value) { 
-            GLOBAL_SETTINGS[field] = value; 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
+        window.updateSettingsField = async function(field, value) { 
+            window.GLOBAL_SETTINGS[field] = value; 
+            await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
             alert("Password Setting Saved Successfully!"); 
-        }
+        };
         
-        async function addItemToSettingArray(field, inputId) { 
+        window.addItemToSettingArray = async function(field, inputId) { 
             const val = document.getElementById(inputId).value.trim(); 
             if(val) { 
-                GLOBAL_SETTINGS[field] = GLOBAL_SETTINGS[field] || [];
-                GLOBAL_SETTINGS[field].push(val); 
+                window.GLOBAL_SETTINGS[field] = window.GLOBAL_SETTINGS[field] || [];
+                window.GLOBAL_SETTINGS[field].push(val); 
                 document.getElementById(inputId).value = ''; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
                 alert("Added Successfully!");
             } 
-        }
+        };
         
-        async function removeSettingItem(field, idx) { 
+        window.removeSettingItem = async function(field, idx) { 
             if(confirm('Delete item?')) { 
-                GLOBAL_SETTINGS[field].splice(idx, 1); 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
+                window.GLOBAL_SETTINGS[field].splice(idx, 1); 
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
             } 
-        }
+        };
         
-        async function updateArrayItem(field, idx, inputId) { 
-            GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim(); 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
+        window.updateArrayItem = async function(field, idx, inputId) { 
+            window.GLOBAL_SETTINGS[field][idx] = document.getElementById(inputId).value.trim(); 
+            await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
             alert('Item Updated Successfully!'); 
-        }
+        };
         
-        async function updateContact(idx) { 
-            GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim(); 
-            GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim(); 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
+        window.updateContact = async function(idx) { 
+            window.GLOBAL_SETTINGS.contacts[idx].name = document.getElementById(`edit-contact-name-${idx}`).value.trim(); 
+            window.GLOBAL_SETTINGS.contacts[idx].phone = document.getElementById(`edit-contact-phone-${idx}`).value.trim(); 
+            await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
             alert('Contact Updated Successfully!');
-        }
+        };
         
-        async function updateEvent(idx) { 
-            GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim(); 
-            GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value; 
-            GLOBAL_SETTINGS.events[idx].start = document.getElementById(`edit-ev-start-${idx}`).value; 
-            GLOBAL_SETTINGS.events[idx].end = document.getElementById(`edit-ev-end-${idx}`).value; 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
+        window.updateEvent = async function(idx) { 
+            window.GLOBAL_SETTINGS.events[idx].name = document.getElementById(`edit-ev-name-${idx}`).value.trim(); 
+            window.GLOBAL_SETTINGS.events[idx].date = document.getElementById(`edit-ev-date-${idx}`).value; 
+            window.GLOBAL_SETTINGS.events[idx].start = document.getElementById(`edit-ev-start-${idx}`).value; 
+            window.GLOBAL_SETTINGS.events[idx].end = document.getElementById(`edit-ev-end-${idx}`).value; 
+            await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
             alert('Event Saved Successfully!');
-        }
+        };
 
-        async function addContact() { 
+        window.addContact = async function() { 
             const n = document.getElementById('new-contact-name').value.trim(); 
             const p = document.getElementById('new-contact-phone').value.trim(); 
             if(n && p) { 
-                GLOBAL_SETTINGS.contacts.push({name: n, phone: p}); 
+                window.GLOBAL_SETTINGS.contacts.push({name: n, phone: p}); 
                 document.getElementById('new-contact-name').value = ''; 
                 document.getElementById('new-contact-phone').value = ''; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
                 alert("Contact Added Successfully!");
             } 
-        }
+        };
         
-        async function addEvent() { 
+        window.addEvent = async function() { 
             const n = document.getElementById('new-event-name').value.trim();
             const d = document.getElementById('new-event-date').value; 
             if(n && d) { 
-                GLOBAL_SETTINGS.events.push({ id: 'ev_'+Date.now(), name: n, date: d, start: "", end: "", masses: [], allowedZones: GLOBAL_SETTINGS.zones, assignments: [] }); 
+                window.GLOBAL_SETTINGS.events.push({ id: 'ev_'+Date.now(), name: n, date: d, start: "", end: "", masses: [], allowedZones: window.GLOBAL_SETTINGS.zones, assignments: [] }); 
                 document.getElementById('new-event-name').value = ''; 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
                 alert("Event Created Successfully!");
             } else {
                 alert("Name and Date required.");
             }
-        }
+        };
 
-        async function toggleEventZone(eIdx, zone) {
-            const ev = GLOBAL_SETTINGS.events[eIdx];
+        window.toggleEventZone = async function(eIdx, zone) {
+            const ev = window.GLOBAL_SETTINGS.events[eIdx];
             if(ev.allowedZones.includes(zone)) ev.allowedZones = ev.allowedZones.filter(z => z !== zone);
             else ev.allowedZones.push(zone);
-            await DB.updateSettings(GLOBAL_SETTINGS);
-        }
+            await window.DB.updateSettings(window.GLOBAL_SETTINGS);
+        };
 
-        async function addMass(eIdx) { 
+        window.addMass = async function(eIdx) { 
             const n = document.getElementById(`m-name-${eIdx}`).value.trim();
             const s = document.getElementById(`m-start-${eIdx}`).value;
             const e = document.getElementById(`m-end-${eIdx}`).value; 
             if(n && s && e) { 
-                GLOBAL_SETTINGS.events[eIdx].masses = GLOBAL_SETTINGS.events[eIdx].masses || [];
-                GLOBAL_SETTINGS.events[eIdx].masses.push({ id: 'm_'+Date.now(), name: n, start: s, end: e }); 
-                await DB.updateSettings(GLOBAL_SETTINGS); 
+                window.GLOBAL_SETTINGS.events[eIdx].masses = window.GLOBAL_SETTINGS.events[eIdx].masses || [];
+                window.GLOBAL_SETTINGS.events[eIdx].masses.push({ id: 'm_'+Date.now(), name: n, start: s, end: e }); 
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
                 alert("Mass Shift Added Successfully!");
             } else {
                 alert('Fill all mass fields'); 
             }
-        }
+        };
 
-        async function removeMass(eIdx, mIdx) { 
-            GLOBAL_SETTINGS.events[eIdx].masses.splice(mIdx, 1); 
-            await DB.updateSettings(GLOBAL_SETTINGS); 
-        }
+        window.removeMass = async function(eIdx, mIdx) { 
+            window.GLOBAL_SETTINGS.events[eIdx].masses.splice(mIdx, 1); 
+            await window.DB.updateSettings(window.GLOBAL_SETTINGS); 
+        };
 
-        async function uploadLogo(type) {
+        window.uploadLogo = async function(type) {
             const file = document.getElementById(`set-logo-${type}`).files[0];
             if(file) {
-                GLOBAL_SETTINGS.logos[type] = await resizeImage(file, 300, true);
-                await DB.updateSettings(GLOBAL_SETTINGS);
+                window.GLOBAL_SETTINGS.logos[type] = await window.resizeImage(file, 300, true);
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS);
                 alert('Logo Uploaded Successfully!');
             }
-        }
+        };
 
-        // 11. SYNC ENGINE
-        async function saveSyncSettings() {
-            GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
-            GLOBAL_SETTINGS.liveMapping.events = document.getElementById('live-event-rng').value;
-            GLOBAL_SETTINGS.liveMapping.locations = document.getElementById('live-loc-rng').value;
-            GLOBAL_SETTINGS.liveMapping.names = document.getElementById('live-name-rng').value;
+        // --- BUILT-IN SYNC ENGINE ---
+        window.saveSyncSettings = async function() {
+            window.GLOBAL_SETTINGS.sheetUrlLive = document.getElementById('set-sheet-live').value;
+            window.GLOBAL_SETTINGS.liveMapping.events = document.getElementById('live-event-rng').value;
+            window.GLOBAL_SETTINGS.liveMapping.locations = document.getElementById('live-loc-rng').value;
+            window.GLOBAL_SETTINGS.liveMapping.names = document.getElementById('live-name-rng').value;
             
-            GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
-            GLOBAL_SETTINGS.dataMapping.events = document.getElementById('data-event-rng').value;
-            GLOBAL_SETTINGS.dataMapping.locations = document.getElementById('data-loc-rng').value;
-            GLOBAL_SETTINGS.dataMapping.names = document.getElementById('data-name-rng').value;
+            window.GLOBAL_SETTINGS.sheetUrlData = document.getElementById('set-sheet-data').value;
+            window.GLOBAL_SETTINGS.dataMapping.events = document.getElementById('data-event-rng').value;
+            window.GLOBAL_SETTINGS.dataMapping.locations = document.getElementById('data-loc-rng').value;
+            window.GLOBAL_SETTINGS.dataMapping.names = document.getElementById('data-name-rng').value;
             
-            GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
+            window.GLOBAL_SETTINGS.skipWords = document.getElementById('global-skip-words').value;
             
-            await DB.updateSettings(GLOBAL_SETTINGS);
-            loadIframePreview();
+            await window.DB.updateSettings(window.GLOBAL_SETTINGS);
+            window.loadIframePreview();
             alert("Mapping Settings Saved!");
-        }
+        };
 
-        async function startBuiltInSync(targetTeam) {
-            if(!targetTeam) targetTeam = currentSyncTab; 
+        window.startBuiltInSync = async function(targetTeam) {
+            if(!targetTeam) targetTeam = window.currentSyncTab; 
             
             const container = targetTeam === 'live' ? document.getElementById('sync-live-section') : document.getElementById('sync-projector-section');
             const btn = container ? container.querySelector('button') : null;
@@ -2131,46 +2028,46 @@
                 
                 document.getElementById('sync-console-wrapper').classList.remove('hidden');
                 document.getElementById('sync-terminal').innerHTML = ''; 
-                refreshIcons();
+                window.refreshIcons();
 
-                await syncBuiltInSheets(targetTeam);
+                await window.syncBuiltInSheets(targetTeam);
             } catch (e) {
                 console.error(e);
-                printSyncMessage(`<span class="text-red-500">Critical Sync Error: ${e.message}</span>`);
+                window.printSyncMessage(`<span class="text-red-500">Critical Sync Error: ${e.message}</span>`);
             } finally {
                 if (btn && originalHTML) btn.innerHTML = originalHTML;
                 if (globalBtn && globalOriginalHTML) globalBtn.innerHTML = globalOriginalHTML;
-                refreshIcons();
+                window.refreshIcons();
             }
-        }
+        };
 
-        async function syncBuiltInSheets(targetTeam) {
-            printSyncMessage(`Starting Sync for ${targetTeam}...`);
+        window.syncBuiltInSheets = async function(targetTeam) {
+            window.printSyncMessage(`Starting Sync for ${targetTeam}...`);
             let newCount = 0; let passesCount = 0;
-            const s = GLOBAL_SETTINGS;
+            const s = window.GLOBAL_SETTINGS;
             let settingsModified = false;
             
-            await fetchServantsData();
+            await window.fetchServantsData();
             let servantMap = {};
-            localServants.forEach(srv => {
+            window.localServants.forEach(srv => {
                 servantMap[srv.Name.toLowerCase().trim()] = {
                     Name: srv.Name, Phone: srv.Phone, PhotoURL: srv.PhotoURL,
                     Teams: new Set(srv.Team ? srv.Team.split(' & ') : [])
                 };
             });
 
-            let existingPasses = await DB.fetchAllPasses() || [];
+            let existingPasses = await window.DB.fetchAllPasses() || [];
             const passCache = new Set(existingPasses.map(p => `${p.Name.toLowerCase().trim()}_${p.Event}`));
 
-            const liveMap = { events: parseRange(s.liveMapping?.events), locs: parseRange(s.liveMapping?.locations), names: parseRange(s.liveMapping?.names) };
-            const dataMap = { events: parseRange(s.dataMapping?.events), locs: parseRange(s.dataMapping?.locations), names: parseRange(s.dataMapping?.names) };
+            const liveMap = { events: window.parseRange(s.liveMapping?.events), locs: window.parseRange(s.liveMapping?.locations), names: window.parseRange(s.liveMapping?.names) };
+            const dataMap = { events: window.parseRange(s.dataMapping?.events), locs: window.parseRange(s.dataMapping?.locations), names: window.parseRange(s.dataMapping?.names) };
             const skipWords = s.skipWords ? s.skipWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w) : [];
 
             async function processSheet(url, teamNameStr, parsedMap) {
-                if(!url) { printSyncMessage(`Skipping ${teamNameStr} - No URL provided.`); return; }
+                if(!url) { window.printSyncMessage(`Skipping ${teamNameStr} - No URL provided.`); return; }
                 
                 try {
-                    printSyncMessage(`Downloading ${teamNameStr} schedule...`);
+                    window.printSyncMessage(`Downloading ${teamNameStr} schedule...`);
                     let fetchUrl = url.trim();
                     if (fetchUrl.includes('/edit')) fetchUrl = fetchUrl.split('/edit')[0] + '/export?format=csv';
                     else if (fetchUrl.includes('/pubhtml')) fetchUrl = fetchUrl.split('/pubhtml')[0] + '/pub?output=csv';
@@ -2179,7 +2076,7 @@
                     const res = await fetch(fetchUrl);
                     const text = await res.text();
                     if (text.toLowerCase().includes('<!doctype html>')) {
-                        printSyncMessage(`<span class="text-red-500">ERROR: Invalid format. Ensure the sheet is published to the web as CSV.</span>`);
+                        window.printSyncMessage(`<span class="text-red-500">ERROR: Invalid format. Ensure the sheet is published to the web as CSV.</span>`);
                         throw new Error('Not CSV Format');
                     }
                     
@@ -2195,7 +2092,7 @@
                     }
                     if (currentCell || currentRow.length > 0) { currentRow.push(currentCell.trim()); rows.push(currentRow); }
 
-                    printSyncMessage(`Parsing data mapped ranges for ${rows.length} rows...`);
+                    window.printSyncMessage(`Parsing data mapped ranges for ${rows.length} rows...`);
 
                     let currentEvent = "";
                     let currentLocation = "St. George Church";
@@ -2203,7 +2100,7 @@
                     for(let r = 0; r < rows.length; r++) {
                         const row = rows[r]; if(!row || row.length === 0) continue;
                         
-                        let rowEvents = extractFromRanges(row, r, parsedMap.events);
+                        let rowEvents = window.extractFromRanges(row, r, parsedMap.events);
                         let eventText = rowEvents.join(' ').trim();
                         if(eventText) {
                             currentEvent = eventText
@@ -2217,7 +2114,7 @@
                                 .trim();
                         }
                         
-                        let rowLocs = extractFromRanges(row, r, parsedMap.locs);
+                        let rowLocs = window.extractFromRanges(row, r, parsedMap.locs);
                         let locText = rowLocs.join(' ').trim();
                         if(locText) {
                             if (locText.includes("جوار")) currentLocation = "St. George Church";
@@ -2228,28 +2125,28 @@
 
                         if(!currentEvent) continue; 
 
-                        let existingEv = GLOBAL_SETTINGS.events.find(e => e.name === currentEvent);
+                        let existingEv = window.GLOBAL_SETTINGS.events.find(e => e.name === currentEvent);
                         if(!existingEv) {
-                            let { start: evStart, end: evEnd } = extractTimesFromArabic(currentEvent);
+                            let { start: evStart, end: evEnd } = window.extractTimesFromArabic(currentEvent);
                             existingEv = { 
                                 id: 'ev_'+Date.now()+'_'+Math.floor(Math.random()*1000), 
-                                name: currentEvent, date: '', start: evStart, end: evEnd, masses: [], allowedZones: getMatrixZones(teamNameStr, currentLocation), assignments: [] 
+                                name: currentEvent, date: '', start: evStart, end: evEnd, masses: [], allowedZones: window.getMatrixZones(teamNameStr, currentLocation), assignments: [] 
                             };
-                            GLOBAL_SETTINGS.events.push(existingEv);
+                            window.GLOBAL_SETTINGS.events.push(existingEv);
                             settingsModified = true;
-                            printSyncMessage(`Created new event: <b>${currentEvent}</b>`);
+                            window.printSyncMessage(`Created new event: <b>${currentEvent}</b>`);
                         }
                         
                         if(!existingEv.assignments) existingEv.assignments = [];
 
-                        let rawNames = extractFromRanges(row, r, parsedMap.names);
+                        let rawNames = window.extractFromRanges(row, r, parsedMap.names);
                         for(let rawName of rawNames) {
                             if(!rawName) continue;
                             let subNames = rawName.split('\n').map(n => n.trim()).filter(n => n);
                             
                             for(let name of subNames) {
                                 let originalName = name;
-                                let transName = translateArabicToEnglish(name);
+                                let transName = window.translateArabicToEnglish(name);
                                 let lowerName = transName.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_');
                                 
                                 if (s.aliases && s.aliases[lowerName]) {
@@ -2261,7 +2158,7 @@
                                 if(shouldSkip || transName.length <= 2 || transName.match(/^[\d\s\W]+$/)) continue;
 
                                 if (!servantMap[lowerName]) {
-                                    let existingSrv = localServants.find(s => s.Name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_') === lowerName);
+                                    let existingSrv = window.localServants.find(s => s.Name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_') === lowerName);
                                     servantMap[lowerName] = { 
                                         Name: transName, 
                                         Phone: existingSrv ? existingSrv.Phone : 'N/A', 
@@ -2272,14 +2169,14 @@
                                 }
                                 servantMap[lowerName].Teams.add(teamNameStr);
                                 
-                                if(servantMap[lowerName].Teams.has('IT Team') || normalizeTeamName(teamNameStr) === 'IT Team') {
+                                if(servantMap[lowerName].Teams.has('IT Team') || window.normalizeTeamName(teamNameStr) === 'IT Team') {
                                     servantMap[lowerName].Teams = new Set(['IT Team']);
                                 }
 
                                 if (!existingEv.assignments.some(a => a.name.toLowerCase().trim().replace(/[^a-z0-9\u0600-\u06FF]/g, '_') === lowerName)) {
                                     existingEv.assignments.push({ name: servantMap[lowerName].Name, team: teamNameStr, location: currentLocation });
                                     settingsModified = true;
-                                    printSyncMessage(`Assigned: ${servantMap[lowerName].Name} to ${currentEvent}`);
+                                    window.printSyncMessage(`Assigned: ${servantMap[lowerName].Name} to ${currentEvent}`);
                                 }
 
                                 if (!servantMap[lowerName].Teams.has('IT Team')) {
@@ -2291,7 +2188,7 @@
                                         
                                         let zones = existingEv.allowedZones.length > 0 ? existingEv.allowedZones.join(', ') : 'ALL ZONES';
                                         
-                                        await DB.savePass({
+                                        await window.DB.savePass({
                                             PassID: passId, Name: servantMap[lowerName].Name, Phone: servantMap[lowerName].Phone || 'N/A', Team: teamNameStr,
                                             Event: existingEv.id, Mass: 'N/A', Location: currentLocation,
                                             AllowedZones: zones, PhotoURL: servantMap[lowerName].PhotoURL || "", Status: 'VALID', EntryTime: new Date().toISOString()
@@ -2305,7 +2202,7 @@
                     }
                 } catch(e) {
                     console.error("Error processing " + teamNameStr, e);
-                    printSyncMessage(`<span class="text-red-500">Error processing ${teamNameStr}: ${e.message}</span>`);
+                    window.printSyncMessage(`<span class="text-red-500">Error processing ${teamNameStr}: ${e.message}</span>`);
                 }
             }
 
@@ -2319,59 +2216,59 @@
             for (let key in servantMap) {
                 let srv = servantMap[key];
                 let teamStr = Array.from(srv.Teams).join(' & ');
-                await DB.saveServant({ Name: srv.Name, Phone: srv.Phone, Team: teamStr, PhotoURL: srv.PhotoURL });
+                await window.DB.saveServant({ Name: srv.Name, Phone: srv.Phone, Team: teamStr, PhotoURL: srv.PhotoURL });
                 
                 if (teamStr === 'IT Team') {
-                    let passes = await DB.fetchAllPasses() || [];
+                    let passes = await window.DB.fetchAllPasses() || [];
                     const existingSrvPasses = passes.filter(p => p.Name.toLowerCase().trim() === srv.Name.toLowerCase().trim() && p.Event !== 'ALL ACCESS');
-                    for (let p of existingSrvPasses) { await DB.deletePass(p.PassID); }
-                    await autoGenerateITPass(srv.Name, srv.Phone, srv.PhotoURL);
+                    for (let p of existingSrvPasses) { await window.DB.deletePass(p.PassID); }
+                    await window.autoGenerateITPass(srv.Name, srv.Phone, srv.PhotoURL);
                 }
             }
 
-            printSyncMessage(`<span class="text-green-400 font-bold">Sync Complete! Discovered ${newCount} new servants and auto-generated ${passesCount} new passes directly!</span>`);
+            window.printSyncMessage(`<span class="text-green-400 font-bold">Sync Complete! Discovered ${newCount} new servants and auto-generated ${passesCount} new passes directly!</span>`);
             
             if(settingsModified) {
-                await DB.updateSettings(GLOBAL_SETTINGS);
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS);
             } else {
-                await applyGlobalSettings(); 
+                await window.applyGlobalSettings(); 
             }
             
-            await fetchServantsData();
+            await window.fetchServantsData();
             if(document.getElementById('admin-tab-servants') && !document.getElementById('admin-tab-servants').classList.contains('hidden')) {
-                loadServantsTable();
+                window.loadServantsTable();
             }
             if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) {
-                loadManageTable();
+                window.loadManageTable();
             }
-            loadStats();
-        }
+            window.loadStats();
+        };
 
-        async function autoGenerateITPass(name, phone, photoURL) {
-            let passes = await DB.fetchAllPasses() || [];
+        window.autoGenerateITPass = async function(name, phone, photoURL) {
+            let passes = await window.DB.fetchAllPasses() || [];
             if(!passes.find(p => p.Name.toLowerCase() === name.toLowerCase() && p.Team === 'IT Team')) {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                 let rp = ''; for(let i=0; i<6; i++) rp += chars.charAt(Math.floor(Math.random() * chars.length));
                 const passId = `LWT-${rp}`;
-                await DB.savePass({
+                await window.DB.savePass({
                     PassID: passId, Name: name, Phone: phone, Team: 'IT Team',
                     Event: 'ALL ACCESS', Mass: 'N/A', Location: 'ALL CHURCHES',
                     AllowedZones: 'ALL ZONES', PhotoURL: photoURL, Status: 'VALID',
                     EntryTime: new Date().toISOString()
                 });
             }
-        }
+        };
 
-        // 12. SERVANTS DIRECTORY
-        async function fetchServantsData() {
-            localServants = await DB.fetchAllServants() || [];
+        // --- SERVANTS DIRECTORY LOGIC ---
+        window.fetchServantsData = async function() {
+            window.localServants = await window.DB.fetchAllServants() || [];
             const dl = document.getElementById('servants-list');
             if(dl) {
-                dl.innerHTML = localServants.map(s => `<option value="${s.Name}">`).join('');
+                dl.innerHTML = window.localServants.map(s => `<option value="${s.Name}">`).join('');
             }
-        }
+        };
 
-        function toggleBulkServantImport() {
+        window.toggleBulkServantImport = function() {
             const manual = document.getElementById('manual-servant-form');
             const bulk = document.getElementById('bulk-servant-form');
             if (manual.classList.contains('hidden')) {
@@ -2381,9 +2278,9 @@
                 manual.classList.add('hidden');
                 bulk.classList.remove('hidden');
             }
-        }
+        };
 
-        async function processBulkServantImport() {
+        window.processBulkServantImport = async function() {
             const text = document.getElementById('bulk-servant-data').value.trim();
             if (!text) return alert("Please paste some data first.");
 
@@ -2391,11 +2288,11 @@
             const originalHtml = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Importing...`;
             btn.disabled = true;
-            refreshIcons();
+            window.refreshIcons();
 
             const rows = text.split('\n');
             let importedCount = 0;
-            const allPasses = await DB.fetchAllPasses() || [];
+            const allPasses = await window.DB.fetchAllPasses() || [];
 
             for (let row of rows) {
                 if (!row.trim()) continue;
@@ -2406,25 +2303,25 @@
 
                 let rawName = (cols[0] || '').trim();
                 if (!rawName || rawName.toLowerCase() === 'name') continue; 
-                const name = translateArabicToEnglish(rawName);
+                const name = window.translateArabicToEnglish(rawName);
 
                 const phone = (cols[1] || 'N/A').trim() || 'N/A';
                 const rawTeam = (cols[2] || 'Live Team').trim();
-                const team = normalizeTeamName(rawTeam);
+                const team = window.normalizeTeamName(rawTeam);
                 const photo = (cols[3] || '').trim();
 
-                await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photo });
+                await window.DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photo });
                 importedCount++;
 
                 if (team === 'IT Team') {
-                    await autoGenerateITPass(name, phone, photo);
+                    await window.autoGenerateITPass(name, phone, photo);
                 } else {
                     const servantPasses = allPasses.filter(p => p.Name.toLowerCase() === name.toLowerCase());
                     for (let p of servantPasses) {
                         p.Phone = phone;
                         p.Team = team;
                         if (photo) p.PhotoURL = photo;
-                        await DB.savePass(p);
+                        await window.DB.savePass(p);
                     }
                 }
             }
@@ -2432,43 +2329,43 @@
             document.getElementById('bulk-servant-data').value = '';
             alert(`Successfully imported/updated ${importedCount} servants! Pending status automatically applied if missing photos. `);
             
-            await fetchServantsData();
-            loadServantsTable();
-            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
+            await window.fetchServantsData();
+            window.loadServantsTable();
+            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) window.loadManageTable();
 
             btn.innerHTML = originalHtml;
             btn.disabled = false;
-            refreshIcons();
-        }
+            window.refreshIcons();
+        };
 
-        async function manualSaveServant() {
+        window.manualSaveServant = async function() {
             const rawName = document.getElementById('s-name').value.trim();
             const phone = document.getElementById('s-phone').value.trim() || 'N/A';
             const rawTeam = document.getElementById('s-team').value;
-            const team = normalizeTeamName(rawTeam);
+            const team = window.normalizeTeamName(rawTeam);
             const photoFile = document.getElementById('s-photo').files[0];
             if(!rawName) return alert("Servant name is required.");
-            const name = translateArabicToEnglish(rawName);
+            const name = window.translateArabicToEnglish(rawName);
 
             let photoB64 = "";
-            const internal = localServants.find(s => s.Name.toLowerCase() === name.toLowerCase());
+            const internal = window.localServants.find(s => s.Name.toLowerCase() === name.toLowerCase());
             if (internal && internal.PhotoURL) photoB64 = internal.PhotoURL;
             
-            if(photoFile) photoB64 = await resizeImage(photoFile, 300, false);
+            if(photoFile) photoB64 = await window.resizeImage(photoFile, 300, false);
 
-            await DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photoB64 });
+            await window.DB.saveServant({ Name: name, Phone: phone, Team: team, PhotoURL: photoB64 });
             
             if (team === 'IT Team') {
-                await autoGenerateITPass(name, phone, photoB64);
+                await window.autoGenerateITPass(name, phone, photoB64);
                 alert("IT Servant saved and ALL ACCESS pass automatically generated.");
             } else {
-                const allPasses = await DB.fetchAllPasses() || [];
+                const allPasses = await window.DB.fetchAllPasses() || [];
                 const servantPasses = allPasses.filter(p => p.Name.toLowerCase() === name.toLowerCase());
                 for(let p of servantPasses) {
                     p.Phone = phone;
                     p.Team = team;
                     if(photoB64) p.PhotoURL = photoB64;
-                    await DB.savePass(p);
+                    await window.DB.savePass(p);
                 }
                 alert(`Servant saved! ${servantPasses.length} of their existing passes were automatically updated.`);
             }
@@ -2477,27 +2374,27 @@
             document.getElementById('s-phone').value = '';
             document.getElementById('s-photo').value = '';
             
-            await fetchServantsData();
-            loadServantsTable();
-            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
-        }
+            await window.fetchServantsData();
+            window.loadServantsTable();
+            if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) window.loadManageTable();
+        };
 
-        async function loadServantsTable() {
+        window.loadServantsTable = async function() {
             const tbody = document.getElementById('servants-table-body');
             if (!tbody) return;
             tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
-            refreshIcons();
+            window.refreshIcons();
             
-            await fetchServantsData(); 
+            await window.fetchServantsData(); 
             
-            let displayServants = localServants;
-            if(currentAdminTeamFilterServants !== 'all') {
-                displayServants = displayServants.filter(s => s.Team.includes(currentAdminTeamFilterServants));
+            let displayServants = window.localServants;
+            if(window.currentAdminTeamFilterServants !== 'all') {
+                displayServants = displayServants.filter(s => s.Team.includes(window.currentAdminTeamFilterServants));
             }
-            if(currentAdminStatusFilterServants === 'pending') {
-                displayServants = displayServants.filter(s => isPending(s, 'servant'));
-            } else if (currentAdminStatusFilterServants === 'done') {
-                displayServants = displayServants.filter(s => !isPending(s, 'servant'));
+            if(window.currentAdminStatusFilterServants === 'pending') {
+                displayServants = displayServants.filter(s => window.isPending(s, 'servant'));
+            } else if (window.currentAdminStatusFilterServants === 'done') {
+                displayServants = displayServants.filter(s => !window.isPending(s, 'servant'));
             }
             
             if(displayServants.length === 0) {
@@ -2507,7 +2404,7 @@
 
             tbody.innerHTML = displayServants.map(s => {
                 const id = s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase();
-                const isPend = isPending(s, 'servant');
+                const isPend = window.isPending(s, 'servant');
                 const pendingBadge = isPend ? `<span class="bg-yellow-900 text-yellow-300 text-[10px] px-2 py-0.5 rounded ml-2">PENDING</span>` : `<span class="bg-green-900 text-green-300 text-[10px] px-2 py-0.5 rounded ml-2">DONE</span>`;
 
                 return `
@@ -2519,53 +2416,54 @@
                     <td class="px-6 py-4 text-gray-300">${s.Phone}</td>
                     <td class="px-6 py-4 text-gray-300 text-xs font-bold text-brand-yellow">${s.Team}</td>
                     <td class="px-6 py-4 text-right space-x-1">
-                        <button onclick="openLinkModal('${id}')" class="text-brand-yellow hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Link & Merge"><i data-lucide="link" class="w-3 h-3 md:mr-1"></i><span class="hidden md:inline">Merge</span></button>
-                        <button onclick="editServant('${id}')" class="text-blue-400 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Edit"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
-                        <button onclick="deleteServant('${id}')" class="text-red-500 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Delete"><i data-lucide="trash" class="w-3 h-3"></i></button>
+                        <button onclick="window.openLinkModal('${id}')" class="text-brand-yellow hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Link & Merge"><i data-lucide="link" class="w-3 h-3 md:mr-1"></i><span class="hidden md:inline">Merge</span></button>
+                        <button onclick="window.editServant('${id}')" class="text-blue-400 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Edit"><i data-lucide="edit-2" class="w-3 h-3"></i></button>
+                        <button onclick="window.deleteServant('${id}')" class="text-red-500 hover:text-white font-bold text-xs px-2 py-1.5 inline-flex bg-brand-panel border border-brand-border rounded" title="Delete"><i data-lucide="trash" class="w-3 h-3"></i></button>
                     </td>
                 </tr>`
             }).join('');
-            refreshIcons();
-        }
+            window.refreshIcons();
+        };
 
-        function editServant(id) {
-            const s = localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === id);
+        window.editServant = function(id) {
+            const s = window.localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === id);
             if(s) {
                 document.getElementById('s-name').value = s.Name;
                 document.getElementById('s-phone').value = s.Phone !== 'N/A' ? s.Phone : '';
                 document.getElementById('s-team').value = s.Team.includes('&') ? s.Team.split(' & ')[0] : s.Team;
                 window.scrollTo({top:0, behavior:'smooth'});
             }
-        }
+        };
 
-        async function deleteServant(id) {
+        window.deleteServant = async function(id) {
             if(confirm("Remove this servant from the internal directory? (This will NOT delete their passes)")) {
-                await DB.deleteServant(id);
-                loadServantsTable();
+                await window.DB.deleteServant(id);
+                window.loadServantsTable();
             }
-        }
+        };
 
-        // 13. LINK MODAL
-        function openLinkModal(sourceId) {
-            document.getElementById('link-source-id').value = sourceId;
-            resetLinkModal();
+        // LINK MODAL LOGIC
+        window.openLinkModal = function(sourceId) {
+            const inputEl = document.getElementById('link-source-id');
+            if (inputEl) inputEl.value = sourceId;
+            window.resetLinkModal();
             document.getElementById('link-modal').classList.remove('hidden');
-        }
+        };
 
-        function closeLinkModal() {
+        window.closeLinkModal = function() {
             document.getElementById('link-modal').classList.add('hidden');
-        }
+        };
 
-        function resetLinkModal() {
+        window.resetLinkModal = function() {
             document.getElementById('link-step-1').classList.remove('hidden');
             document.getElementById('link-step-2').classList.add('hidden');
-        }
+        };
 
-        function selectLinkTeam(teamName) {
+        window.selectLinkTeam = function(teamName) {
             const sourceId = document.getElementById('link-source-id').value;
             const select = document.getElementById('link-target-select');
             
-            const filtered = localServants.filter(s => 
+            const filtered = window.localServants.filter(s => 
                 s.Team && s.Team.includes(teamName) && 
                 s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() !== sourceId
             );
@@ -2576,21 +2474,21 @@
             }
 
             select.innerHTML = filtered.map(s => {
-                const status = isPending(s, 'servant') ? '(Pending)' : '(Done)';
+                const status = window.isPending(s, 'servant') ? '(Pending)' : '(Done)';
                 return `<option value="${s.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase()}">${s.Name} ${status}</option>`;
             }).join('');
 
             document.getElementById('link-step-1').classList.add('hidden');
             document.getElementById('link-step-2').classList.remove('hidden');
-        }
+        };
 
-        async function confirmLinkServant() {
+        window.confirmLinkServant = async function() {
             const sourceId = document.getElementById('link-source-id').value;
             const targetId = document.getElementById('link-target-select').value;
             if(!sourceId || !targetId) return alert("Select a target servant to merge into.");
 
-            const sourceSrv = localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === sourceId);
-            const targetSrv = localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === targetId);
+            const sourceSrv = window.localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === sourceId);
+            const targetSrv = window.localServants.find(x => x.Name.trim().replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').toLowerCase() === targetId);
 
             if(!sourceSrv || !targetSrv) return alert("Error finding profiles.");
 
@@ -2602,18 +2500,18 @@
             btn.disabled = true;
 
             try {
-                if(!GLOBAL_SETTINGS.aliases) GLOBAL_SETTINGS.aliases = {};
-                GLOBAL_SETTINGS.aliases[sourceId] = targetSrv.Name;
-                await DB.updateSettings(GLOBAL_SETTINGS);
+                if(!window.GLOBAL_SETTINGS.aliases) window.GLOBAL_SETTINGS.aliases = {};
+                window.GLOBAL_SETTINGS.aliases[sourceId] = targetSrv.Name;
+                await window.DB.updateSettings(window.GLOBAL_SETTINGS);
 
-                const allPasses = await DB.fetchAllPasses() || [];
+                const allPasses = await window.DB.fetchAllPasses() || [];
                 const passesToUpdate = allPasses.filter(p => p.Name.toLowerCase() === sourceSrv.Name.toLowerCase());
                 
                 for(let p of passesToUpdate) {
                     p.Name = targetSrv.Name;
                     if(targetSrv.Phone && targetSrv.Phone !== 'N/A') p.Phone = targetSrv.Phone;
                     if(targetSrv.PhotoURL) p.PhotoURL = targetSrv.PhotoURL;
-                    await DB.savePass(p);
+                    await window.DB.savePass(p);
                 }
 
                 let mergedTeams = new Set([...(targetSrv.Team ? targetSrv.Team.split(' & ') : []), ...(sourceSrv.Team ? sourceSrv.Team.split(' & ') : [])]);
@@ -2623,21 +2521,21 @@
                 if((!targetSrv.Phone || targetSrv.Phone === 'N/A') && sourceSrv.Phone !== 'N/A') targetSrv.Phone = sourceSrv.Phone;
                 if(!targetSrv.PhotoURL && sourceSrv.PhotoURL) targetSrv.PhotoURL = sourceSrv.PhotoURL;
 
-                await DB.saveServant(targetSrv);
-                await DB.deleteServant(sourceId);
+                await window.DB.saveServant(targetSrv);
+                await window.DB.deleteServant(sourceId);
 
                 if (mergedTeams.has('IT Team')) {
-                    const postMergePasses = await DB.fetchAllPasses() || [];
+                    const postMergePasses = await window.DB.fetchAllPasses() || [];
                     const nonITPasses = postMergePasses.filter(p => p.Name.toLowerCase() === targetSrv.Name.toLowerCase() && p.Event !== 'ALL ACCESS');
-                    for (let p of nonITPasses) { await DB.deletePass(p.PassID); }
-                    await autoGenerateITPass(targetSrv.Name, targetSrv.Phone, targetSrv.PhotoURL);
+                    for (let p of nonITPasses) { await window.DB.deletePass(p.PassID); }
+                    await window.autoGenerateITPass(targetSrv.Name, targetSrv.Phone, targetSrv.PhotoURL);
                 }
 
                 alert(`Successfully merged ${sourceSrv.Name} into ${targetSrv.Name} and taught the sync engine to fix it automatically next time!`);
-                closeLinkModal();
-                await fetchServantsData();
-                loadServantsTable();
-                if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) loadManageTable();
+                window.closeLinkModal();
+                await window.fetchServantsData();
+                window.loadServantsTable();
+                if(document.getElementById('admin-tab-manage') && !document.getElementById('admin-tab-manage').classList.contains('hidden')) window.loadManageTable();
             } catch(e) {
                 console.error(e);
                 alert("Error during merge.");
@@ -2645,39 +2543,39 @@
                 btn.innerHTML = origHTML;
                 btn.disabled = false;
             }
-        }
+        };
 
         // 14. PASSES
-        async function loadManageTable() {
+        window.loadManageTable = async function() {
             const tbody = document.getElementById('manage-table-body');
             if(!tbody) return;
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-brand-yellow font-bold"><i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2"></i>Loading...</td></tr>`;
-            refreshIcons();
+            window.refreshIcons();
             
-            let passes = await DB.fetchAllPasses() || []; 
+            let passes = await window.DB.fetchAllPasses() || []; 
             passes = passes.filter(p => p && p.PassID && p.PassID !== "undefined" && Object.keys(p).length > 0);
             
-            if(currentAdminTeamFilterPasses !== 'all') {
-                passes = passes.filter(p => p.Team === currentAdminTeamFilterPasses);
+            if(window.currentAdminTeamFilterPasses !== 'all') {
+                passes = passes.filter(p => p.Team === window.currentAdminTeamFilterPasses);
             }
-            if(currentAdminStatusFilterPasses === 'pending') {
-                passes = passes.filter(p => isPending(p, 'pass'));
-            } else if (currentAdminStatusFilterPasses === 'done') {
-                passes = passes.filter(p => !isPending(p, 'pass'));
+            if(window.currentAdminStatusFilterPasses === 'pending') {
+                passes = passes.filter(p => window.isPending(p, 'pass'));
+            } else if (window.currentAdminStatusFilterPasses === 'done') {
+                passes = passes.filter(p => !window.isPending(p, 'pass'));
             }
             passes.reverse();
             
-            const s = GLOBAL_SETTINGS;
+            const s = window.GLOBAL_SETTINGS;
             if(passes.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-500 font-bold">No valid passes found for this filter.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = passes.map(p => {
-                const tColor = getTeamColor(p.Team);
+                const tColor = window.getTeamColor(p.Team);
                 const ev = (s.events || []).find(e => e.id === p.Event);
                 const evName = p.Team === 'IT Team' ? 'ALL ACCESS' : (ev ? ev.name : p.Event);
-                const isPend = isPending(p, 'pass');
+                const isPend = window.isPending(p, 'pass');
                 const pendingBadge = isPend ? `<span class="bg-yellow-900 text-yellow-300 text-[10px] px-2 py-0.5 rounded ml-2">PENDING</span>` : `<span class="bg-green-900 text-green-300 text-[10px] px-2 py-0.5 rounded ml-2">DONE</span>`;
                 
                 return `
@@ -2687,49 +2585,50 @@
                     <td class="px-6 py-4 text-gray-300 text-xs">${evName}</td>
                     <td class="px-6 py-4"><span class="px-3 py-1 rounded text-xs font-black ${p.Status==='VALID'?'bg-green-900 text-green-300':'bg-red-900 text-red-300'}">${p.Status}</span></td>
                     <td class="px-6 py-4 text-right space-x-2">
-                        ${isPend ? `<button onclick="forcePassDone('${p.PassID}')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex" title="Force Mark as Done"><i data-lucide="check" class="w-3 h-3"></i></button>` : ''}
-                        <button onclick="manualEntry('${p.PassID}')" class="text-blue-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex" title="Manual Check-In"><i data-lucide="user-check" class="w-3 h-3"></i></button>
-                        <button onclick="editPass('${p.PassID}')" class="text-gray-300 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Edit</button>
-                        <button onclick="downloadPass('${p.PassID}')" class="text-brand-yellow hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="download" class="w-3 h-3"></i></button>
+                        ${isPend ? `<button onclick="window.forcePassDone('${p.PassID}')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex" title="Force Mark as Done"><i data-lucide="check" class="w-3 h-3"></i></button>` : ''}
+                        <button onclick="window.manualEntry('${p.PassID}')" class="text-blue-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex" title="Manual Check-In"><i data-lucide="user-check" class="w-3 h-3"></i></button>
+                        <button onclick="window.editPass('${p.PassID}')" class="text-gray-300 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="edit-2" class="w-3 h-3 mr-1"></i> Edit</button>
+                        <button onclick="window.downloadPass('${p.PassID}')" class="text-brand-yellow hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="download" class="w-3 h-3"></i></button>
                         <a href="#/pass/${p.PassID}" target="_blank" class="text-gray-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="eye" class="w-3 h-3"></i></a>
-                        ${p.Status==='VALID' ? `<button onclick="togglePassStatus('${p.PassID}', 'REVOKED')" class="text-red-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="x-circle" class="w-3 h-3"></i></button>` : `<button onclick="togglePassStatus('${p.PassID}', 'VALID')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="check-circle" class="w-3 h-3"></i></button>`}
-                        <button onclick="deletePass('${p.PassID}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
+                        ${p.Status==='VALID' ? `<button onclick="window.togglePassStatus('${p.PassID}', 'REVOKED')" class="text-red-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="x-circle" class="w-3 h-3"></i></button>` : `<button onclick="window.togglePassStatus('${p.PassID}', 'VALID')" class="text-green-400 hover:text-white font-bold text-xs bg-brand-panel border border-brand-border px-2 py-1.5 rounded inline-flex"><i data-lucide="check-circle" class="w-3 h-3"></i></button>`}
+                        <button onclick="window.deletePass('${p.PassID}')" class="text-gray-600 hover:text-red-500 font-bold text-xs px-2 py-1.5 inline-flex"><i data-lucide="trash" class="w-3 h-3"></i></button>
                     </td>
                 </tr>`}).join('');
-            refreshIcons();
-        }
+            window.refreshIcons();
+        };
 
-        async function manualEntry(id) { 
+        window.manualEntry = async function(id) { 
             if(confirm("Manually log this person as entered?")) {
-                await DB.logEntry(id, "GRANTED - MANUAL ENTRY"); 
+                await window.DB.logEntry(id, "GRANTED - MANUAL ENTRY"); 
                 alert("Entry manually logged.");
-                loadStats();
+                window.loadStats();
             }
-        }
+        };
         
-        async function forcePassDone(id) {
+        window.forcePassDone = async function(id) {
             if(confirm("Force this pass to 'Done' status even if it has missing information?")) {
-                await DB.updatePassPending(id, false);
-                loadManageTable();
+                await window.DB.updatePassPending(id, false);
+                window.loadManageTable();
             }
-        }
+        };
 
-        async function togglePassStatus(id, stat) { await DB.updatePassStatus(id, stat); loadManageTable(); loadStats(); }
-        async function deletePass(id) { if(confirm(`Completely Delete Pass ${id}?`)) { await DB.deletePass(id); loadManageTable(); loadStats(); } }
+        window.togglePassStatus = async function(id, stat) { await window.DB.updatePassStatus(id, stat); window.loadManageTable(); window.loadStats(); };
+        window.deletePass = async function(id) { if(confirm(`Completely Delete Pass ${id}?`)) { await window.DB.deletePass(id); window.loadManageTable(); window.loadStats(); } };
 
-        async function bulkDownloadZIP() {
+        // --- BULK ZIP EXPORT ---
+        window.bulkDownloadZIP = async function() {
             const btn = document.getElementById('btn-bulk-zip');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Loading...`;
             btn.disabled = true;
-            refreshIcons();
+            window.refreshIcons();
 
             try {
-                let passes = await DB.fetchAllPasses() || [];
+                let passes = await window.DB.fetchAllPasses() || [];
                 
-                if(currentAdminTeamFilterPasses !== 'all') passes = passes.filter(p => p.Team === currentAdminTeamFilterPasses);
-                if(currentAdminStatusFilterPasses === 'pending') passes = passes.filter(p => isPending(p, 'pass'));
-                if(currentAdminStatusFilterPasses === 'done') passes = passes.filter(p => !isPending(p, 'pass'));
+                if(window.currentAdminTeamFilterPasses !== 'all') passes = passes.filter(p => p.Team === window.currentAdminTeamFilterPasses);
+                if(window.currentAdminStatusFilterPasses === 'pending') passes = passes.filter(p => window.isPending(p, 'pass'));
+                if(window.currentAdminStatusFilterPasses === 'done') passes = passes.filter(p => !window.isPending(p, 'pass'));
                 
                 if(passes.length === 0) {
                     alert("No passes to download based on current filters.");
@@ -2739,13 +2638,13 @@
                 if(!confirm(`Generate and download a ZIP file containing ${passes.length} passes? This may take a moment.`)) return;
 
                 const zip = new JSZip();
-                const s = GLOBAL_SETTINGS;
+                const s = window.GLOBAL_SETTINGS;
 
                 for(let i=0; i<passes.length; i++) {
                     const pass = passes[i];
                     btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> PDF ${i+1}/${passes.length}...`;
                     
-                    const blob = await generatePerfectPDFBlob(pass, s);
+                    const blob = await window.generatePerfectPDFBlob(pass, s);
                     
                     let evName = pass.Event;
                     const ev = (s.events||[]).find(e => e.id === pass.Event); 
@@ -2753,7 +2652,7 @@
                     
                     const safeEv = evName.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
                     const safeName = pass.Name.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
-                    zip.folder(safeEv).file(`${pass.Team}_${safeName}_${pass.PassID}.pdf`, blob);
+                    zip.folder(safeEv).file(`${safeName}_${pass.PassID}.pdf`, blob);
                 }
 
                 btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Zipping...`;
@@ -2766,13 +2665,14 @@
             } finally {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
-                refreshIcons();
+                window.refreshIcons();
             }
-        }
+        };
 
-        async function batchGenerateForEvent() {
+        // --- GENERATE / EDIT PASS ---
+        window.batchGenerateForEvent = async function() {
             const eventId = document.getElementById('g-bulk-event').value;
-            const ev = GLOBAL_SETTINGS.events.find(e => e.id === eventId);
+            const ev = window.GLOBAL_SETTINGS.events.find(e => e.id === eventId);
             
             if (!ev || !ev.assignments || ev.assignments.length === 0) {
                 return alert(`No scheduled servants found for ${ev ? ev.name : 'this event'}. Make sure you've synced the Google Sheets first!`);
@@ -2780,15 +2680,15 @@
 
             if(!confirm(`Generate missing passes for ${ev.assignments.length} scheduled servants for ${ev.name}?`)) return;
 
-            const btn = document.querySelector('#admin-tab-generate button[onclick="batchGenerateForEvent()"]');
+            const btn = document.querySelector('#admin-tab-generate button[onclick="window.batchGenerateForEvent()"]');
             const originalText = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Generating...`;
-            refreshIcons();
+            window.refreshIcons();
 
             let count = 0;
-            const existingPasses = await DB.fetchAllPasses() || [];
-            const allServants = await DB.fetchAllServants() || [];
+            const existingPasses = await window.DB.fetchAllPasses() || [];
+            const allServants = await window.DB.fetchAllServants() || [];
 
             try {
                 for (const assignment of ev.assignments) {
@@ -2801,9 +2701,9 @@
                     let rp = ''; for(let i=0; i<6; i++) rp += chars.charAt(Math.floor(Math.random() * chars.length));
                     const passId = `LWT-${rp}`;
 
-                    let isPend = false;
+                    let isPending = false;
                     if (!servant || !servant.PhotoURL || servant.PhotoURL === "" || !servant.Phone || servant.Phone === 'N/A' || /[\u0600-\u06FF]/.test(assignment.name)) {
-                        isPend = true;
+                        isPending = true;
                     }
 
                     const passData = {
@@ -2817,27 +2717,27 @@
                         AllowedZones: ev.allowedZones && ev.allowedZones.length > 0 ? ev.allowedZones.join(', ') : 'ALL ZONES',
                         PhotoURL: servant ? servant.PhotoURL : "", 
                         Status: 'VALID',
-                        IsPending: isPend,
+                        IsPending: isPending,
                         EntryTime: new Date().toISOString()
                     };
 
-                    await DB.savePass(passData);
+                    await window.DB.savePass(passData);
                     count++;
                 }
                 alert(`Successfully generated ${count} missing passes for ${ev.name}!`);
-                loadManageTable();
-                loadStats();
+                window.loadManageTable();
+                window.loadStats();
             } catch (err) {
                 console.error(err);
                 alert("An error occurred during bulk generation. Check your network.");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
-                refreshIcons();
+                window.refreshIcons();
             }
-        }
+        };
 
-        async function handleGeneratePass(e) {
+        window.handleGeneratePass = async function(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-generate');
             const isIT = document.getElementById('g-team').value === 'IT Team';
@@ -2854,7 +2754,7 @@
 
             try {
                 let passId = document.getElementById('g-edit-id').value;
-                let existingPass = passId ? await DB.fetchPass(passId) : null;
+                let existingPass = passId ? await window.DB.fetchPass(passId) : null;
                 if(!passId) {
                     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                     let rp = ''; for(let i=0; i<6; i++) rp += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -2862,21 +2762,21 @@
                 }
 
                 const rawName = document.getElementById('g-name').value.trim();
-                const nameInput = translateArabicToEnglish(rawName);
+                const nameInput = window.translateArabicToEnglish(rawName);
                 const phoneInput = document.getElementById('g-phone').value || 'N/A';
                 const photoFile = document.getElementById('g-photo').files[0];
                 let photoB64 = existingPass ? existingPass.PhotoURL : "";
                 
                 if (!photoFile && !existingPass) {
-                    const internal = localServants.find(s => s.Name.toLowerCase() === nameInput.toLowerCase());
+                    const internal = window.localServants.find(s => s.Name.toLowerCase() === nameInput.toLowerCase());
                     if(internal && internal.PhotoURL) photoB64 = internal.PhotoURL;
                 }
                 
-                if(photoFile) photoB64 = await resizeImage(photoFile, 300, false);
+                if(photoFile) photoB64 = await window.resizeImage(photoFile, 300, false);
 
-                let isPend = false;
-                if (photoB64 === "" || phoneInput === 'N/A' || phoneInput === '' || /[\u0600-\u06FF]/.test(nameInput)) isPend = true;
-                if (existingPass && existingPass.IsPending === false && !photoFile) isPend = false; 
+                let isPending = false;
+                if (photoB64 === "" || phoneInput === 'N/A' || phoneInput === '' || /[\u0600-\u06FF]/.test(nameInput)) isPending = true;
+                if (existingPass && existingPass.IsPending === false && !photoFile) isPending = false; 
 
                 const passData = {
                     PassID: passId,
@@ -2889,48 +2789,48 @@
                     AllowedZones: zones,
                     PhotoURL: photoB64,
                     Status: existingPass ? existingPass.Status : 'VALID',
-                    IsPending: isPend,
+                    IsPending: isPending,
                     EntryTime: existingPass ? existingPass.EntryTime : new Date().toISOString()
                 };
 
-                const saved = await DB.savePass(passData);
+                const saved = await window.DB.savePass(passData);
                 if(saved) {
-                    await DB.saveServant({
+                    await window.DB.saveServant({
                         Name: passData.Name,
                         Phone: passData.Phone,
                         Team: passData.Team,
                         PhotoURL: passData.PhotoURL
                     });
                     
-                    if(currentSubmitAction === 'generate' || currentSubmitAction === 'update-download') {
-                        await generatePerfectPDF(passData);
+                    if(window.currentSubmitAction === 'generate' || window.currentSubmitAction === 'update-download') {
+                        await window.generatePerfectPDF(passData);
                     }
                     alert(`Pass ${passId} Saved successfully!`);
-                    cancelEdit();
-                    await fetchServantsData();
-                    loadManageTable();
+                    window.cancelEdit();
+                    await window.fetchServantsData();
+                    window.loadManageTable();
                 }
             } catch (err) {
                 console.error(err); alert("Critical Error saving pass.");
             } finally {
                 btns.forEach(b => b.disabled = false);
             }
-        }
+        };
 
-        async function editPass(id) {
-            const pass = await DB.fetchPass(id);
+        window.editPass = async function(id) {
+            const pass = await window.DB.fetchPass(id);
             if(!pass) return;
 
             document.getElementById('g-edit-id').value = pass.PassID;
             document.getElementById('g-name').value = pass.Name;
             document.getElementById('g-phone').value = pass.Phone !== 'N/A' ? pass.Phone : ''; 
             document.getElementById('g-team').value = pass.Team;
-            handleTeamLogic();
+            window.handleTeamLogic();
 
             if(pass.Team !== 'IT Team') {
                 document.getElementById('g-location').value = pass.Location;
                 document.getElementById('g-event').value = pass.Event;
-                updateMassDropdown();
+                window.updateMassDropdown();
                 if(pass.Mass) document.getElementById('g-mass').value = pass.Mass;
 
                 const checkboxes = document.querySelectorAll('input[name="zone"]');
@@ -2941,11 +2841,11 @@
             document.getElementById('create-buttons').classList.add('hidden');
             document.getElementById('edit-buttons').classList.remove('hidden');
             
-            switchAdminTab('generate'); refreshIcons();
+            window.switchAdminTab('generate'); window.refreshIcons();
             window.scrollTo({top:0, behavior:'smooth'});
-        }
+        };
 
-        function cancelEdit() {
+        window.cancelEdit = function() {
             document.getElementById('generate-form').reset();
             document.getElementById('g-edit-id').value = "";
             document.getElementById('generate-title').innerHTML = `<i data-lucide="badge-plus" class="w-6 h-6 mr-2 text-brand-yellow"></i> Create Manual Pass`;
@@ -2957,11 +2857,11 @@
             if(gPhotoPreview) gPhotoPreview.classList.add('hidden');
             if(gPhotoStatus) gPhotoStatus.classList.add('hidden');
             
-            handleTeamLogic(); refreshIcons();
-        }
+            window.handleTeamLogic(); window.refreshIcons();
+        };
 
-        // 15. PDF ENGINE
-        async function prepPassForPDF(pass, s) {
+        // --- PDF ENGINE ---
+        window.prepPassForPDF = async function(pass, s) {
             if(pass.PhotoURL) {
                 document.getElementById('pdf-photo').src = pass.PhotoURL;
                 document.getElementById('pdf-photo').classList.remove('hidden');
@@ -2975,7 +2875,7 @@
             document.getElementById('pdf-team').textContent = pass.Team.toUpperCase();
             document.getElementById('pdf-phone').textContent = pass.Phone && pass.Phone !== 'N/A' ? pass.Phone : '';
             
-            const tColor = getTeamColor(pass.Team);
+            const tColor = window.getTeamColor(pass.Team);
             document.getElementById('pdf-team').style.color = tColor;
             document.getElementById('pdf-card').style.borderColor = tColor;
             
@@ -3003,10 +2903,10 @@
 
             document.getElementById('pdf-footer-contacts').innerHTML = (s.contacts||[]).map(c => `${c.name}: ${c.phone}`).join(' | ');
             await new Promise(r => setTimeout(r, 100)); 
-        }
+        };
 
-        async function generatePerfectPDFBlob(pass, s) {
-            await prepPassForPDF(pass, s);
+        window.generatePerfectPDFBlob = async function(pass, s) {
+            await window.prepPassForPDF(pass, s);
             const cardEl = document.getElementById('pdf-card');
             const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
@@ -3014,11 +2914,11 @@
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
             doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
             return doc.output('blob');
-        }
+        };
 
-        async function generatePerfectPDF(pass) {
-            const s = GLOBAL_SETTINGS;
-            await prepPassForPDF(pass, s);
+        window.generatePerfectPDF = async function(pass) {
+            const s = window.GLOBAL_SETTINGS;
+            await window.prepPassForPDF(pass, s);
             const cardEl = document.getElementById('pdf-card');
             const canvas = await html2canvas(cardEl, { scale: 4, useCORS: true, backgroundColor: '#050505', logging: false });
             const imgData = canvas.toDataURL('image/jpeg', 1.0);
@@ -3026,14 +2926,16 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [54, 86] });
             doc.addImage(imgData, 'JPEG', 0, 0, 54, 86, '', 'FAST');
-            doc.save(`LWT-Pass-${pass.PassID}.pdf`);
-        }
+            
+            const safeName = pass.Name.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_');
+            doc.save(`${safeName}_${pass.PassID}.pdf`);
+        };
         
-        async function downloadPass(id) {
-            const pass = await DB.fetchPass(id);
-            if(pass) await generatePerfectPDF(pass);
+        window.downloadPass = async function(id) {
+            const pass = await window.DB.fetchPass(id);
+            if(pass) await window.generatePerfectPDF(pass);
             else alert("Pass data not found.");
-        }
+        };
     </script>
 </body>
 </html>
